@@ -347,32 +347,20 @@
   .map-wrap { flex: 1; position: relative; }
   #map { width: 100%; height: 100%; }
 
-  /* 사용자 정의 마커 (배경 색은 카테고리 color, 아이콘은 카테고리별 이모지) */
+  /* 마커: 카테고리 이모지 그대로 표시 (핀 배경 없음, 더 깔끔) */
   .map-marker {
-    position: relative;
-    width: 36px; height: 36px;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg) translate(-50%, -50%);
-    transform-origin: top left;
-    border: 2.5px solid white;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+    width: 32px;
+    height: 32px;
+    font-size: 26px;
+    line-height: 32px;
+    text-align: center;
     cursor: pointer;
+    user-select: none;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
+    transition: transform 0.12s ease-out;
   }
-  .map-marker-icon {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform: rotate(45deg);   /* 마커 -45° 회전 보정 */
-    font-size: 17px;
-    line-height: 1;
-    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji',
-                 'Pretendard Variable', sans-serif;
-    /* 컬러 이모지는 그대로 색이 나오게 두고, 흰 글자 배지처럼 보이게 살짝 그림자 */
-    text-shadow: 0 1px 1px rgba(0,0,0,0.25);
-    pointer-events: none;
-  }
+  .map-marker:hover { transform: scale(1.2); }
 
   /* 정보창 (InfoWindow 내부 컨텐츠) */
   .info-window {
@@ -654,9 +642,8 @@ function createMarker(catKey, cat, item) {
     position: new naver.maps.LatLng(item.lat, item.lng),
     map: map,
     icon: {
-      content: '<div class="map-marker" style="background:' + cat.color + ';" title="' + escapeHtml(item.name) + '">' +
-               '<span class="map-marker-icon">' + icon + '</span></div>',
-      anchor: new naver.maps.Point(0, 0),
+      content: '<div class="map-marker" title="' + escapeHtml(item.name) + '">' + icon + '</div>',
+      anchor: new naver.maps.Point(16, 16),   // 32×32 마커 박스의 중앙이 좌표를 가리킴
     },
     title: item.name,
   });
