@@ -704,6 +704,14 @@ function initMap() {
   // 지적편집도 레이어 (토글 가능, 기본은 OFF)
   cadastralLayer = new naver.maps.CadastralLayer();
 
+  // 빈 지도(마커/InfoWindow 아닌 곳) 클릭 시 열린 InfoWindow 닫기
+  naver.maps.Event.addListener(map, 'click', () => {
+    if (openInfoWindow) {
+      openInfoWindow.close();
+      openInfoWindow = null;
+    }
+  });
+
   // 카테고리 UI + 마커 렌더
   renderChips();
   renderAllMarkers();
