@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>동두천시 재난안전지도</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* === 다크 테마 (기본) === */
+  :root {
+    --bg: #060a18;
+    --bg-grad-from: #0a1530;
+    --bg-grad-to: #060a18;
+    --bg-card: #0f1730;
+    --bg-card-2: #141d3a;
+    --border: #1f2a4e;
+    --text: #e6ebff;
+    --text-dim: #8a96bd;
+    --text-sub: #5a6890;
+    --accent: #00d4ff;
+    --accent-glow: rgba(0, 212, 255, 0.4);
+    --fire: #ff3b5c;
+    --hospital: #4aa8ff;
+    --shelter: #00d68f;
+    --danger: #ffaa00;
+    --river: #b478ff;
+    --highlight-bg: rgba(0, 212, 255, 0.08);
+  }
+
+  /* === 라이트 테마 === */
+  [data-theme="light"] {
+    --bg: #f3f5fa;
+    --bg-grad-from: #ffffff;
+    --bg-grad-to: #e9eef7;
+    --bg-card: #ffffff;
+    --bg-card-2: #f5f7fb;
+    --border: #dde3ed;
+    --text: #1a2138;
+    --text-dim: #5a6890;
+    --text-sub: #8a96bd;
+    --accent: #0077b6;
+    --accent-glow: rgba(0, 119, 182, 0.3);
+    --fire: #d32f3a;
+    --hospital: #0077b6;
+    --shelter: #00a672;
+    --danger: #e08e00;
+    --river: #7a3fd6;
+    --highlight-bg: rgba(0, 119, 182, 0.06);
+  }
+
+  html, body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-feature-settings: 'tnum';
+    transition: background 0.3s, color 0.3s;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    height: 100%;
+    overflow: hidden;
+  }
+  html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+
+  body {
+    background: radial-gradient(ellipse at top, var(--bg-grad-from) 0%, var(--bg-grad-to) 70%) fixed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: linear-gradient(180deg, var(--highlight-bg) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo-mark {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--accent), #0088ff);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 14px var(--accent-glow);
+    font-weight: 900; font-size: 16px;
+    color: #fff;
+  }
+  .title { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+  .subtitle { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .updated-at { font-size: 11px; color: var(--text-dim); }
+  .updated-at strong { color: var(--text); font-weight: 600; }
+
+  /* 테마 토글 */
+  .theme-btn {
+    width: 32px; height: 32px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim);
+    transition: all 0.2s;
+  }
+  .theme-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ===== 메인 ===== */
+  .main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* 사이드바 */
+  .sidebar {
+    width: 280px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex-shrink: 0;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-sub);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* 카테고리 카드 */
+  .cat-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .cat-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+  }
+  .cat-item:hover { border-color: var(--accent); }
+  .cat-item.off { opacity: 0.4; }
+  .cat-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    box-shadow: 0 0 8px currentColor;
+    flex-shrink: 0;
+  }
+  .cat-name { flex: 1; font-size: 13px; font-weight: 600; }
+  .cat-count {
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--bg-card);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    min-width: 28px;
+    text-align: center;
+  }
+
+  /* 장소 목록 */
+  .place-list {
+    display: flex; flex-direction: column; gap: 4px;
+    max-height: calc(100vh - 380px);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .place-list::-webkit-scrollbar { display: none; }
+  .place-item {
+    padding: 8px 10px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .place-item:hover {
+    border-color: var(--accent);
+    background: var(--highlight-bg);
+  }
+  .place-name { font-size: 12px; font-weight: 600; }
+  .place-addr { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+  .empty-hint {
+    padding: 14px;
+    font-size: 11px;
+    color: var(--text-sub);
+    text-align: center;
+    line-height: 1.6;
+    background: var(--bg-card-2);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+  }
+
+  /* ===== 지도 ===== */
+  .map-wrap { flex: 1; position: relative; }
+  #map { width: 100%; height: 100%; }
+
+  /* 사용자 정의 마커 */
+  .map-marker {
+    position: relative;
+    width: 30px; height: 30px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg) translate(-50%, -50%);
+    transform-origin: top left;
+    border: 2.5px solid white;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .map-marker::before {
+    content: ''; position: absolute;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: white;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .marker-fire { background: #ff3b5c; }
+  .marker-hospital { background: #4aa8ff; }
+  .marker-shelter { background: #00d68f; }
+  .marker-danger { background: #ffaa00; }
+  .marker-river { background: #b478ff; }
+
+  /* 정보창 (InfoWindow 내부 컨텐츠) */
+  .info-window {
+    min-width: 220px; max-width: 320px;
+    padding: 12px 14px;
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    color: #1a2138;
+  }
+  .info-cat {
+    display: inline-block;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: white;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .info-name { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+  .info-row {
+    font-size: 12px;
+    color: #4a5570;
+    margin-top: 3px;
+    display: flex;
+    gap: 6px;
+  }
+  .info-row strong { color: #2a3148; font-weight: 600; min-width: 36px; }
+  .info-row a { color: #0077b6; text-decoration: none; }
+  .info-row a:hover { text-decoration: underline; }
+
+  /* 지도 오버레이 배지 */
+  .map-overlay {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 5;
+  }
+  .map-overlay strong { color: var(--text); font-weight: 700; }
+
+  /* 모바일 */
+  @media (max-width: 720px) {
+    .sidebar { width: 100%; max-height: 40vh; }
+    .main { flex-direction: column; }
+    .place-list { max-height: 200px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark">D</div>
+    <div>
+      <div class="title">동두천시 재난안전지도</div>
+      <div class="subtitle">소방서 · 병원 · 대피소 · 위험지역 · 하천관측소</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="updated-at">갱신 <strong id="updated-at">-</strong></div>
+    <button class="theme-btn" id="theme-toggle" title="테마 전환">🌓</button>
+  </div>
+</header>
+
+<main class="main">
+  <aside class="sidebar">
+    <div class="section-label">카테고리</div>
+    <div class="cat-list" id="cat-list"></div>
+
+    <div class="section-label">장소 목록</div>
+    <div class="place-list" id="place-list"></div>
+  </aside>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-overlay">
+      마커 클릭 시 <strong>상세정보</strong> 표시
+    </div>
+  </div>
+</main>
+
+<!-- 데이터 (별도 파일에서 로드) -->
+<script src="data.js"></script>
+
+<!-- 네이버맵 v3 SDK -->
+<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=nk07ypv156"></script>
+
+<script>
+/* ============================================================
+   동두천시 재난안전지도 — 클라이언트 로직
+   ============================================================ */
+
+const DDC_CENTER = { lat: 37.9034, lng: 127.0606 }; // 동두천시청 기준
+const DEFAULT_ZOOM = 13;
+
+// 데이터 로드 (data.js 가 window.DDC_DATA 정의)
+const DATA = window.DDC_DATA || { updatedAt: '-', categories: {} };
+document.getElementById('updated-at').textContent = DATA.updatedAt || '-';
+
+// 카테고리 상태
+const CATS = DATA.categories || {};
+const visibility = {}; // { fire: true, hospital: true, ... }
+Object.keys(CATS).forEach(k => { visibility[k] = true; });
+
+/* ----- 테마 토글 ----- */
+const savedTheme = localStorage.getItem('ddc-theme');
+if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+document.getElementById('theme-toggle').onclick = () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'light' ? null : 'light';
+  if (next) document.documentElement.setAttribute('data-theme', next);
+  else document.documentElement.removeAttribute('data-theme');
+  localStorage.setItem('ddc-theme', next || 'dark');
+};
+
+/* ----- 네이버맵 초기화 ----- */
+let map;
+const markers = {}; // catKey -> [naver.maps.Marker, ...]
+let openInfoWindow = null;
+
+function initMap() {
+  if (typeof naver === 'undefined' || !naver.maps) {
+    document.getElementById('map').innerHTML =
+      '<div style="padding:40px;text-align:center;color:var(--text-dim);">' +
+      '네이버맵 SDK 로드 실패. Client ID 또는 네트워크 확인 필요.</div>';
+    return;
+  }
+
+  map = new naver.maps.Map('map', {
+    center: new naver.maps.LatLng(DDC_CENTER.lat, DDC_CENTER.lng),
+    zoom: DEFAULT_ZOOM,
+    zoomControl: true,
+    zoomControlOptions: { position: naver.maps.Position.TOP_LEFT },
+    mapTypeControl: false,
+  });
+
+  // 카테고리 UI + 마커 렌더
+  renderCategories();
+  renderAllMarkers();
+  renderPlaceList();
+}
+
+/* ----- 카테고리 사이드바 ----- */
+function renderCategories() {
+  const wrap = document.getElementById('cat-list');
+  wrap.innerHTML = '';
+  Object.entries(CATS).forEach(([key, cat]) => {
+    const count = (cat.items || []).length;
+    const el = document.createElement('div');
+    el.className = 'cat-item' + (visibility[key] ? '' : ' off');
+    el.innerHTML =
+      '<span class="cat-dot" style="background:' + cat.color + ';color:' + cat.color + '"></span>' +
+      '<span class="cat-name">' + cat.label + '</span>' +
+      '<span class="cat-count">' + count + '</span>';
+    el.onclick = () => {
+      visibility[key] = !visibility[key];
+      el.classList.toggle('off', !visibility[key]);
+      (markers[key] || []).forEach(m => m.setMap(visibility[key] ? map : null));
+    };
+    wrap.appendChild(el);
+  });
+}
+
+/* ----- 마커 렌더 ----- */
+function renderAllMarkers() {
+  Object.entries(CATS).forEach(([key, cat]) => {
+    markers[key] = [];
+    (cat.items || []).forEach(item => {
+      const m = createMarker(key, cat, item);
+      if (m) markers[key].push(m);
+    });
+  });
+}
+
+function createMarker(catKey, cat, item) {
+  if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return null;
+  const marker = new naver.maps.Marker({
+    position: new naver.maps.LatLng(item.lat, item.lng),
+    map: visibility[catKey] ? map : null,
+    icon: {
+      content: '<div class="map-marker marker-' + catKey + '" title="' + escapeHtml(item.name) + '"></div>',
+      anchor: new naver.maps.Point(0, 0),
+    },
+    title: item.name,
+  });
+  const infoHtml = buildInfoWindowHtml(cat, item);
+  const info = new naver.maps.InfoWindow({
+    content: infoHtml,
+    borderWidth: 0,
+    backgroundColor: '#fff',
+    anchorSize: new naver.maps.Size(12, 10),
+    pixelOffset: new naver.maps.Point(0, -8),
+  });
+  naver.maps.Event.addListener(marker, 'click', () => {
+    if (openInfoWindow) openInfoWindow.close();
+    info.open(map, marker);
+    openInfoWindow = info;
+  });
+  marker._info = info;
+  return marker;
+}
+
+function buildInfoWindowHtml(cat, item) {
+  const rows = [];
+  if (item.address) rows.push(row('주소', escapeHtml(item.address)));
+  if (item.phone) rows.push(row('전화', '<a href="tel:' + item.phone.replace(/[^0-9]/g,'') + '">' + escapeHtml(item.phone) + '</a>'));
+  if (item.type) rows.push(row('종류', escapeHtml(item.type)));
+  if (item.capacity) rows.push(row('수용', escapeHtml(String(item.capacity)) + '명'));
+  if (item.level) rows.push(row('등급', escapeHtml(item.level)));
+  if (item.note) rows.push(row('비고', escapeHtml(item.note)));
+
+  return (
+    '<div class="info-window">' +
+      '<span class="info-cat" style="background:' + cat.color + '">' + escapeHtml(cat.label) + '</span>' +
+      '<div class="info-name">' + escapeHtml(item.name) + '</div>' +
+      rows.join('') +
+    '</div>'
+  );
+  function row(label, val) {
+    return '<div class="info-row"><strong>' + label + '</strong><span>' + val + '</span></div>';
+  }
+}
+
+/* ----- 사이드바 장소 목록 ----- */
+function renderPlaceList() {
+  const wrap = document.getElementById('place-list');
+  wrap.innerHTML = '';
+  const all = [];
+  Object.entries(CATS).forEach(([key, cat]) => {
+    (cat.items || []).forEach(it => all.push({ catKey: key, cat, item: it }));
+  });
+  if (all.length === 0) {
+    wrap.innerHTML =
+      '<div class="empty-hint">' +
+      '아직 등록된 장소가 없습니다.<br><br>' +
+      '<code>data.js</code> 의 각 카테고리 <code>items</code> 배열에<br>' +
+      '<code>{name, lat, lng, address, phone}</code><br>' +
+      '형태로 추가하세요.' +
+      '</div>';
+    return;
+  }
+  all.forEach(({ catKey, cat, item }, idx) => {
+    if (typeof item.lat !== 'number') return;
+    const el = document.createElement('div');
+    el.className = 'place-item';
+    el.innerHTML =
+      '<div class="place-name">' +
+        '<span class="cat-dot" style="background:' + cat.color + ';display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;"></span>' +
+        escapeHtml(item.name) +
+      '</div>' +
+      (item.address ? '<div class="place-addr">' + escapeHtml(item.address) + '</div>' : '');
+    el.onclick = () => {
+      map.setCenter(new naver.maps.LatLng(item.lat, item.lng));
+      map.setZoom(15);
+      const m = (markers[catKey] || []).find(mm => mm.getTitle() === item.name);
+      if (m) {
+        if (openInfoWindow) openInfoWindow.close();
+        m._info.open(map, m);
+        openInfoWindow = m._info;
+      }
+    };
+    wrap.appendChild(el);
+  });
+}
+
+/* ----- 유틸 ----- */
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+/* ----- 부팅 ----- */
+window.addEventListener('load', initMap);
+</script>
+
+</body>
+</html>
