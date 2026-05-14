@@ -120,89 +120,221 @@
 
   /* 사이드바 */
   .sidebar {
-    width: 280px;
+    width: 300px;
     background: var(--bg-card);
     border-right: 1px solid var(--border);
-    padding: 16px;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.25s, margin-left 0.25s;
+    overflow: hidden;
+  }
+  .sidebar.collapsed { width: 0; border-right: none; }
+  .sidebar-inner {
+    padding: 14px 14px 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 300px;
+  }
+
+  /* 카테고리 칩 그룹 (가로 wrap) */
+  .cat-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .cat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px 6px 8px;
+    background: var(--bg-card-2);
+    border: 1.5px solid var(--border);
+    border-radius: 99px;
+    cursor: pointer;
+    user-select: none;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: all 0.12s;
+    line-height: 1;
+  }
+  .cat-chip:hover {
+    color: var(--text);
+    border-color: var(--text-dim);
+  }
+  .cat-chip.active {
+    color: white;
+    background: var(--chip-color, var(--accent));
+    border-color: var(--chip-color, var(--accent));
+    box-shadow: 0 2px 8px var(--chip-color, var(--accent-glow));
+  }
+  .cat-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--chip-color, var(--accent));
     flex-shrink: 0;
   }
-  .sidebar::-webkit-scrollbar { display: none; }
+  .cat-chip.active .cat-dot { background: rgba(255,255,255,0.9); }
+  .cat-count {
+    font-size: 10px;
+    color: var(--text-sub);
+    background: var(--bg-card);
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-weight: 700;
+    min-width: 18px;
+    text-align: center;
+    margin-left: 2px;
+  }
+  .cat-chip.active .cat-count {
+    background: rgba(255,255,255,0.25);
+    color: white;
+  }
 
-  .section-label {
+  /* 검색창 */
+  .search-bar {
+    position: relative;
+    margin-bottom: 10px;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 9px 30px 9px 32px;
+    background: var(--bg-card-2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-bar input:focus { border-color: var(--accent); }
+  .search-bar input::placeholder { color: var(--text-sub); }
+  .search-bar::before {
+    content: '';
+    position: absolute;
+    left: 11px; top: 50%;
+    width: 13px; height: 13px;
+    margin-top: -7px;
+    border: 1.7px solid var(--text-sub);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .search-bar::after {
+    content: '';
+    position: absolute;
+    left: 21px; top: 50%;
+    width: 6px; height: 1.7px;
+    background: var(--text-sub);
+    transform: rotate(45deg);
+    margin-top: 3px;
+    pointer-events: none;
+  }
+  .search-clear {
+    position: absolute;
+    right: 6px; top: 50%;
+    transform: translateY(-50%);
+    width: 22px; height: 22px;
+    background: transparent;
+    border: none;
+    color: var(--text-sub);
+    cursor: pointer;
+    font-size: 14px;
+    display: none;
+    border-radius: 50%;
+  }
+  .search-clear:hover { color: var(--text); background: var(--bg-card); }
+  .search-bar.has-text .search-clear { display: flex; align-items: center; justify-content: center; }
+
+  /* 목록 헤더 */
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 4px 2px 8px;
+  }
+  .list-header .label {
     font-size: 11px;
     font-weight: 700;
     color: var(--text-sub);
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    margin-bottom: 10px;
   }
-
-  /* 카테고리 카드 */
-  .cat-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-  .cat-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 12px;
-    background: var(--bg-card-2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.15s;
-  }
-  .cat-item:hover { border-color: var(--accent); }
-  .cat-item.off { opacity: 0.4; }
-  .cat-dot {
-    width: 12px; height: 12px; border-radius: 50%;
-    box-shadow: 0 0 8px currentColor;
-    flex-shrink: 0;
-  }
-  .cat-name { flex: 1; font-size: 13px; font-weight: 600; }
-  .cat-count {
+  .list-header .count {
     font-size: 11px;
     color: var(--text-dim);
-    background: var(--bg-card);
-    padding: 2px 8px;
-    border-radius: 10px;
     font-weight: 600;
-    min-width: 28px;
-    text-align: center;
   }
 
-  /* 장소 목록 */
+  /* 장소 목록 (사이드바 남은 영역 다 사용) */
   .place-list {
-    display: flex; flex-direction: column; gap: 4px;
-    max-height: calc(100vh - 380px);
+    flex: 1;
+    display: flex; flex-direction: column;
+    gap: 4px;
     overflow-y: auto;
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    padding-bottom: 12px;
   }
-  .place-list::-webkit-scrollbar { display: none; }
+  .place-list::-webkit-scrollbar { width: 4px; }
+  .place-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   .place-item {
-    padding: 8px 10px;
+    padding: 7px 10px;
     background: var(--bg-card-2);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 7px;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.12s;
   }
   .place-item:hover {
     border-color: var(--accent);
     background: var(--highlight-bg);
   }
-  .place-name { font-size: 12px; font-weight: 600; }
-  .place-addr { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+  .place-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .place-name .pdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .place-addr {
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    padding-left: 13px;
+    line-height: 1.4;
+  }
   .empty-hint {
-    padding: 14px;
-    font-size: 11px;
+    padding: 24px 14px;
+    font-size: 12px;
     color: var(--text-sub);
     text-align: center;
     line-height: 1.6;
-    background: var(--bg-card-2);
-    border: 1px dashed var(--border);
-    border-radius: 8px;
   }
+
+  /* 사이드바 토글 버튼 (지도 좌상단) */
+  .sidebar-toggle {
+    position: absolute;
+    top: 14px; left: 14px;
+    width: 34px; height: 34px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 5;
+    transition: all 0.15s;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .sidebar-toggle:hover { color: var(--accent); border-color: var(--accent); }
 
   /* ===== 지도 ===== */
   .map-wrap { flex: 1; position: relative; }
@@ -257,26 +389,13 @@
   .info-row a { color: #0077b6; text-decoration: none; }
   .info-row a:hover { text-decoration: underline; }
 
-  /* 지도 오버레이 배지 */
-  .map-overlay {
-    position: absolute;
-    top: 14px; right: 14px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 11px;
-    color: var(--text-dim);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 5;
-  }
-  .map-overlay strong { color: var(--text); font-weight: 700; }
-
   /* 모바일 */
   @media (max-width: 720px) {
-    .sidebar { width: 100%; max-height: 40vh; }
     .main { flex-direction: column; }
-    .place-list { max-height: 200px; }
+    .sidebar { width: 100%; max-height: 45vh; border-right: none; border-bottom: 1px solid var(--border); }
+    .sidebar-inner { min-width: 0; padding: 12px 12px 0; }
+    .sidebar.collapsed { max-height: 0; }
+    .sidebar-toggle { top: auto; bottom: 14px; left: 14px; }
   }
 </style>
 </head>
@@ -297,19 +416,26 @@
 </header>
 
 <main class="main">
-  <aside class="sidebar">
-    <div class="section-label">카테고리</div>
-    <div class="cat-list" id="cat-list"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="cat-chips" id="cat-chips"></div>
 
-    <div class="section-label">장소 목록</div>
-    <div class="place-list" id="place-list"></div>
+      <div class="search-bar" id="search-bar">
+        <input type="text" id="search-input" placeholder="장소 이름·주소 검색" autocomplete="off">
+        <button class="search-clear" id="search-clear" title="지우기">✕</button>
+      </div>
+
+      <div class="list-header">
+        <span class="label">장소 목록</span>
+        <span class="count"><span id="place-count">0</span>개</span>
+      </div>
+      <div class="place-list" id="place-list"></div>
+    </div>
   </aside>
 
   <div class="map-wrap">
+    <button class="sidebar-toggle" id="sidebar-toggle" title="사이드바 접기/펼치기">☰</button>
     <div id="map"></div>
-    <div class="map-overlay">
-      마커 클릭 시 <strong>상세정보</strong> 표시
-    </div>
   </div>
 </main>
 
@@ -333,8 +459,8 @@ document.getElementById('updated-at').textContent = DATA.updatedAt || '-';
 
 // 카테고리 상태
 const CATS = DATA.categories || {};
-const visibility = {}; // { fire: true, hospital: true, ... }
-Object.keys(CATS).forEach(k => { visibility[k] = true; });
+let activeCategory = null;   // null = 전체 보기, 또는 카테고리 키
+let searchQuery = '';
 
 /* ----- 테마 토글 ----- */
 const savedTheme = localStorage.getItem('ddc-theme');
@@ -369,30 +495,103 @@ function initMap() {
   });
 
   // 카테고리 UI + 마커 렌더
-  renderCategories();
+  renderChips();
   renderAllMarkers();
+  applyFilter();   // 초기 상태: 전체 보기
+  bindSearch();
+  bindSidebarToggle();
+}
+
+/* ----- 카테고리 칩 ----- */
+function renderChips() {
+  const wrap = document.getElementById('cat-chips');
+  wrap.innerHTML = '';
+
+  const total = Object.values(CATS).reduce((s, c) => s + (c.items || []).length, 0);
+
+  // 전체 칩
+  const all = document.createElement('button');
+  all.className = 'cat-chip active';
+  all.dataset.cat = '';
+  all.innerHTML =
+    '<span class="cat-name">전체</span>' +
+    '<span class="cat-count">' + total + '</span>';
+  all.onclick = () => setActiveCategory(null);
+  wrap.appendChild(all);
+
+  // 카테고리별 칩
+  Object.entries(CATS).forEach(([key, cat]) => {
+    const count = (cat.items || []).length;
+    const chip = document.createElement('button');
+    chip.className = 'cat-chip';
+    chip.dataset.cat = key;
+    chip.style.setProperty('--chip-color', cat.color);
+    chip.innerHTML =
+      '<span class="cat-dot"></span>' +
+      '<span class="cat-name">' + escapeHtml(cat.label || key) + '</span>' +
+      '<span class="cat-count">' + count + '</span>';
+    chip.onclick = () => setActiveCategory(key);
+    wrap.appendChild(chip);
+  });
+}
+
+function setActiveCategory(key) {
+  activeCategory = key;
+  document.querySelectorAll('.cat-chip').forEach(el => {
+    el.classList.toggle('active', el.dataset.cat === (key || ''));
+  });
+  applyFilter();
+}
+
+/* ----- 검색 ----- */
+function bindSearch() {
+  const input = document.getElementById('search-input');
+  const clear = document.getElementById('search-clear');
+  const bar = document.getElementById('search-bar');
+  input.addEventListener('input', e => {
+    searchQuery = e.target.value.trim().toLowerCase();
+    bar.classList.toggle('has-text', !!searchQuery);
+    applyFilter();
+  });
+  clear.addEventListener('click', () => {
+    input.value = '';
+    searchQuery = '';
+    bar.classList.remove('has-text');
+    applyFilter();
+    input.focus();
+  });
+}
+
+/* ----- 사이드바 접기/펼치기 ----- */
+function bindSidebarToggle() {
+  document.getElementById('sidebar-toggle').onclick = () => {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+    // 지도 리사이즈 트리거
+    setTimeout(() => { if (map) naver.maps.Event.trigger(map, 'resize'); }, 280);
+  };
+}
+
+/* ----- 필터 적용 (카테고리 + 검색) ----- */
+function applyFilter() {
+  if (openInfoWindow) { openInfoWindow.close(); openInfoWindow = null; }
+
+  // 마커 표시/숨김
+  Object.entries(markers).forEach(([key, list]) => {
+    list.forEach(rec => {
+      const showByCat = !activeCategory || activeCategory === key;
+      const showBySearch = !searchQuery || matchSearch(rec.item, rec.cat);
+      rec.marker.setMap(showByCat && showBySearch ? map : null);
+    });
+  });
+
   renderPlaceList();
 }
 
-/* ----- 카테고리 사이드바 ----- */
-function renderCategories() {
-  const wrap = document.getElementById('cat-list');
-  wrap.innerHTML = '';
-  Object.entries(CATS).forEach(([key, cat]) => {
-    const count = (cat.items || []).length;
-    const el = document.createElement('div');
-    el.className = 'cat-item' + (visibility[key] ? '' : ' off');
-    el.innerHTML =
-      '<span class="cat-dot" style="background:' + cat.color + ';color:' + cat.color + '"></span>' +
-      '<span class="cat-name">' + cat.label + '</span>' +
-      '<span class="cat-count">' + count + '</span>';
-    el.onclick = () => {
-      visibility[key] = !visibility[key];
-      el.classList.toggle('off', !visibility[key]);
-      (markers[key] || []).forEach(m => m.setMap(visibility[key] ? map : null));
-    };
-    wrap.appendChild(el);
-  });
+function matchSearch(item, cat) {
+  const q = searchQuery;
+  if (!q) return true;
+  const fields = [item.name, item.address, item.type, item.note, cat.label];
+  return fields.some(f => f && String(f).toLowerCase().includes(q));
 }
 
 /* ----- 마커 렌더 ----- */
@@ -400,8 +599,8 @@ function renderAllMarkers() {
   Object.entries(CATS).forEach(([key, cat]) => {
     markers[key] = [];
     (cat.items || []).forEach(item => {
-      const m = createMarker(key, cat, item);
-      if (m) markers[key].push(m);
+      const rec = createMarker(key, cat, item);
+      if (rec) markers[key].push(rec);
     });
   });
 }
@@ -410,7 +609,7 @@ function createMarker(catKey, cat, item) {
   if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return null;
   const marker = new naver.maps.Marker({
     position: new naver.maps.LatLng(item.lat, item.lng),
-    map: visibility[catKey] ? map : null,
+    map: map,
     icon: {
       content: '<div class="map-marker" style="background:' + cat.color + ';" title="' + escapeHtml(item.name) + '"></div>',
       anchor: new naver.maps.Point(0, 0),
@@ -430,8 +629,7 @@ function createMarker(catKey, cat, item) {
     info.open(map, marker);
     openInfoWindow = info;
   });
-  marker._info = info;
-  return marker;
+  return { marker, info, item, cat };
 }
 
 function buildInfoWindowHtml(cat, item) {
@@ -455,42 +653,45 @@ function buildInfoWindowHtml(cat, item) {
   }
 }
 
-/* ----- 사이드바 장소 목록 ----- */
+/* ----- 사이드바 장소 목록 (카테고리·검색 필터 적용) ----- */
 function renderPlaceList() {
   const wrap = document.getElementById('place-list');
   wrap.innerHTML = '';
-  const all = [];
+
+  const filtered = [];
   Object.entries(CATS).forEach(([key, cat]) => {
-    (cat.items || []).forEach(it => all.push({ catKey: key, cat, item: it }));
+    if (activeCategory && key !== activeCategory) return;
+    (cat.items || []).forEach(it => {
+      if (typeof it.lat !== 'number') return;
+      if (!matchSearch(it, cat)) return;
+      filtered.push({ catKey: key, cat, item: it });
+    });
   });
-  if (all.length === 0) {
-    wrap.innerHTML =
-      '<div class="empty-hint">' +
-      '아직 등록된 장소가 없습니다.<br><br>' +
-      '<code>data.js</code> 의 각 카테고리 <code>items</code> 배열에<br>' +
-      '<code>{name, lat, lng, address, phone}</code><br>' +
-      '형태로 추가하세요.' +
-      '</div>';
+
+  document.getElementById('place-count').textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    wrap.innerHTML = '<div class="empty-hint">조건에 맞는 장소가 없습니다.</div>';
     return;
   }
-  all.forEach(({ catKey, cat, item }, idx) => {
-    if (typeof item.lat !== 'number') return;
+
+  filtered.forEach(({ catKey, cat, item }) => {
     const el = document.createElement('div');
     el.className = 'place-item';
     el.innerHTML =
       '<div class="place-name">' +
-        '<span class="cat-dot" style="background:' + cat.color + ';display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;"></span>' +
+        '<span class="pdot" style="background:' + cat.color + '"></span>' +
         escapeHtml(item.name) +
       '</div>' +
       (item.address ? '<div class="place-addr">' + escapeHtml(item.address) + '</div>' : '');
     el.onclick = () => {
       map.setCenter(new naver.maps.LatLng(item.lat, item.lng));
-      map.setZoom(15);
-      const m = (markers[catKey] || []).find(mm => mm.getTitle() === item.name);
-      if (m) {
+      map.setZoom(Math.max(map.getZoom(), 15));
+      const rec = (markers[catKey] || []).find(r => r.item === item);
+      if (rec) {
         if (openInfoWindow) openInfoWindow.close();
-        m._info.open(map, m);
-        openInfoWindow = m._info;
+        rec.info.open(map, rec.marker);
+        openInfoWindow = rec.info;
       }
     };
     wrap.appendChild(el);
