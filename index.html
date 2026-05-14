@@ -524,12 +524,11 @@ const CATEGORY_SVGS = {
       '<rect x="13.5" y="7" width="5" height="18" fill="white"/>' +
       '<rect x="7" y="13.5" width="18" height="5" fill="white"/>' +
     '</svg>',
-  // 산악위치표지판: 표지판(직사각형) + 막대
+  // 산악위치표지판: 노란 마름모(도로 주의표지 풍) + 검은 산 봉우리
   '산악위치표지판':
     '<svg viewBox="0 0 32 32" width="32" height="32" aria-label="산악위치표지판">' +
-      '<rect x="14.5" y="14" width="3" height="17" fill="#6b7280"/>' +
-      '<rect x="2" y="3" width="28" height="14" rx="2" fill="#15803d" stroke="white" stroke-width="1.5"/>' +
-      '<text x="16" y="13" fill="white" font-size="9" font-weight="800" font-family="Pretendard, sans-serif" text-anchor="middle">山</text>' +
+      '<polygon points="16,2 30,16 16,30 2,16" fill="#fbbf24" stroke="#111" stroke-width="2" stroke-linejoin="round"/>' +
+      '<polygon points="16,10 23,22 9,22" fill="#111"/>' +
     '</svg>',
 };
 function svgFor(catKey) {
