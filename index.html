@@ -357,6 +357,48 @@
     border-color: var(--accent);
     box-shadow: 0 2px 10px var(--accent-glow);
   }
+  .map-tool-btn.loading { opacity: 0.55; pointer-events: none; }
+
+  /* 내 위치 마커 (파란 점 + 펄스) */
+  .user-loc-marker {
+    width: 18px; height: 18px;
+    background: #3b82f6;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.6), 0 2px 8px rgba(0,0,0,0.35);
+    position: relative;
+  }
+  .user-loc-marker::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    background: rgba(59,130,246,0.35);
+    animation: pulse-loc 1.8s ease-out infinite;
+    z-index: -1;
+  }
+  @keyframes pulse-loc {
+    0%   { transform: scale(0.5); opacity: 0.7; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  /* 장소 목록에서 거리 표시 */
+  .place-distance {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-weight: 700;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 1px 7px;
+    border-radius: 99px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  .place-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 
   /* ===== 지도 ===== */
   .map-wrap { flex: 1; position: relative; }
@@ -464,6 +506,7 @@
   <div class="map-wrap">
     <div class="map-tools">
       <button class="map-tool-btn" id="sidebar-toggle" title="사이드바 접기/펼치기">☰</button>
+      <button class="map-tool-btn" id="locate-btn" title="내 현재 위치 표시 (장소까지 거리도 함께 계산)">📍</button>
       <button class="map-tool-btn" id="cadastral-toggle" title="지적편집도 표시/숨김">지적</button>
       <button class="map-tool-btn" id="recenter-btn" title="동두천 시청 기준으로 되돌리기">⟲</button>
     </div>
@@ -560,6 +603,12 @@ let map;
 let cadastralLayer;
 const markers = {}; // catKey -> [{marker, info, item, cat}, ...]
 let openInfoWindow = null;
+
+// 사용자 현재 위치 상태
+let userLatLng = null;        // { lat, lng } or null
+let userMarker = null;
+let userCircle = null;
+let userWatchId = null;       // 모바일 등 연속 위치 갱신용 (선택적으로 사용)
 
 function initMap() {
   if (typeof naver === 'undefined' || !naver.maps) {
@@ -690,6 +739,89 @@ function bindMapTools() {
     map.setCenter(new naver.maps.LatLng(DDC_CENTER.lat, DDC_CENTER.lng));
     map.setZoom(DEFAULT_ZOOM);
   };
+
+  // 내 현재 위치
+  document.getElementById('locate-btn').onclick = requestUserLocation;
+}
+
+/* ----- 사용자 위치 / 거리 계산 ----- */
+function requestUserLocation() {
+  const btn = document.getElementById('locate-btn');
+  if (!navigator.geolocation) {
+    alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+    return;
+  }
+  btn.classList.add('loading');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      btn.classList.remove('loading');
+      btn.classList.add('active');
+      setUserLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+    },
+    err => {
+      btn.classList.remove('loading');
+      const msg = {
+        1: '위치 권한이 거부됐습니다. 브라우저 설정에서 이 사이트의 위치 권한을 허용해주세요.',
+        2: '위치를 알 수 없습니다 (GPS·네트워크 확인).',
+        3: '위치 요청 시간이 초과됐습니다.',
+      }[err.code] || ('위치 가져오기 실패: ' + err.message);
+      alert(msg);
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
+  );
+}
+
+function setUserLocation(lat, lng, accuracy) {
+  userLatLng = { lat, lng };
+  const ll = new naver.maps.LatLng(lat, lng);
+
+  if (userMarker) userMarker.setMap(null);
+  if (userCircle) userCircle.setMap(null);
+
+  userMarker = new naver.maps.Marker({
+    position: ll,
+    map: map,
+    icon: {
+      content: '<div class="user-loc-marker" title="현재 내 위치"></div>',
+      anchor: new naver.maps.Point(9, 9),
+    },
+    zIndex: 1000,
+  });
+
+  // GPS 정확도 원 (m 단위 반지름). 50m 미만은 너무 작아 안 그림.
+  if (accuracy && accuracy >= 50) {
+    userCircle = new naver.maps.Circle({
+      map: map,
+      center: ll,
+      radius: accuracy,
+      fillColor: '#3b82f6',
+      fillOpacity: 0.08,
+      strokeColor: '#3b82f6',
+      strokeOpacity: 0.4,
+      strokeWeight: 1,
+    });
+  }
+
+  map.setCenter(ll);
+  map.setZoom(Math.max(map.getZoom(), 14));
+  renderPlaceList();  // 거리 갱신
+}
+
+// Haversine 거리 (미터)
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function formatDistance(m) {
+  if (m < 1000) return Math.round(m) + 'm';
+  if (m < 10000) return (m / 1000).toFixed(1) + 'km';
+  return Math.round(m / 1000) + 'km';
 }
 
 /* ----- 필터 적용 (카테고리 + 검색) ----- */
@@ -790,9 +922,16 @@ function renderPlaceList() {
     (cat.items || []).forEach(it => {
       if (typeof it.lat !== 'number') return;
       if (!matchSearch(it, cat)) return;
-      filtered.push({ catKey: key, cat, item: it });
+      const rec = { catKey: key, cat, item: it };
+      if (userLatLng) {
+        rec.distance = haversine(userLatLng.lat, userLatLng.lng, it.lat, it.lng);
+      }
+      filtered.push(rec);
     });
   });
+
+  // 내 위치가 있으면 가까운 순으로 정렬
+  if (userLatLng) filtered.sort((a, b) => a.distance - b.distance);
 
   document.getElementById('place-count').textContent = filtered.length;
 
@@ -801,13 +940,18 @@ function renderPlaceList() {
     return;
   }
 
-  filtered.forEach(({ catKey, cat, item }) => {
+  filtered.forEach(({ catKey, cat, item, distance }) => {
     const el = document.createElement('div');
     el.className = 'place-item';
+    const distHtml = (typeof distance === 'number')
+      ? '<span class="place-distance">' + formatDistance(distance) + '</span>'
+      : '';
     el.innerHTML =
-      '<div class="place-name">' +
-        '<span class="pdot" style="background:' + cat.color + '"></span>' +
-        escapeHtml(item.name) +
+      '<div class="place-name-row">' +
+        '<div class="place-name">' +
+          '<span class="pdot" style="background:' + cat.color + '"></span>' +
+          escapeHtml(item.name) +
+        '</div>' + distHtml +
       '</div>' +
       (item.address ? '<div class="place-addr">' + escapeHtml(item.address) + '</div>' : '');
     el.onclick = () => {
