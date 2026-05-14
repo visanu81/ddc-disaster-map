@@ -358,28 +358,28 @@
     box-shadow: 0 2px 10px var(--accent-glow);
   }
   .map-tool-btn.loading { opacity: 0.55; pointer-events: none; }
+  .map-tool-btn.icon-btn { padding: 0; width: 34px; }
+  .map-tool-btn svg { display: block; }
 
-  /* 내 위치 마커 (파란 점 + 펄스) */
+  /* 내 위치 마커 (조준점 / crosshair) */
   .user-loc-marker {
-    width: 18px; height: 18px;
-    background: #3b82f6;
-    border: 3px solid white;
-    border-radius: 50%;
-    box-shadow: 0 0 0 2px rgba(59,130,246,0.6), 0 2px 8px rgba(0,0,0,0.35);
+    width: 32px; height: 32px;
     position: relative;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
   }
+  .user-loc-marker svg { display: block; }
   .user-loc-marker::after {
     content: '';
     position: absolute;
-    inset: -8px;
+    inset: 4px;
     border-radius: 50%;
-    background: rgba(59,130,246,0.35);
+    background: rgba(220,38,38,0.28);
     animation: pulse-loc 1.8s ease-out infinite;
     z-index: -1;
   }
   @keyframes pulse-loc {
-    0%   { transform: scale(0.5); opacity: 0.7; }
-    100% { transform: scale(2.2); opacity: 0; }
+    0%   { transform: scale(0.6); opacity: 0.7; }
+    100% { transform: scale(2.4); opacity: 0; }
   }
 
   /* 장소 목록에서 거리 표시 */
@@ -531,9 +531,25 @@
   <div class="map-wrap">
     <div class="map-tools">
       <button class="map-tool-btn" id="sidebar-toggle" title="사이드바 접기/펼치기">☰</button>
-      <button class="map-tool-btn" id="locate-btn" title="내 현재 위치 표시 (장소까지 거리도 함께 계산)">📍</button>
+      <button class="map-tool-btn icon-btn" id="locate-btn" title="내 현재 위치 표시 (장소까지 거리도 함께 계산)">
+        <svg viewBox="0 0 32 32" width="20" height="20" aria-label="내 위치">
+          <circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <line x1="16" y1="2"  x2="16" y2="7"  stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="16" y1="25" x2="16" y2="30" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="2"  y1="16" x2="7"  y2="16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="25" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="16" cy="16" r="3" fill="#dc2626"/>
+        </svg>
+      </button>
       <button class="map-tool-btn" id="cadastral-toggle" title="지적편집도 표시/숨김">지적</button>
-      <button class="map-tool-btn" id="recenter-btn" title="동두천 시청 기준으로 되돌리기">⟲</button>
+      <button class="map-tool-btn icon-btn" id="recenter-btn" title="동두천소방서 기준으로 되돌리기">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-label="소방서로 복귀">
+          <path d="M3 12 L12 3 L21 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M5 11 L5 20 L19 20 L19 11" fill="#dc2626" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          <rect x="10" y="14" width="4" height="6" fill="white"/>
+          <text x="12" y="10" font-size="5.5" font-weight="800" fill="currentColor" text-anchor="middle" font-family="Pretendard, sans-serif">119</text>
+        </svg>
+      </button>
     </div>
     <div id="map"></div>
   </div>
@@ -550,8 +566,21 @@
    동두천시 재난안전지도 — 클라이언트 로직
    ============================================================ */
 
-const DDC_CENTER = { lat: 37.9034, lng: 127.0606 }; // 동두천시청 기준
+// 기본 중심 좌표 — 동두천소방서. 데이터(data.js)에 동두천소방서가 있으면 그 좌표를 자동 사용.
+const DDC_HQ_FALLBACK = { lat: 37.892294, lng: 127.047618 }; // 동두천소방서 (지행로 6)
 const DEFAULT_ZOOM = 13;
+
+function getHomeCenter() {
+  const fire = (window.DDC_DATA && window.DDC_DATA.categories && window.DDC_DATA.categories['소방서']);
+  if (fire && Array.isArray(fire.items)) {
+    const main = fire.items.find(it => it.name === '동두천소방서');
+    if (main && typeof main.lat === 'number' && typeof main.lng === 'number') {
+      return { lat: main.lat, lng: main.lng };
+    }
+  }
+  return DDC_HQ_FALLBACK;
+}
+const DDC_CENTER = getHomeCenter();
 
 // 카테고리별 아이콘 — 마커는 SVG 우선, 사이드바 칩·InfoWindow 배지는 이모지 fallback.
 // 시트에 없는 새 카테고리가 들어와도 기본 아이콘으로 안전 fallback.
@@ -803,12 +832,22 @@ function setUserLocation(lat, lng, accuracy) {
   if (userMarker) userMarker.setMap(null);
   if (userCircle) userCircle.setMap(null);
 
+  const crosshairSvg =
+    '<svg viewBox="0 0 32 32" width="32" height="32">' +
+      '<circle cx="16" cy="16" r="11" fill="white" stroke="#111" stroke-width="2.4"/>' +
+      '<line x1="16" y1="1"  x2="16" y2="7"  stroke="#111" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<line x1="16" y1="25" x2="16" y2="31" stroke="#111" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<line x1="1"  y1="16" x2="7"  y2="16" stroke="#111" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<line x1="25" y1="16" x2="31" y2="16" stroke="#111" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<circle cx="16" cy="16" r="3.5" fill="#dc2626"/>' +
+    '</svg>';
+
   userMarker = new naver.maps.Marker({
     position: ll,
     map: map,
     icon: {
-      content: '<div class="user-loc-marker" title="현재 내 위치"></div>',
-      anchor: new naver.maps.Point(9, 9),
+      content: '<div class="user-loc-marker" title="현재 내 위치">' + crosshairSvg + '</div>',
+      anchor: new naver.maps.Point(16, 16),
     },
     zIndex: 1000,
   });
