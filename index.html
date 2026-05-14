@@ -179,6 +179,13 @@
     flex-shrink: 0;
   }
   .cat-chip.active .cat-dot { background: rgba(255,255,255,0.9); }
+  .cat-emoji {
+    font-size: 14px;
+    line-height: 1;
+    flex-shrink: 0;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji',
+                 'Pretendard Variable', sans-serif;
+  }
   .cat-count {
     font-size: 10px;
     color: var(--text-sub);
@@ -340,26 +347,32 @@
   .map-wrap { flex: 1; position: relative; }
   #map { width: 100%; height: 100%; }
 
-  /* 사용자 정의 마커 */
+  /* 사용자 정의 마커 (배경 색은 카테고리 color, 아이콘은 카테고리별 이모지) */
   .map-marker {
     position: relative;
-    width: 30px; height: 30px;
+    width: 36px; height: 36px;
     border-radius: 50% 50% 50% 0;
     transform: rotate(-45deg) translate(-50%, -50%);
     transform-origin: top left;
     border: 2.5px solid white;
     box-shadow: 0 3px 10px rgba(0,0,0,0.35);
-    display: flex; align-items: center; justify-content: center;
     cursor: pointer;
   }
-  .map-marker::before {
-    content: ''; position: absolute;
-    width: 6px; height: 6px; border-radius: 50%;
-    background: white;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
+  .map-marker-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(45deg);   /* 마커 -45° 회전 보정 */
+    font-size: 17px;
+    line-height: 1;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji',
+                 'Pretendard Variable', sans-serif;
+    /* 컬러 이모지는 그대로 색이 나오게 두고, 흰 글자 배지처럼 보이게 살짝 그림자 */
+    text-shadow: 0 1px 1px rgba(0,0,0,0.25);
+    pointer-events: none;
   }
-  /* 마커 색상은 data.js 의 category.color 로 인라인 적용됨 (동적 카테고리 지원) */
 
   /* 정보창 (InfoWindow 내부 컨텐츠) */
   .info-window {
@@ -369,13 +382,20 @@
     color: #1a2138;
   }
   .info-cat {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 10px; font-weight: 700;
-    padding: 2px 8px;
+    padding: 3px 9px 3px 7px;
     border-radius: 10px;
     color: white;
     margin-bottom: 6px;
     letter-spacing: 0.3px;
+  }
+  .info-cat-icon {
+    font-size: 12px;
+    line-height: 1;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
   }
   .info-name { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
   .info-row {
@@ -453,6 +473,28 @@
 const DDC_CENTER = { lat: 37.9034, lng: 127.0606 }; // 동두천시청 기준
 const DEFAULT_ZOOM = 13;
 
+// 카테고리별 아이콘 (마커·칩·목록에 공통 사용)
+// 시트에 없는 새 카테고리가 들어와도 안전하게 기본 아이콘 fallback.
+const CATEGORY_ICONS = {
+  '소방서':         '🚒',
+  '구급함':         '⛑️',
+  '산악위치표지판': '⛰️',
+  '병원':           '🏥',
+  '의료기관':       '🏥',
+  '대피소':         '🏠',
+  '위험지역':       '⚠️',
+  '하천 관측소':    '🌊',
+  '하천관측소':     '🌊',
+  '헬기장':         '🚁',
+  '취약가구':       '👥',
+  '소화전':         '🧯',
+  '비상급수':       '🚰',
+};
+const DEFAULT_ICON = '📍';
+function iconFor(catKey) {
+  return CATEGORY_ICONS[catKey] || DEFAULT_ICON;
+}
+
 // 데이터 로드 (data.js 가 window.DDC_DATA 정의)
 const DATA = window.DDC_DATA || { updatedAt: '-', categories: {} };
 document.getElementById('updated-at').textContent = DATA.updatedAt || '-';
@@ -527,7 +569,7 @@ function renderChips() {
     chip.dataset.cat = key;
     chip.style.setProperty('--chip-color', cat.color);
     chip.innerHTML =
-      '<span class="cat-dot"></span>' +
+      '<span class="cat-emoji">' + iconFor(key) + '</span>' +
       '<span class="cat-name">' + escapeHtml(cat.label || key) + '</span>' +
       '<span class="cat-count">' + count + '</span>';
     chip.onclick = () => setActiveCategory(key);
@@ -607,16 +649,18 @@ function renderAllMarkers() {
 
 function createMarker(catKey, cat, item) {
   if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return null;
+  const icon = iconFor(catKey);
   const marker = new naver.maps.Marker({
     position: new naver.maps.LatLng(item.lat, item.lng),
     map: map,
     icon: {
-      content: '<div class="map-marker" style="background:' + cat.color + ';" title="' + escapeHtml(item.name) + '"></div>',
+      content: '<div class="map-marker" style="background:' + cat.color + ';" title="' + escapeHtml(item.name) + '">' +
+               '<span class="map-marker-icon">' + icon + '</span></div>',
       anchor: new naver.maps.Point(0, 0),
     },
     title: item.name,
   });
-  const infoHtml = buildInfoWindowHtml(cat, item);
+  const infoHtml = buildInfoWindowHtml(catKey, cat, item);
   const info = new naver.maps.InfoWindow({
     content: infoHtml,
     borderWidth: 0,
@@ -632,7 +676,7 @@ function createMarker(catKey, cat, item) {
   return { marker, info, item, cat };
 }
 
-function buildInfoWindowHtml(cat, item) {
+function buildInfoWindowHtml(catKey, cat, item) {
   const rows = [];
   if (item.address) rows.push(row('주소', escapeHtml(item.address)));
   if (item.phone) rows.push(row('전화', '<a href="tel:' + item.phone.replace(/[^0-9]/g,'') + '">' + escapeHtml(item.phone) + '</a>'));
@@ -641,9 +685,12 @@ function buildInfoWindowHtml(cat, item) {
   if (item.level) rows.push(row('등급', escapeHtml(item.level)));
   if (item.note) rows.push(row('비고', escapeHtml(item.note)));
 
+  const catLabel = escapeHtml(cat.label || catKey);
   return (
     '<div class="info-window">' +
-      '<span class="info-cat" style="background:' + cat.color + '">' + escapeHtml(cat.label) + '</span>' +
+      '<span class="info-cat" style="background:' + cat.color + '">' +
+        '<span class="info-cat-icon">' + iconFor(catKey) + '</span>' + catLabel +
+      '</span>' +
       '<div class="info-name">' + escapeHtml(item.name) + '</div>' +
       rows.join('') +
     '</div>'
