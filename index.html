@@ -324,11 +324,19 @@
     line-height: 1.6;
   }
 
-  /* 사이드바 토글 버튼 (지도 좌상단) */
-  .sidebar-toggle {
+  /* 지도 위 도구 모음 (좌상단) */
+  .map-tools {
     position: absolute;
     top: 14px; left: 14px;
-    width: 34px; height: 34px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 5;
+  }
+  .map-tool-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -336,12 +344,19 @@
     display: flex; align-items: center; justify-content: center;
     color: var(--text-dim);
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    z-index: 5;
     transition: all 0.15s;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
+    font-family: inherit;
+    white-space: nowrap;
   }
-  .sidebar-toggle:hover { color: var(--accent); border-color: var(--accent); }
+  .map-tool-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .map-tool-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 10px var(--accent-glow);
+  }
 
   /* ===== 지도 ===== */
   .map-wrap { flex: 1; position: relative; }
@@ -403,7 +418,7 @@
     .sidebar { width: 100%; max-height: 45vh; border-right: none; border-bottom: 1px solid var(--border); }
     .sidebar-inner { min-width: 0; padding: 12px 12px 0; }
     .sidebar.collapsed { max-height: 0; }
-    .sidebar-toggle { top: auto; bottom: 14px; left: 14px; }
+    .map-tools { top: auto; bottom: 14px; left: 14px; flex-direction: row; }
   }
 </style>
 </head>
@@ -442,7 +457,11 @@
   </aside>
 
   <div class="map-wrap">
-    <button class="sidebar-toggle" id="sidebar-toggle" title="사이드바 접기/펼치기">☰</button>
+    <div class="map-tools">
+      <button class="map-tool-btn" id="sidebar-toggle" title="사이드바 접기/펼치기">☰</button>
+      <button class="map-tool-btn" id="cadastral-toggle" title="지적편집도 표시/숨김">지적</button>
+      <button class="map-tool-btn" id="recenter-btn" title="동두천 시청 기준으로 되돌리기">⟲</button>
+    </div>
     <div id="map"></div>
   </div>
 </main>
@@ -505,7 +524,8 @@ document.getElementById('theme-toggle').onclick = () => {
 
 /* ----- 네이버맵 초기화 ----- */
 let map;
-const markers = {}; // catKey -> [naver.maps.Marker, ...]
+let cadastralLayer;
+const markers = {}; // catKey -> [{marker, info, item, cat}, ...]
 let openInfoWindow = null;
 
 function initMap() {
@@ -519,17 +539,41 @@ function initMap() {
   map = new naver.maps.Map('map', {
     center: new naver.maps.LatLng(DDC_CENTER.lat, DDC_CENTER.lng),
     zoom: DEFAULT_ZOOM,
+    // 일반/위성/지형/하이브리드 모드 토글 (우상단)
+    mapTypeControl: true,
+    mapTypeControlOptions: {
+      position: naver.maps.Position.TOP_RIGHT,
+      style: naver.maps.MapTypeControlStyle.BUTTON,
+      mapTypeIds: [
+        naver.maps.MapTypeId.NORMAL,
+        naver.maps.MapTypeId.TERRAIN,
+        naver.maps.MapTypeId.SATELLITE,
+        naver.maps.MapTypeId.HYBRID,
+      ],
+    },
+    // 줌 컨트롤 (우측 중앙)
     zoomControl: true,
-    zoomControlOptions: { position: naver.maps.Position.TOP_LEFT },
-    mapTypeControl: false,
+    zoomControlOptions: {
+      position: naver.maps.Position.RIGHT_CENTER,
+      style: naver.maps.ZoomControlStyle.SMALL,
+    },
+    // 축척 (좌하단)
+    scaleControl: true,
+    scaleControlOptions: { position: naver.maps.Position.BOTTOM_LEFT },
+    // 네이버 로고 (의무 — 우하단)
+    logoControl: true,
+    logoControlOptions: { position: naver.maps.Position.BOTTOM_RIGHT },
   });
+
+  // 지적편집도 레이어 (토글 가능, 기본은 OFF)
+  cadastralLayer = new naver.maps.CadastralLayer();
 
   // 카테고리 UI + 마커 렌더
   renderChips();
   renderAllMarkers();
-  applyFilter();   // 초기 상태: 전체 보기
+  applyFilter();
   bindSearch();
-  bindSidebarToggle();
+  bindMapTools();
 }
 
 /* ----- 카테고리 칩 ----- */
@@ -592,12 +636,26 @@ function bindSearch() {
   });
 }
 
-/* ----- 사이드바 접기/펼치기 ----- */
-function bindSidebarToggle() {
+/* ----- 지도 좌상단 도구 모음 ----- */
+function bindMapTools() {
+  // 사이드바 접기/펼치기
   document.getElementById('sidebar-toggle').onclick = () => {
     document.getElementById('sidebar').classList.toggle('collapsed');
-    // 지도 리사이즈 트리거
     setTimeout(() => { if (map) naver.maps.Event.trigger(map, 'resize'); }, 280);
+  };
+
+  // 지적편집도 ON/OFF
+  const cBtn = document.getElementById('cadastral-toggle');
+  cBtn.onclick = () => {
+    const on = cadastralLayer.getMap() == null;
+    cadastralLayer.setMap(on ? map : null);
+    cBtn.classList.toggle('active', on);
+  };
+
+  // 동두천 시청 기준 위치·줌 복귀
+  document.getElementById('recenter-btn').onclick = () => {
+    map.setCenter(new naver.maps.LatLng(DDC_CENTER.lat, DDC_CENTER.lng));
+    map.setZoom(DEFAULT_ZOOM);
   };
 }
 
