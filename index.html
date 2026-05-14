@@ -459,6 +459,31 @@
   .info-row a { color: #0077b6; text-decoration: none; }
   .info-row a:hover { text-decoration: underline; }
 
+  /* 길찾기 버튼들 (InfoWindow 하단) */
+  .info-nav {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px solid #e5e7eb;
+  }
+  .info-nav-btn {
+    flex: 1;
+    text-align: center;
+    padding: 8px 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none !important;
+    color: white !important;
+    letter-spacing: -0.2px;
+    line-height: 1.2;
+  }
+  .info-nav-btn:hover { filter: brightness(0.95); }
+  .info-nav-btn.nav-naver  { background: #03c75a; }
+  .info-nav-btn.nav-kakao  { background: #fee500; color: #381f1f !important; }
+  .info-nav-btn.nav-tmap   { background: #ed174c; }
+
   /* 모바일 */
   @media (max-width: 720px) {
     .main { flex-direction: column; }
@@ -881,6 +906,8 @@ function createMarker(catKey, cat, item) {
   });
   naver.maps.Event.addListener(marker, 'click', () => {
     if (openInfoWindow) openInfoWindow.close();
+    // userLatLng 가 갱신됐을 수 있으므로 매번 최신 콘텐츠로 다시 빌드 (길찾기 URL 의 출발지 반영)
+    info.setContent(buildInfoWindowHtml(catKey, cat, item));
     info.open(map, marker);
     openInfoWindow = info;
   });
@@ -904,11 +931,39 @@ function buildInfoWindowHtml(catKey, cat, item) {
       '</span>' +
       '<div class="info-name">' + escapeHtml(item.name) + '</div>' +
       rows.join('') +
+      buildNavButtons(item) +
     '</div>'
   );
   function row(label, val) {
     return '<div class="info-row"><strong>' + label + '</strong><span>' + val + '</span></div>';
   }
+}
+
+/* ----- 길찾기 (도보) 버튼 — 모바일 앱 URL Scheme ----- */
+function buildNavButtons(item) {
+  if (typeof item.lat !== 'number') return '';
+  const lat = item.lat, lng = item.lng;
+  const name = encodeURIComponent(item.name || '목적지');
+
+  // 네이버맵: 도보 경로
+  let nmap = 'nmap://route/walk?dlat=' + lat + '&dlng=' + lng + '&dname=' + name + '&appname=ddc-disaster-map';
+  if (userLatLng) {
+    nmap += '&slat=' + userLatLng.lat + '&slng=' + userLatLng.lng + '&sname=' + encodeURIComponent('내 위치');
+  }
+
+  // 카카오맵: 도보 경로 (ep=목적지, by=FOOT)
+  let kakao = 'kakaomap://route?ep=' + lat + ',' + lng + '&by=FOOT';
+  if (userLatLng) {
+    kakao = 'kakaomap://route?sp=' + userLatLng.lat + ',' + userLatLng.lng +
+            '&ep=' + lat + ',' + lng + '&by=FOOT';
+  }
+
+  return (
+    '<div class="info-nav">' +
+      '<a href="' + nmap + '" class="info-nav-btn nav-naver" target="_blank" rel="noopener">🚶 네이버맵</a>' +
+      '<a href="' + kakao + '" class="info-nav-btn nav-kakao" target="_blank" rel="noopener">🚶 카카오맵</a>' +
+    '</div>'
+  );
 }
 
 /* ----- 사이드바 장소 목록 (카테고리·검색 필터 적용) ----- */
