@@ -362,20 +362,25 @@
   .map-wrap { flex: 1; position: relative; }
   #map { width: 100%; height: 100%; }
 
-  /* 마커: 카테고리 이모지 그대로 표시 (핀 배경 없음, 더 깔끔) */
+  /* 마커: 카테고리별 SVG (소방서·구급함·산악표지판) 또는 이모지 fallback */
   .map-marker {
     width: 32px;
     height: 32px;
-    font-size: 26px;
-    line-height: 32px;
-    text-align: center;
     cursor: pointer;
     user-select: none;
-    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
     transition: transform 0.12s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .map-marker:hover { transform: scale(1.2); }
+  .map-marker svg { display: block; }
+  .map-marker-emoji {
+    font-size: 26px;
+    line-height: 1;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  }
 
   /* 정보창 (InfoWindow 내부 컨텐츠) */
   .info-window {
@@ -480,8 +485,8 @@
 const DDC_CENTER = { lat: 37.9034, lng: 127.0606 }; // 동두천시청 기준
 const DEFAULT_ZOOM = 13;
 
-// 카테고리별 아이콘 (마커·칩·목록에 공통 사용)
-// 시트에 없는 새 카테고리가 들어와도 안전하게 기본 아이콘 fallback.
+// 카테고리별 아이콘 — 마커는 SVG 우선, 사이드바 칩·InfoWindow 배지는 이모지 fallback.
+// 시트에 없는 새 카테고리가 들어와도 기본 아이콘으로 안전 fallback.
 const CATEGORY_ICONS = {
   '소방서':         '🚒',
   '구급함':         '⛑️',
@@ -500,6 +505,35 @@ const CATEGORY_ICONS = {
 const DEFAULT_ICON = '📍';
 function iconFor(catKey) {
   return CATEGORY_ICONS[catKey] || DEFAULT_ICON;
+}
+
+// 마커용 SVG — 단순한 도형. OS·브라우저 무관하게 동일하게 보이려면 SVG 가 정답.
+const CATEGORY_SVGS = {
+  // 소방서: 빨간 집 (지붕 + 본체 + 119)
+  '소방서':
+    '<svg viewBox="0 0 32 32" width="32" height="32" aria-label="소방서">' +
+      '<polygon points="16,3 30,15 2,15" fill="#dc2626"/>' +
+      '<rect x="5" y="15" width="22" height="14" fill="#dc2626"/>' +
+      '<rect x="5" y="15" width="22" height="14" fill="none" stroke="white" stroke-width="1"/>' +
+      '<text x="16" y="25" fill="white" font-size="9" font-weight="800" font-family="Pretendard, sans-serif" text-anchor="middle">119</text>' +
+    '</svg>',
+  // 구급함: 빨간 사각형 + 흰 십자가 (적십자)
+  '구급함':
+    '<svg viewBox="0 0 32 32" width="32" height="32" aria-label="구급함">' +
+      '<rect x="2" y="2" width="28" height="28" rx="5" fill="#dc2626" stroke="white" stroke-width="1.5"/>' +
+      '<rect x="13.5" y="7" width="5" height="18" fill="white"/>' +
+      '<rect x="7" y="13.5" width="18" height="5" fill="white"/>' +
+    '</svg>',
+  // 산악위치표지판: 표지판(직사각형) + 막대
+  '산악위치표지판':
+    '<svg viewBox="0 0 32 32" width="32" height="32" aria-label="산악위치표지판">' +
+      '<rect x="14.5" y="14" width="3" height="17" fill="#6b7280"/>' +
+      '<rect x="2" y="3" width="28" height="14" rx="2" fill="#15803d" stroke="white" stroke-width="1.5"/>' +
+      '<text x="16" y="13" fill="white" font-size="9" font-weight="800" font-family="Pretendard, sans-serif" text-anchor="middle">山</text>' +
+    '</svg>',
+};
+function svgFor(catKey) {
+  return CATEGORY_SVGS[catKey] || null;
 }
 
 // 데이터 로드 (data.js 가 window.DDC_DATA 정의)
@@ -695,12 +729,13 @@ function renderAllMarkers() {
 
 function createMarker(catKey, cat, item) {
   if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return null;
-  const icon = iconFor(catKey);
+  // SVG 가 있으면 SVG, 없으면 이모지 fallback
+  const inner = svgFor(catKey) || '<span class="map-marker-emoji">' + iconFor(catKey) + '</span>';
   const marker = new naver.maps.Marker({
     position: new naver.maps.LatLng(item.lat, item.lng),
     map: map,
     icon: {
-      content: '<div class="map-marker" title="' + escapeHtml(item.name) + '">' + icon + '</div>',
+      content: '<div class="map-marker" title="' + escapeHtml(item.name) + '">' + inner + '</div>',
       anchor: new naver.maps.Point(16, 16),   // 32×32 마커 박스의 중앙이 좌표를 가리킴
     },
     title: item.name,
