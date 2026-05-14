@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
-"""동두천시 재난안전지도 — 마커 데이터 수집기.
+"""동두천시 재난안전지도 — 마커 데이터 수집기 (구글 시트 연동판).
 
-이 스크립트가 data.js 의 single source of truth.
-- 알려진 주소들을 네이버 지오코딩으로 좌표 변환
-- 한강홍수통제소(HRFCO) API로 하천관측소 정보 수집
-- 결과를 프로젝트 루트 data.js 로 출력
+데이터 소스: 구글 시트 (.env 의 GOOGLE_SHEET_ID 로 지정)
+시트의 첫 탭(gid=0)을 CSV 로 가져와서 좌표를 자동 변환 후 data.js 생성.
 
-장소를 추가/수정하려면 아래 PLACES 딕셔너리만 수정하고 다시 실행하세요.
+시트 양식 (헤더 행은 어디 있어도 자동 탐지):
+  category | name | address | phone | type | note | code | lat | lng
+  - category, name 은 필수
+  - address 있고 lat/lng 비어있으면 → 네이버 지오코딩으로 자동 변환
+  - lat/lng 가 직접 입력되어 있으면 그대로 사용 (지오코딩 안 함)
+  - code(하천관측소만): 한강홍수통제소 코드 → 좌표 자동 수집
 
 실행: python tools/update_places.py
 """
+import csv
+import io
 import json
 import sys
 import time
@@ -18,7 +23,6 @@ from pathlib import Path
 
 import requests
 
-# Windows 콘솔 한글 출력
 try:
     sys.stdout.reconfigure(encoding='utf-8')
 except Exception:
@@ -29,8 +33,14 @@ ENV_PATH = ROOT / '.env'
 OUTPUT_PATH = ROOT / 'data.js'
 
 
+# ============================================================
+# 환경
+# ============================================================
+
 def load_env(path=ENV_PATH):
     env = {}
+    if not path.exists():
+        return env
     with open(path, encoding='utf-8') as f:
         for line in f:
             line = line.strip()
@@ -43,104 +53,92 @@ def load_env(path=ENV_PATH):
 
 
 ENV = load_env()
+SHEET_ID = ENV.get('GOOGLE_SHEET_ID', '')
 NAVER_ID = ENV.get('NAVER_MAP_CLIENT_ID', '')
 NAVER_SECRET = ENV.get('NAVER_MAP_CLIENT_SECRET', '')
 HRFCO_KEY = ENV.get('HRFCO_KEY', '')
 
 
 # ============================================================
-# 장소 정의
+# 카테고리 색상
 # ============================================================
-# items 의 각 항목에 address 만 적으면 자동으로 lat/lng 가 채워집니다.
-# 이미 lat/lng 가 있으면 지오코딩을 건너뜁니다 (예: 정확한 좌표를 알 때).
-# 주소가 모호하면 검색 결과의 첫 번째 좌표가 잡힙니다 — 결과 검증 필요.
+# 시트에 새 카테고리가 생겨도 자동 처리됨. 색상 지정하고 싶으면 여기 추가.
 
-PLACES = {
-    'fire': {
-        'label': '소방서',
-        'color': '#ff3b5c',
-        'items': [
-            {
-                'name': '동두천소방서',
-                'address': '경기도 동두천시 지행로 6',
-                'phone': '031-830-5323',
-                'type': '소방서 본서',
-                'note': '경기북부소방재난본부 산하 · 불현119안전센터 포함',
-            },
-            {
-                'name': '소요119안전센터',
-                'address': '경기 동두천시 평화로2910번길 65',  # 법정동(상봉암동) 빼면 지오코딩 잘 됨
-                'type': '119안전센터',
-                'note': '동두천소방서 산하 · 상봉암동 소요산 인근',
-            },
-            {
-                'name': '광암119지역대',
-                'address': '경기 동두천시 삼육사로1269번길 9',
-                'type': '119지역대',
-                'note': '동두천소방서 산하',
-            },
-        ],
-    },
-
-    'hospital': {
-        'label': '병원',
-        'color': '#4aa8ff',
-        'items': [
-            {
-                'name': '동두천중앙성모병원',
-                'address': '경기도 동두천시 동광로 53',
-                'type': '종합병원',
-                'note': '응급의학과 운영',
-            },
-            {
-                'name': '동두천제일요양병원',
-                'address': '경기도 동두천시 광암로 7',
-                'type': '요양병원',
-            },
-            {
-                'name': '동두천시보건소',
-                'address': '경기도 동두천시 중앙로 167',
-                'phone': '031-860-3372',
-                'type': '보건소',
-            },
-        ],
-    },
-
-    'shelter': {
-        'label': '대피소',
-        'color': '#00d68f',
-        'items': [],  # 추후 행안부 대피소 API 연동 예정
-    },
-
-    'danger': {
-        'label': '위험지역',
-        'color': '#ffaa00',
-        'items': [],  # 추후 산림청 산사태위험지역 / 환경부 침수예상지역 연동
-    },
-
-    'river': {
-        'label': '하천 관측소',
-        'color': '#b478ff',
-        'items': [],  # HRFCO API 에서 자동 수집 (아래 RIVER_STATIONS)
-    },
+CATEGORY_COLORS = {
+    '소방서':         '#ff3b5c',  # 빨강
+    '병원':           '#4aa8ff',  # 파랑
+    '의료기관':       '#4aa8ff',
+    '대피소':         '#00d68f',  # 녹색
+    '위험지역':       '#ffaa00',  # 주황
+    '하천 관측소':    '#b478ff',  # 보라
+    '하천관측소':     '#b478ff',
+    '구급함':         '#ff8fab',  # 분홍 (구급)
+    '산악위치표지판': '#22c55e',  # 진녹색 (안내)
 }
 
-# HRFCO 에서 가져올 동두천 관련 수위관측소 코드 (한강홍수통제소 표준수문DB)
-RIVER_STATIONS = [
-    {'code': '1022668'},  # 신천 송천교 — 경기도 동두천시 송내동
-]
+# 매핑 없는 카테고리에 자동 부여할 색상 팔레트
+AUTO_PALETTE = ['#00d4ff', '#9333ea', '#06b6d4', '#f59e0b', '#ec4899',
+                '#84cc16', '#0ea5e9', '#d97706']
+
+
+def color_for(cat, used_count):
+    if cat in CATEGORY_COLORS:
+        return CATEGORY_COLORS[cat]
+    return AUTO_PALETTE[used_count % len(AUTO_PALETTE)]
 
 
 # ============================================================
-# 유틸
+# 구글 시트 fetch
+# ============================================================
+
+def fetch_sheet_rows(sheet_id):
+    """공유 링크가 있는 구글 시트의 첫 탭을 CSV 로 가져와 dict 리스트로 변환."""
+    if not sheet_id:
+        raise RuntimeError('GOOGLE_SHEET_ID 가 .env 에 없습니다.')
+
+    url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid=0'
+    r = requests.get(url, timeout=20, allow_redirects=True)
+    if r.status_code != 200:
+        raise RuntimeError(f'시트 fetch 실패 (HTTP {r.status_code}). '
+                           f'시트가 "링크가 있는 사람: 뷰어" 로 공유되어 있는지 확인하세요.')
+    r.encoding = 'utf-8'
+
+    rows = list(csv.reader(io.StringIO(r.text)))
+    if not rows:
+        return []
+
+    # 헤더 행 자동 탐지 (category 단어가 있는 행)
+    header_idx = None
+    for i, row in enumerate(rows):
+        cells = [c.strip().lower() for c in row]
+        if 'category' in cells:
+            header_idx = i
+            break
+    if header_idx is None:
+        raise RuntimeError('시트에서 "category" 헤더를 찾을 수 없습니다.')
+
+    header = [c.strip() for c in rows[header_idx]]
+    items = []
+    for row in rows[header_idx + 1:]:
+        if not any(c.strip() for c in row):
+            continue
+        d = {}
+        for i, h in enumerate(header):
+            if not h:
+                continue
+            d[h] = row[i].strip() if i < len(row) else ''
+        if not d.get('category') or not d.get('name'):
+            continue
+        items.append(d)
+    return items
+
+
+# ============================================================
+# 네이버 지오코딩
 # ============================================================
 
 def geocode(address):
-    """주소 → (lat, lng). 실패 시 None."""
-    if not address:
-        return None
-    if not NAVER_ID or not NAVER_SECRET:
-        print('  ! NAVER_MAP_CLIENT_ID/SECRET 가 .env 에 없습니다.')
+    if not address or not NAVER_ID or not NAVER_SECRET:
         return None
     try:
         r = requests.get(
@@ -153,24 +151,22 @@ def geocode(address):
             timeout=10,
         )
         if r.status_code != 200:
-            print(f'  ✗ geocode HTTP {r.status_code}: {address}')
             return None
         addrs = r.json().get('addresses', [])
         if not addrs:
-            print(f'  ✗ geocode 결과 없음: {address}')
             return None
         a = addrs[0]
         return float(a['y']), float(a['x'])
-    except Exception as e:
-        print(f'  ✗ geocode 에러: {e}')
+    except Exception:
         return None
 
+
+# ============================================================
+# 한강홍수통제소 — 시트에 'code' 컬럼이 채워진 행만 좌표 자동 수집
+# ============================================================
 
 def dms_to_dec(dms_str):
-    """'127-03-05' → 127.0514"""
-    if not dms_str:
-        return None
-    parts = dms_str.strip().split('-')
+    parts = (dms_str or '').strip().split('-')
     if len(parts) != 3:
         return None
     try:
@@ -180,129 +176,156 @@ def dms_to_dec(dms_str):
         return None
 
 
-# ============================================================
-# 하천 관측소 (한강홍수통제소)
-# ============================================================
+_river_cache = None
 
-def fetch_river_stations():
-    print('[하천 관측소]')
-    if not HRFCO_KEY:
-        print('  ! HRFCO_KEY 가 .env 에 없습니다.')
-        return []
+def fetch_hrfco_station(code):
+    """HRFCO 관측소 코드 → (lat, lng, info_dict) 또는 None."""
+    global _river_cache
+    if not code or not HRFCO_KEY:
+        return None
 
-    sess = requests.Session()
-    sess.headers.update({
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-    })
+    if _river_cache is None:
+        sess = requests.Session()
+        sess.headers.update({'User-Agent': 'Mozilla/5.0'})
+        for attempt in range(5):
+            try:
+                r = sess.get(f'http://api.hrfco.go.kr/{HRFCO_KEY}/waterlevel/info.json', timeout=60)
+                r.raise_for_status()
+                stations = r.json().get('content', [])
+                _river_cache = {s['wlobscd']: s for s in stations}
+                print(f'  ✓ HRFCO 관측소 목록 {len(stations)}개 로드')
+                break
+            except Exception as e:
+                print(f'  HRFCO 재시도 {attempt+1}/5: {type(e).__name__}')
+                time.sleep(3 + attempt)
+        else:
+            print('  ✗ HRFCO 호출 실패 — code 컬럼 행은 마커 미표시')
+            _river_cache = {}
 
-    info_map = None
-    for attempt in range(5):
-        try:
-            r = sess.get(
-                f'http://api.hrfco.go.kr/{HRFCO_KEY}/waterlevel/info.json',
-                timeout=60,
-            )
-            r.raise_for_status()
-            stations = r.json().get('content', [])
-            info_map = {s['wlobscd']: s for s in stations}
-            print(f'  ✓ HRFCO 관측소 목록 {len(stations)}개 로드')
-            break
-        except Exception as e:
-            print(f'  재시도 {attempt + 1}/5: {type(e).__name__}')
-            time.sleep(3 + attempt)
-
-    if info_map is None:
-        print('  ✗ HRFCO API 호출 실패 — 알려진 좌표로 fallback')
-        return [{
-            'name': '신천 송천교 (동두천)',
-            'lat': 37.8803, 'lng': 127.0514,
-            'address': '경기도 동두천시 송내동',
-            'type': '수위관측소',
-            'code': '1022668',
-            'note': '한강홍수통제소 관할 / 주의 3.4m · 경계 4m · 경보 5m',
-        }]
-
-    items = []
-    for cfg in RIVER_STATIONS:
-        s = info_map.get(cfg['code'])
-        if not s:
-            print(f'  ✗ 코드 {cfg["code"]} 없음')
-            continue
-        lat = dms_to_dec(s.get('lat', ''))
-        lng = dms_to_dec(s.get('lon', ''))
-        if lat is None or lng is None:
-            print(f'  ✗ 좌표 변환 실패: {cfg["code"]}')
-            continue
-        addr = f"{s.get('addr', '').strip()} {s.get('etcaddr', '').strip()}".strip()
-        note_parts = []
-        if s.get('attwl'): note_parts.append(f'주의 {s["attwl"]}m')
-        if s.get('wrnwl'): note_parts.append(f'경계 {s["wrnwl"]}m')
-        if s.get('almwl'): note_parts.append(f'경보 {s["almwl"]}m')
-        note = '한강홍수통제소 관할 / ' + ' · '.join(note_parts) if note_parts else '한강홍수통제소 관할'
-        items.append({
-            'name': s.get('obsnm', '').strip(),
-            'lat': round(lat, 6),
-            'lng': round(lng, 6),
-            'address': addr,
-            'type': '수위관측소',
-            'code': cfg['code'],
-            'note': note,
-        })
-        print(f'  ✓ {s["obsnm"]:20s} {lat:.4f}, {lng:.4f}')
-    return items
+    s = _river_cache.get(code)
+    if not s:
+        return None
+    lat = dms_to_dec(s.get('lat'))
+    lng = dms_to_dec(s.get('lon'))
+    if lat is None or lng is None:
+        return None
+    return lat, lng, s
 
 
 # ============================================================
-# 메인
+# 메인 처리
 # ============================================================
+
+def normalize_name(name):
+    """셀 안 줄바꿈을 ' / ' 로 단순화."""
+    return ' / '.join(part.strip() for part in name.replace('\r', '').split('\n') if part.strip())
+
 
 def main():
     print('=' * 60)
-    print('  동두천시 재난안전지도 — 마커 데이터 갱신')
+    print('  동두천시 재난안전지도 — 시트 → data.js 동기화')
     print('=' * 60)
     print()
 
-    # 1) 하천 관측소
-    PLACES['river']['items'] = fetch_river_stations()
+    print(f'[1] 구글 시트 fetch ({SHEET_ID[:10]}...)')
+    rows = fetch_sheet_rows(SHEET_ID)
+    print(f'  ✓ {len(rows)} 행 로드')
     print()
 
-    # 2) 나머지 카테고리: 주소 → 좌표 변환
-    for cat_key, cat in PLACES.items():
-        if cat_key == 'river':
-            continue
-        if not cat['items']:
-            continue
-        print(f'[{cat["label"]}]')
-        for item in cat['items']:
-            if 'lat' in item and 'lng' in item:
-                print(f'  · {item["name"]:20s} (수동 좌표)')
-                continue
-            addr = item.get('address', '')
-            coord = geocode(addr)
-            if coord:
-                item['lat'], item['lng'] = round(coord[0], 6), round(coord[1], 6)
-                print(f'  ✓ {item["name"]:20s} {coord[0]:.4f}, {coord[1]:.4f}')
-            else:
-                print(f'  ✗ {item["name"]}: 좌표 변환 실패 (마커 미표시)')
-            time.sleep(0.2)
-        print()
+    # 카테고리별로 분류 (시트 순서 유지)
+    categories = {}  # 한글 키 → {'color': ..., 'items': [...]}
+    cat_order = []   # 카테고리 출현 순서
+    for row in rows:
+        cat = row['category']
+        if cat not in categories:
+            color = color_for(cat, len(cat_order))
+            categories[cat] = {'color': color, 'items': []}
+            cat_order.append(cat)
 
-    # 3) data.js 출력
+    # 행별로 좌표 처리
+    skipped = []
+    for row in rows:
+        cat = row['category']
+        name = normalize_name(row['name'])
+        item = {'name': name}
+
+        # 선택 필드들
+        for k in ('address', 'phone', 'type', 'note', 'code'):
+            v = row.get(k, '').strip()
+            if v:
+                item[k] = v
+
+        # 좌표 결정 (우선순위: 직접 입력 > HRFCO 코드 > 주소 지오코딩)
+        lat = row.get('lat', '').strip()
+        lng = row.get('lng', '').strip()
+        coord = None
+        if lat and lng:
+            try:
+                coord = (float(lat), float(lng))
+                source = 'sheet'
+            except ValueError:
+                pass
+
+        if coord is None and item.get('code'):
+            res = fetch_hrfco_station(item['code'])
+            if res:
+                coord = (res[0], res[1])
+                source = 'HRFCO'
+                # 관측소 부가정보 자동 첨부
+                s = res[2]
+                addr = f"{s.get('addr','').strip()} {s.get('etcaddr','').strip()}".strip()
+                if addr and 'address' not in item:
+                    item['address'] = addr
+                note_parts = []
+                if s.get('attwl'): note_parts.append(f'주의 {s["attwl"]}m')
+                if s.get('wrnwl'): note_parts.append(f'경계 {s["wrnwl"]}m')
+                if s.get('almwl'): note_parts.append(f'경보 {s["almwl"]}m')
+                if note_parts:
+                    extra = '한강홍수통제소 / ' + ' · '.join(note_parts)
+                    item['note'] = (item.get('note', '') + ' · ' + extra).strip(' ·') if item.get('note') else extra
+
+        if coord is None and item.get('address'):
+            geo = geocode(item['address'])
+            if geo:
+                coord = geo
+                source = 'geocode'
+                time.sleep(0.15)
+
+        if coord is None:
+            skipped.append((cat, name))
+            continue
+
+        item['lat'] = round(coord[0], 6)
+        item['lng'] = round(coord[1], 6)
+        categories[cat]['items'].append(item)
+
+    # 출력
+    print('[2] 카테고리별 결과')
+    total = 0
+    for cat in cat_order:
+        n = len(categories[cat]['items'])
+        total += n
+        print(f'  · {cat:14s} {n:3d}개 (색 {categories[cat]["color"]})')
+    print(f'  총 마커: {total}개')
+    if skipped:
+        print(f'  마커 미표시: {len(skipped)}개 (주소/좌표 둘 다 없음)')
+        for cat, name in skipped:
+            print(f'      - [{cat}] {name}')
+    print()
+
+    # JSON 출력
     out = {
         'updatedAt': datetime.now().strftime('%Y-%m-%d %H:%M'),
-        'categories': {
-            k: {'label': v['label'], 'color': v['color'], 'items': v['items']}
-            for k, v in PLACES.items()
-        },
+        'sheetId': SHEET_ID,
+        'categories': {cat: categories[cat] for cat in cat_order},
     }
     js_text = (
         '/* 자동 생성 — tools/update_places.py 실행 시 갱신됨.\n'
-        '   직접 편집하지 말고 update_places.py 의 PLACES 를 고친 뒤 재실행하세요. */\n\n'
-        'window.DDC_DATA = ' +
-        json.dumps(out, ensure_ascii=False, indent=2) + ';\n'
+        '   데이터를 추가/수정하려면 구글 시트(.env GOOGLE_SHEET_ID)를 편집하세요. */\n\n'
+        'window.DDC_DATA = ' + json.dumps(out, ensure_ascii=False, indent=2) + ';\n'
     )
     OUTPUT_PATH.write_text(js_text, encoding='utf-8')
-    print(f'data.js 저장 완료 ({len(js_text):,} bytes)')
+    print(f'[3] data.js 저장 완료 ({len(js_text):,} bytes)')
 
 
 if __name__ == '__main__':

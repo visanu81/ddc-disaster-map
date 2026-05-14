@@ -227,11 +227,7 @@
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
   }
-  .marker-fire { background: #ff3b5c; }
-  .marker-hospital { background: #4aa8ff; }
-  .marker-shelter { background: #00d68f; }
-  .marker-danger { background: #ffaa00; }
-  .marker-river { background: #b478ff; }
+  /* 마커 색상은 data.js 의 category.color 로 인라인 적용됨 (동적 카테고리 지원) */
 
   /* 정보창 (InfoWindow 내부 컨텐츠) */
   .info-window {
@@ -416,7 +412,7 @@ function createMarker(catKey, cat, item) {
     position: new naver.maps.LatLng(item.lat, item.lng),
     map: visibility[catKey] ? map : null,
     icon: {
-      content: '<div class="map-marker marker-' + catKey + '" title="' + escapeHtml(item.name) + '"></div>',
+      content: '<div class="map-marker" style="background:' + cat.color + ';" title="' + escapeHtml(item.name) + '"></div>',
       anchor: new naver.maps.Point(0, 0),
     },
     title: item.name,
