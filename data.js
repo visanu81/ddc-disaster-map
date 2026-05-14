@@ -2,7 +2,7 @@
    데이터를 추가/수정하려면 구글 시트(.env GOOGLE_SHEET_ID)를 편집하세요. */
 
 window.DDC_DATA = {
-  "updatedAt": "2026-05-14 16:32",
+  "updatedAt": "2026-05-14 17:42",
   "sheetId": "1KnTps9EUg2cTZ286GO6E0KYdUmmZu482kD2GAXs7cb8",
   "categories": {
     "소방서": {
@@ -14,6 +14,20 @@ window.DDC_DATA = {
           "type": "본서",
           "lat": 37.892294,
           "lng": 127.047618
+        },
+        {
+          "name": "소요119안전센터",
+          "address": "경기 동두천시 평화로2910번길 65",
+          "type": "센터",
+          "lat": 37.946408,
+          "lng": 127.065133
+        },
+        {
+          "name": "광암119지역대",
+          "address": "경기 동두천시 삼육사로1269번길 9",
+          "type": "지역대",
+          "lat": 37.893097,
+          "lng": 127.089296
         }
       ]
     },
