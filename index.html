@@ -213,6 +213,9 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   }
   .rescue-btn:hover { background: #fef3c7; }
+  /* 🆘 구조위치송신 버튼은 조난자 모드(?mode=rescue)에서만 노출 — 소방관 기본 화면에서는 숨김 */
+  #rescue-beacon { display: none; }
+  body.rescue-mode #rescue-beacon { display: inline-block; }
   .rescue-close {
     background: rgba(255,255,255,0.2);
     color: white;
