@@ -257,25 +257,39 @@
   .search-clear:hover { color: var(--text); background: var(--bg-card); }
   .search-bar.has-text .search-clear { display: flex; align-items: center; justify-content: center; }
 
-  /* 목록 헤더 */
+  /* 목록 헤더 (클릭하면 장소 목록 자체를 접기/펼치기) */
   .list-header {
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
+    gap: 8px;
     margin: 4px 2px 8px;
+    padding: 4px 2px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 4px;
   }
+  .list-header:hover { background: var(--highlight-bg); }
   .list-header .label {
     font-size: 11px;
     font-weight: 700;
     color: var(--text-sub);
     letter-spacing: 0.5px;
     text-transform: uppercase;
+    flex: 1;
   }
   .list-header .count {
     font-size: 11px;
     color: var(--text-dim);
     font-weight: 600;
   }
+  .list-toggle {
+    font-size: 10px;
+    color: var(--text-dim);
+    transition: transform 0.18s;
+    margin-left: 2px;
+  }
+  .list-header.collapsed .list-toggle { transform: rotate(-90deg); }
+  .place-list.collapsed { display: none; }
 
   /* 장소 목록 (사이드바 남은 영역 다 사용) */
   .place-list {
@@ -583,9 +597,10 @@
         <button class="search-clear" id="search-clear" title="지우기">✕</button>
       </div>
 
-      <div class="list-header">
+      <div class="list-header" id="list-header" title="장소 목록 접기/펼치기">
         <span class="label">장소 목록</span>
         <span class="count"><span id="place-count">0</span>개</span>
+        <span class="list-toggle">▾</span>
       </div>
       <div class="place-list" id="place-list"></div>
     </div>
@@ -786,6 +801,24 @@ function initMap() {
   applyFilter();
   bindSearch();
   bindMapTools();
+  bindListHeader();
+}
+
+/* ----- 장소 목록 접기/펼치기 (헤더 클릭) ----- */
+function bindListHeader() {
+  const header = document.getElementById('list-header');
+  const list = document.getElementById('place-list');
+  // localStorage 저장 상태 복원
+  if (localStorage.getItem('ddc-placelist-collapsed') === '1') {
+    header.classList.add('collapsed');
+    list.classList.add('collapsed');
+  }
+  header.onclick = () => {
+    const willCollapse = !header.classList.contains('collapsed');
+    header.classList.toggle('collapsed', willCollapse);
+    list.classList.toggle('collapsed', willCollapse);
+    localStorage.setItem('ddc-placelist-collapsed', willCollapse ? '1' : '0');
+  };
 }
 
 /* ----- 카테고리 칩 ----- */
