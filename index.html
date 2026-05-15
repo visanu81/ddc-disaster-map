@@ -379,6 +379,186 @@
     font-family: 'Pretendard Variable', sans-serif;
   }
 
+  /* 출동(rescue session) 패널 — 우상단 floating */
+  .op-panel {
+    position: fixed;
+    top: 60px; right: 14px;
+    width: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    z-index: 20;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 12.5px;
+  }
+  .op-panel.show { display: flex; }
+  .op-panel h3 { font-size: 13px; font-weight: 800; letter-spacing: -0.2px; margin-bottom: 2px; }
+  .op-panel .hint { font-size: 11.5px; color: var(--text-dim); line-height: 1.5; }
+  .op-panel button { font-family: inherit; cursor: pointer; }
+  .op-panel-close {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--bg-card-2);
+    border: none;
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+  .op-panel-close:hover { color: var(--text); }
+  .op-section { display: flex; flex-direction: column; gap: 10px; }
+  .op-section.hidden { display: none; }
+
+  .op-btn {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--bg-card-2);
+    color: var(--text);
+  }
+  .op-btn.primary { background: #dc2626; color: white; }
+  .op-btn.primary:hover { background: #b91c1c; }
+  .op-btn.danger { background: transparent; color: #dc2626; border: 1.5px solid #dc2626; }
+  .op-btn.danger:hover { background: #fee2e2; }
+  .op-btn:not(.primary):not(.danger):hover { background: var(--border); }
+
+  .op-divider {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text-sub); font-size: 10.5px; letter-spacing: 1px;
+  }
+  .op-divider::before, .op-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .op-input, .op-select {
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--bg-card-2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 12.5px;
+    font-family: inherit;
+    text-transform: uppercase;
+  }
+  .op-input:focus, .op-select:focus { outline: none; border-color: var(--accent); }
+  .op-select { text-transform: none; }
+
+  .op-code-box {
+    background: linear-gradient(135deg, #dc2626, #f59e0b);
+    color: white;
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .op-code-box .label { font-size: 10px; opacity: 0.85; letter-spacing: 0.6px; }
+  .op-code-box .code { font-size: 22px; font-weight: 900; letter-spacing: 2px; }
+  .op-code-share {
+    margin-left: auto;
+    background: rgba(255,255,255,0.25); color: white;
+    border: none; border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 11px; font-weight: 700;
+  }
+  .op-code-share:hover { background: rgba(255,255,255,0.4); }
+
+  .op-people {
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 200px; overflow-y: auto;
+  }
+  .op-people-header {
+    font-size: 10.5px; letter-spacing: 0.6px;
+    color: var(--text-sub); font-weight: 700;
+    display: flex; justify-content: space-between;
+    margin-top: 4px;
+  }
+  .op-person {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 11.5px;
+  }
+  .op-person .role-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .op-person .role-dot.r-rescuer { background: #f59e0b; }
+  .op-person .role-dot.r-victim { background: #dc2626; box-shadow: 0 0 0 0 #dc2626; animation: blink-victim 1.5s ease-out infinite; }
+  .op-person .role-dot.r-command { background: #3b82f6; }
+  .op-person .role-dot.r-me { background: #00d4ff; }
+  .op-person .name { flex: 1; font-weight: 700; }
+  .op-person .dist { color: var(--text-dim); font-size: 10.5px; font-weight: 600; }
+  @keyframes blink-victim {
+    0% { box-shadow: 0 0 0 0 rgba(220,38,38,0.6); }
+    100% { box-shadow: 0 0 0 8px rgba(220,38,38,0); }
+  }
+
+  /* 참여자 마커 — 다른 사람들 위치 표시용 */
+  .peer-marker {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    color: white;
+    font-size: 14px;
+    font-weight: 800;
+    border: 2.5px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    cursor: pointer;
+    user-select: none;
+  }
+  .peer-marker.rescuer { background: #f59e0b; }
+  .peer-marker.command { background: #3b82f6; }
+  .peer-marker.victim {
+    background: #dc2626;
+    animation: pulse-victim 1.4s ease-out infinite;
+  }
+  @keyframes pulse-victim {
+    0% { box-shadow: 0 0 0 0 rgba(220,38,38,0.7), 0 2px 8px rgba(0,0,0,0.35); }
+    70% { box-shadow: 0 0 0 14px rgba(220,38,38,0), 0 2px 8px rgba(0,0,0,0.35); }
+    100% { box-shadow: 0 0 0 0 rgba(220,38,38,0), 0 2px 8px rgba(0,0,0,0.35); }
+  }
+  .peer-label {
+    background: rgba(15, 23, 42, 0.9);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.2);
+    transform: translateY(-22px);
+  }
+
+  /* 출동 상태 배지 (헤더 아래 또는 weather strip 옆) */
+  .op-status {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #dc2626;
+    color: white;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    box-shadow: 0 2px 6px rgba(220,38,38,0.3);
+    animation: pulse-status 2s ease-in-out infinite;
+  }
+  .op-status.show { display: inline-flex; }
+  @keyframes pulse-status {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+  }
+
   /* 가장 가까운 마커 안내선 라벨 */
   .nearest-label {
     background: #dc2626;
@@ -954,6 +1134,50 @@
   <button id="measure-done" type="button">완료</button>
 </div>
 
+<!-- 출동(rescue session) 패널 -->
+<div class="op-panel" id="op-panel">
+  <button class="op-panel-close" id="op-close" type="button">✕</button>
+
+  <!-- 출동 시작/참여 화면 -->
+  <div class="op-section" id="op-section-start">
+    <h3>🆘 출동 위치 공유</h3>
+    <div class="hint">동료·조난자와 실시간 위치를 공유해 같이 수색합니다.<br>익명, 출동 종료시 자동 삭제.</div>
+    <button class="op-btn primary" id="op-create">새 출동 시작</button>
+    <div class="op-divider">또는</div>
+    <input type="text" class="op-input" id="op-code-input" placeholder="코드 입력 (예: H3K7)" maxlength="8">
+    <select class="op-select" id="op-role-input">
+      <option value="rescuer">구조자 (소방관)</option>
+      <option value="victim">조난자</option>
+      <option value="command">지휘부</option>
+    </select>
+    <button class="op-btn" id="op-join">참여</button>
+  </div>
+
+  <!-- 출동 활성 화면 -->
+  <div class="op-section hidden" id="op-section-active">
+    <div class="op-code-box">
+      <div>
+        <div class="label">출동 코드</div>
+        <div class="code" id="op-active-code">----</div>
+      </div>
+      <button class="op-code-share" id="op-share">공유</button>
+    </div>
+    <div class="hint" id="op-self-info">나: <strong id="op-self-role">구조자</strong></div>
+    <div class="op-people-header">
+      <span>참여자</span>
+      <span id="op-people-count">0</span>
+    </div>
+    <div class="op-people" id="op-people-list"></div>
+    <button class="op-btn danger" id="op-leave">출동 종료</button>
+  </div>
+</div>
+
+<!-- 헤더에 출동 진행중 표시 -->
+<div class="op-status" id="op-status" style="position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 15;">
+  <span>🆘 출동중</span>
+  <strong id="op-status-code">----</strong>
+</div>
+
 <!-- 조난자 안내 배너 (닫기 가능) -->
 <div class="rescue-banner" id="rescue-banner">
   <div class="msg">
@@ -1008,6 +1232,15 @@
           <line x1="2"  y1="16" x2="7"  y2="16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
           <line x1="25" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
           <circle cx="16" cy="16" r="3" fill="#dc2626"/>
+        </svg>
+      </button>
+      <button class="map-tool-btn icon-btn" id="op-toggle" title="출동 — 실시간 위치 공유">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="8" r="3"/>
+          <circle cx="17" cy="9" r="2.5"/>
+          <path d="M3 20c0-3 2.7-5 6-5s6 2 6 5"/>
+          <path d="M14 19c0-2 1.6-3.5 3.5-3.5S21 17 21 19"/>
         </svg>
       </button>
       <button class="map-tool-btn" id="cadastral-toggle" title="지적편집도 표시/숨김">지적</button>
@@ -1219,6 +1452,10 @@ function initMap() {
   renderWeatherStrip();
   bindMeasureTool();
   handleUrlParams();
+
+  // Firebase 모듈에서 사용할 글로벌 노출
+  window.map = map;
+  window.setUserLocation = setUserLocation;
 }
 
 /* ----- 기상·산림·하천 위험도 띠 ----- */
@@ -2182,6 +2419,341 @@ function escapeHtml(s) {
 
 /* ----- 부팅 ----- */
 window.addEventListener('load', initMap);
+</script>
+
+<!-- Firebase 실시간 위치 공유 (ESM 모듈) -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import {
+  getDatabase, ref, set, update, remove, onValue, onDisconnect, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCxxm1gXe5adbQQT1B5I3Xg0N63KqtTVOs",
+  authDomain: "ddc-disaster-map.firebaseapp.com",
+  databaseURL: "https://ddc-disaster-map-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ddc-disaster-map",
+  storageBucket: "ddc-disaster-map.firebasestorage.app",
+  messagingSenderId: "25365656922",
+  appId: "1:25365656922:web:4fab70df1a16a0d5e1af63",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* ===== 상태 ===== */
+const OpState = {
+  opCode: null,
+  uid: null,
+  role: null,
+  nickname: null,
+  watchId: null,
+  unsubscribe: null,
+  peers: {},          // uid -> { marker, label, info }
+};
+
+const ROLE_LABEL = { rescuer: '구조자', victim: '조난자', command: '지휘부' };
+const ROLE_ICON = { rescuer: 'R', victim: 'S', command: 'C' };
+
+/* ===== 유틸 ===== */
+function randomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // 0/1/O/I 같은 헷갈리는 문자 제외
+  let s = '';
+  for (let i = 0; i < 4; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+function randomUid() {
+  return 'u_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+}
+function hav(a, b) {
+  if (!a || !b) return null;
+  const R = 6371000;
+  const tr = d => d * Math.PI / 180;
+  const dLat = tr(b.lat - a.lat);
+  const dLng = tr(b.lng - a.lng);
+  const s = Math.sin(dLat/2)**2 +
+            Math.cos(tr(a.lat)) * Math.cos(tr(b.lat)) * Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+function fmtDist(m) {
+  if (m == null) return '';
+  if (m < 1000) return Math.round(m) + 'm';
+  return (m / 1000).toFixed(1) + 'km';
+}
+
+/* ===== UI 바인딩 ===== */
+const $ = (id) => document.getElementById(id);
+
+$('op-toggle').onclick = () => {
+  $('op-panel').classList.toggle('show');
+};
+$('op-close').onclick = () => {
+  $('op-panel').classList.remove('show');
+};
+$('op-create').onclick = () => {
+  const code = randomCode();
+  $('op-code-input').value = code;
+  joinOp(code, $('op-role-input').value);
+};
+$('op-join').onclick = () => {
+  const code = $('op-code-input').value.trim().toUpperCase();
+  if (!/^[A-Z0-9]{4,8}$/.test(code)) {
+    alert('코드는 영문대문자·숫자 4~8자입니다. (예: H3K7)');
+    return;
+  }
+  joinOp(code, $('op-role-input').value);
+};
+$('op-leave').onclick = leaveOp;
+$('op-share').onclick = shareOp;
+
+/* ===== 출동 참여 ===== */
+async function joinOp(code, role) {
+  OpState.opCode = code;
+  OpState.uid = randomUid();
+  OpState.role = role;
+  OpState.nickname = ROLE_LABEL[role] + ' ' + OpState.uid.slice(-3).toUpperCase();
+
+  // DB 노드 경로
+  const myRef = ref(db, `operations/${code}/participants/${OpState.uid}`);
+
+  // 초기 데이터 쓰기
+  try {
+    await set(myRef, {
+      role: role,
+      nickname: OpState.nickname,
+      lat: 0, lng: 0,                // 위치 받기 전 0 (UI 에서 필터링)
+      accuracy: 0,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (e) {
+    alert('출동 참여 실패: ' + e.message);
+    return;
+  }
+
+  // 연결 끊기면 자동 삭제
+  onDisconnect(myRef).remove();
+
+  // 메타 정보 갱신
+  update(ref(db, `operations/${code}/meta`), {
+    lastActive: serverTimestamp(),
+  });
+
+  // UI 전환
+  $('op-section-start').classList.add('hidden');
+  $('op-section-active').classList.remove('hidden');
+  $('op-active-code').textContent = code;
+  $('op-status-code').textContent = code;
+  $('op-status').classList.add('show');
+  $('op-self-role').textContent = ROLE_LABEL[role];
+
+  // 위치 송신 시작
+  startWatchingPosition(myRef);
+
+  // 다른 참여자 구독
+  subscribeParticipants(code);
+}
+
+function leaveOp() {
+  if (!OpState.opCode) {
+    $('op-panel').classList.remove('show');
+    return;
+  }
+  const myRef = ref(db, `operations/${OpState.opCode}/participants/${OpState.uid}`);
+  remove(myRef).catch(() => {});
+
+  if (OpState.watchId != null) navigator.geolocation.clearWatch(OpState.watchId);
+  if (OpState.unsubscribe) OpState.unsubscribe();
+
+  // 다른 사람 마커 정리
+  Object.values(OpState.peers).forEach(p => {
+    if (p.marker) p.marker.setMap(null);
+    if (p.label) p.label.setMap(null);
+  });
+  OpState.peers = {};
+
+  // 상태 리셋
+  OpState.opCode = null;
+  OpState.uid = null;
+  OpState.role = null;
+  OpState.watchId = null;
+  OpState.unsubscribe = null;
+
+  // UI 초기화
+  $('op-section-active').classList.add('hidden');
+  $('op-section-start').classList.remove('hidden');
+  $('op-status').classList.remove('show');
+  $('op-people-list').innerHTML = '';
+  $('op-people-count').textContent = '0';
+}
+
+/* ===== 위치 송신 ===== */
+function startWatchingPosition(myRef) {
+  if (!navigator.geolocation) {
+    alert('이 브라우저는 GPS 를 지원하지 않습니다.');
+    return;
+  }
+  OpState.watchId = navigator.geolocation.watchPosition(
+    pos => {
+      const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+      update(myRef, {
+        lat, lng, accuracy: accuracy || 0,
+        updatedAt: serverTimestamp(),
+      }).catch(() => {});
+      // 본인 위치도 기존 user marker 로 표시
+      if (typeof window.setUserLocation === 'function') {
+        window.setUserLocation(lat, lng, accuracy);
+      }
+    },
+    err => {
+      console.warn('watchPosition error', err);
+      // 첫 실패 시에만 안내
+      if (err.code === 1) {
+        alert('위치 권한을 허용해야 다른 참여자에게 내 위치가 보입니다.');
+      }
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
+  );
+}
+
+/* ===== 다른 참여자 구독 ===== */
+function subscribeParticipants(code) {
+  const partsRef = ref(db, `operations/${code}/participants`);
+  const off = onValue(partsRef, snap => {
+    const all = snap.val() || {};
+    renderPeers(all);
+  });
+  OpState.unsubscribe = off;
+}
+
+function renderPeers(all) {
+  // 1) 마커 갱신
+  const seen = new Set();
+  for (const [uid, info] of Object.entries(all)) {
+    seen.add(uid);
+    if (uid === OpState.uid) continue;
+    if (!info || typeof info.lat !== 'number' || (info.lat === 0 && info.lng === 0)) continue;
+    upsertPeerMarker(uid, info);
+  }
+  // 사라진 사람은 마커 제거
+  for (const uid of Object.keys(OpState.peers)) {
+    if (!seen.has(uid)) {
+      OpState.peers[uid].marker && OpState.peers[uid].marker.setMap(null);
+      OpState.peers[uid].label && OpState.peers[uid].label.setMap(null);
+      delete OpState.peers[uid];
+    }
+  }
+
+  // 2) 패널 목록 갱신
+  const list = $('op-people-list');
+  list.innerHTML = '';
+  const entries = Object.entries(all);
+  $('op-people-count').textContent = entries.length;
+
+  entries.forEach(([uid, info]) => {
+    if (!info) return;
+    const isMe = uid === OpState.uid;
+    const role = info.role || 'rescuer';
+    const dotCls = isMe ? 'r-me' : 'r-' + role;
+    let distText = '';
+    if (!isMe && info.lat && info.lng && OpState.lastSelf) {
+      const d = hav(OpState.lastSelf, { lat: info.lat, lng: info.lng });
+      distText = fmtDist(d);
+    }
+    const el = document.createElement('div');
+    el.className = 'op-person';
+    el.innerHTML =
+      '<span class="role-dot ' + dotCls + '"></span>' +
+      '<span class="name">' + (info.nickname || ROLE_LABEL[role]) + (isMe ? ' (나)' : '') + '</span>' +
+      '<span class="dist">' + distText + '</span>';
+    // 클릭하면 그 사람 위치로 지도 이동
+    if (!isMe && info.lat && info.lng) {
+      el.style.cursor = 'pointer';
+      el.onclick = () => {
+        if (window.map) {
+          window.map.setCenter(new naver.maps.LatLng(info.lat, info.lng));
+          window.map.setZoom(Math.max(window.map.getZoom(), 16));
+        }
+      };
+    }
+    list.appendChild(el);
+  });
+}
+
+function upsertPeerMarker(uid, info) {
+  const role = info.role || 'rescuer';
+  const ll = new naver.maps.LatLng(info.lat, info.lng);
+  const peer = OpState.peers[uid];
+  if (peer && peer.marker) {
+    peer.marker.setPosition(ll);
+    if (peer.label) peer.label.setPosition(ll);
+    return;
+  }
+  const marker = new naver.maps.Marker({
+    position: ll,
+    map: window.map,
+    icon: {
+      content: '<div class="peer-marker ' + role + '">' + (ROLE_ICON[role] || '?') + '</div>',
+      anchor: new naver.maps.Point(15, 15),
+    },
+    zIndex: 900,
+    title: info.nickname || ROLE_LABEL[role],
+  });
+  const label = new naver.maps.Marker({
+    position: ll,
+    map: window.map,
+    icon: {
+      content: '<div class="peer-label">' + (info.nickname || ROLE_LABEL[role]) + '</div>',
+      anchor: new naver.maps.Point(40, -10),
+    },
+    clickable: false,
+    zIndex: 901,
+  });
+  OpState.peers[uid] = { marker, label };
+}
+
+/* ===== 공유 ===== */
+function shareOp() {
+  if (!OpState.opCode) return;
+  const url = location.origin + location.pathname + '?op=' + OpState.opCode;
+  if (navigator.share) {
+    navigator.share({
+      title: '동두천시 재난안전지도 — 출동',
+      text: '출동 코드 ' + OpState.opCode + ' 로 위치 공유. 페이지 열고 GPS 허용해주세요.',
+      url: url,
+    }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url).then(
+      () => alert('출동 링크 복사됨:\n' + url),
+      () => prompt('이 링크를 복사하세요:', url),
+    );
+  }
+}
+
+/* ===== URL ?op= 자동 참여 안내 ===== */
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(location.search);
+  const op = params.get('op');
+  if (op && /^[A-Z0-9]{4,8}$/.test(op.toUpperCase())) {
+    // 패널 열고 코드만 미리 채워둠. 역할 선택 + 참여 누르도록 (자동 참여는 GPS 권한 때문에 의도적 클릭이 안전)
+    $('op-code-input').value = op.toUpperCase();
+    $('op-panel').classList.add('show');
+  }
+});
+
+/* ===== 페이지 닫힐 때 cleanup ===== */
+window.addEventListener('beforeunload', () => {
+  if (OpState.opCode && OpState.uid) {
+    const myRef = ref(db, `operations/${OpState.opCode}/participants/${OpState.uid}`);
+    remove(myRef).catch(() => {});
+  }
+});
+
+/* ===== 본인 위치 추적 (renderPeers 의 거리 계산용) ===== */
+const _origSetUserLocation = window.setUserLocation;
+window.setUserLocation = function(lat, lng, accuracy) {
+  OpState.lastSelf = { lat, lng };
+  if (typeof _origSetUserLocation === 'function') _origSetUserLocation(lat, lng, accuracy);
+};
 </script>
 
 </body>
