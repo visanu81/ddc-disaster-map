@@ -1754,21 +1754,18 @@ function bindMapTools() {
   // 내 현재 위치 (토글: 누르면 켜고/끄기)
   document.getElementById('locate-btn').onclick = toggleUserLocation;
 
-  // 지도 모드 순환 (일반 → 지형 → 위성 → 일반...)
+  // 지도 모드 순환 (일반 → 지형 → 위성(하이브리드: 위성 + 도로/라벨) → 일반...)
   const MAP_TYPES = [
-    { id: 'normal',    label: '일반' },
-    { id: 'terrain',   label: '지형' },
-    { id: 'satellite', label: '위성' },
+    { id: 'normal',  label: '일반',  naver: naver.maps.MapTypeId.NORMAL },
+    { id: 'terrain', label: '지형',  naver: naver.maps.MapTypeId.TERRAIN },
+    { id: 'hybrid',  label: '위성',  naver: naver.maps.MapTypeId.HYBRID },
   ];
   let mtIdx = 0;
   const mtBtn = document.getElementById('maptype-toggle');
   mtBtn.onclick = () => {
     mtIdx = (mtIdx + 1) % MAP_TYPES.length;
     const t = MAP_TYPES[mtIdx];
-    const naverType = t.id === 'normal' ? naver.maps.MapTypeId.NORMAL
-                    : t.id === 'terrain' ? naver.maps.MapTypeId.TERRAIN
-                    : naver.maps.MapTypeId.SATELLITE;
-    map.setMapTypeId(naverType);
+    map.setMapTypeId(t.naver);
     mtBtn.textContent = t.label;
     mtBtn.classList.toggle('active', t.id !== 'normal');
   };
