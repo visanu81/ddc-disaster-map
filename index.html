@@ -714,6 +714,18 @@
     .sidebar-inner { min-width: 0; padding: 12px 12px 0; }
     .sidebar.collapsed { max-height: 0; }
     .map-tools { top: auto; bottom: 14px; left: 14px; flex-direction: row; }
+
+    /* 헤더 컴팩트화 */
+    .header { padding: 8px 12px; gap: 8px; }
+    .logo-mark { width: 32px; height: 32px; font-size: 14px; }
+    .header-left { gap: 9px; flex: 1; min-width: 0; }
+    .title { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-right { gap: 8px; flex-shrink: 0; }
+    .updated-at { display: none; }            /* 갱신 표시는 모바일에서 숨김 */
+    .coord-display { padding: 4px 8px; font-size: 10.5px; }
+    .coord-display .ico { display: none; }
+    .sos-btn { padding: 5px 10px; font-size: 12px; }
+    .theme-btn { width: 30px; height: 30px; font-size: 13px; }
   }
 </style>
 </head>
@@ -865,11 +877,10 @@ const CATEGORY_SVGS = {
       '<rect x="13.5" y="7" width="5" height="18" fill="white"/>' +
       '<rect x="7" y="13.5" width="18" height="5" fill="white"/>' +
     '</svg>',
-  // 산악위치표지판: 노란 마름모(도로 주의표지 풍) + 검은 산 봉우리
+  // 산악위치표지판: 갈색 ▲ 봉우리 (미니멀)
   '산악위치표지판':
     '<svg viewBox="0 0 32 32" width="32" height="32" aria-label="산악위치표지판">' +
-      '<polygon points="16,2 30,16 16,30 2,16" fill="#fbbf24" stroke="#111" stroke-width="2" stroke-linejoin="round"/>' +
-      '<polygon points="16,10 23,22 9,22" fill="#111"/>' +
+      '<polygon points="16,5 28,26 4,26" fill="#78350f" stroke="white" stroke-width="1.2" stroke-linejoin="round"/>' +
     '</svg>',
 };
 function svgFor(catKey) {
