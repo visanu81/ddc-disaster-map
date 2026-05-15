@@ -1208,13 +1208,9 @@ function showToast(msg, ms) {
 /* ----- 조난자 배너 + 가장 가까운 산악표지판 안내 ----- */
 function bindRescueBanner() {
   const banner = document.getElementById('rescue-banner');
-  // 닫기 상태 기억 (이번 세션만 — 새로고침하면 다시 보임)
-  if (sessionStorage.getItem('ddc-rescue-closed') === '1') {
-    banner.classList.add('hidden');
-  }
+  // 닫기는 그 화면에서만. 새로고침하면 다시 표시 (저장 안 함).
   document.getElementById('rescue-close').onclick = () => {
     banner.classList.add('hidden');
-    sessionStorage.setItem('ddc-rescue-closed', '1');
   };
   document.getElementById('rescue-go').onclick = guideToNearest;
 }
