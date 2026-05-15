@@ -1119,6 +1119,155 @@
   body.rescue-mode .rescue-banner .msg { font-size: 14px; }
   body.rescue-mode .rescue-banner .rescue-btn { padding: 11px 16px; font-size: 13.5px; }
 
+  /* 민간인 모드 — 출동/공유 관련만 숨김, 지도+카테고리는 유지 */
+  body.civilian-mode .op-panel,
+  body.civilian-mode #op-toggle,
+  body.civilian-mode .op-status,
+  body.civilian-mode .rescue-banner { display: none !important; }
+
+  /* ===== 로비 오버레이 ===== */
+  .lobby-overlay {
+    position: fixed; inset: 0;
+    z-index: 10000;
+    background: linear-gradient(160deg, #0a1530 0%, #1a2550 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .lobby-overlay.hidden { display: none; }
+  .lobby-card {
+    width: 100%; max-width: 380px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 28px 24px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    display: flex; flex-direction: column; gap: 14px;
+    font-family: inherit;
+  }
+  .lobby-card h1 {
+    margin: 0 0 6px 0;
+    font-size: 19px;
+    font-weight: 800;
+    color: #0a1530;
+    text-align: center;
+    letter-spacing: -0.3px;
+  }
+  .lobby-card .subtitle {
+    margin: 0; text-align: center;
+    color: #6b7280; font-size: 12px; font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lobby-card .field { display: flex; flex-direction: column; gap: 5px; }
+  .lobby-card .field label {
+    font-size: 12px; font-weight: 700; color: #374151;
+  }
+  .lobby-card .field label small {
+    font-weight: 500; color: #9ca3af; margin-left: 4px;
+  }
+  .lobby-card .field input {
+    padding: 11px 13px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 9px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #111827;
+    background: #fff;
+  }
+  .lobby-card .field input:focus {
+    outline: none; border-color: #0077b6;
+    box-shadow: 0 0 0 3px rgba(0,119,182,0.15);
+  }
+  .lobby-card .enter-btn {
+    margin-top: 6px;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    font-size: 14.5px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(220,38,38,0.35);
+  }
+  .lobby-card .enter-btn:hover { filter: brightness(1.08); }
+  .lobby-card .hint {
+    margin: 4px 0 0; text-align: center;
+    color: #6b7280; font-size: 11.5px;
+  }
+
+  /* 재난시작 버튼 (출동 패널 내, 소방관 전용) */
+  .op-btn.disaster {
+    background: linear-gradient(135deg, #dc2626, #ea580c);
+    color: white;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    box-shadow: 0 3px 10px rgba(220,38,38,0.35);
+  }
+  .op-btn.disaster:hover { filter: brightness(1.08); }
+  .op-btn.disaster:disabled,
+  .op-share-btn:disabled {
+    opacity: 0.45; cursor: not-allowed; filter: grayscale(0.4);
+    box-shadow: none;
+  }
+  .disaster-active-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px;
+    background: #dc2626; color: white;
+    border-radius: 999px;
+    font-size: 11px; font-weight: 800;
+    animation: pulse-status 2s ease-in-out infinite;
+    margin-bottom: 4px;
+  }
+
+  /* 방향성 마커 — 이동 중일 때 화살표 회전 */
+  .peer-marker.heading {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 38px; height: 38px;
+    position: relative;
+  }
+  .peer-arrow {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    transform: rotate(var(--heading, 0deg));
+    transition: transform 0.4s ease-out;
+    font-size: 26px;
+    line-height: 1;
+    color: #f59e0b;
+    text-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 2px 4px rgba(0,0,0,0.5);
+    font-weight: 900;
+  }
+  .peer-marker.heading.rescuer .peer-arrow { color: #f59e0b; }
+  .peer-marker.heading.command .peer-arrow { color: #3b82f6; }
+  .peer-marker.heading.victim .peer-arrow { color: #dc2626; }
+
+  /* 요구조자 마커 강조 — 크기 키우고 🆘 오버레이 */
+  .peer-marker.victim {
+    width: 38px; height: 38px;
+    border-width: 3px;
+    font-size: 16px;
+  }
+  .peer-marker.victim .victim-overlay {
+    position: absolute;
+    bottom: -10px; right: -10px;
+    background: #fff;
+    border-radius: 50%;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+  .peer-marker.heading.victim {
+    background: transparent !important;
+    animation: pulse-victim 1.4s ease-out infinite;
+  }
+  .peer-label.victim-label {
+    background: #dc2626;
+    color: white;
+    border-color: rgba(255,255,255,0.5);
+  }
+
   /* 모바일 */
   @media (max-width: 720px) {
     /* main 은 가로 유지. 사이드바를 fixed overlay 로 좌측 슬라이드 */
@@ -1233,6 +1382,24 @@
   <button id="measure-done" type="button">완료</button>
 </div>
 
+<!-- 로비 화면 — 페이지 진입시 이름·코드 입력 -->
+<div class="lobby-overlay hidden" id="lobby-overlay">
+  <form class="lobby-card" id="lobby-form" autocomplete="off">
+    <h1>🚒 동두천시 재난안전지도</h1>
+    <p class="subtitle">이름 · 출동코드를 입력하고 입장하세요</p>
+    <div class="field">
+      <label for="lobby-name">이름</label>
+      <input id="lobby-name" type="text" maxlength="20" required placeholder="예: 한경승">
+    </div>
+    <div class="field">
+      <label for="lobby-code">출동코드 <small>(소방관만 입력)</small></label>
+      <input id="lobby-code" type="text" maxlength="6" inputmode="numeric" placeholder="예: 119">
+    </div>
+    <button type="submit" class="enter-btn">입장</button>
+    <p class="hint">출동코드 미입력 시 민간인 모드로 입장합니다.</p>
+  </form>
+</div>
+
 <!-- 출동(rescue session) 패널 -->
 <div class="op-panel" id="op-panel">
   <button class="op-panel-close" id="op-close" type="button">✕</button>
@@ -1241,6 +1408,7 @@
   <div class="op-section" id="op-section-start">
     <h3>🆘 출동 위치 공유</h3>
     <div class="hint">동료·조난자와 실시간 위치를 공유해 같이 수색합니다.<br>익명, 출동 종료시 자동 삭제.</div>
+    <button class="op-btn disaster" id="op-disaster-start">🚨 재난시작 (전원 자동합류)</button>
     <button class="op-btn primary" id="op-create">새 출동 시작</button>
     <button class="op-btn" id="op-join-default">상시방 (DDC119) 참여</button>
     <div class="op-divider">또는</div>
@@ -1261,14 +1429,16 @@
         <div class="code" id="op-active-code">----</div>
       </div>
     </div>
+    <div id="op-disaster-badge-wrap"></div>
     <div class="op-share-group">
-      <button class="op-share-btn victim" id="op-share-victim">
-        🚨 조난자에게 공유 <small>(단순 화면 + 위치송신)</small>
+      <button class="op-share-btn victim" id="op-share-victim" disabled title="재난시작 후 사용 가능">
+        🆘 요구조자 초대 <small>(위치 추적용 링크)</small>
       </button>
       <button class="op-share-btn teammate" id="op-share-teammate">
         👮 동료에게 공유 <small>(같이 출동중 — 풀 화면)</small>
       </button>
     </div>
+    <button class="op-btn disaster hidden" id="op-disaster-end">🛑 재난종료 (전원 합류 해제)</button>
     <div class="hint" id="op-self-info">나: <strong id="op-self-role">구조자</strong></div>
     <div class="op-people-header">
       <span>참여자</span>
@@ -2622,7 +2792,7 @@ window.addEventListener('load', initMap);
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
-  getDatabase, ref, set, update, remove, onValue, onDisconnect, serverTimestamp
+  getDatabase, ref, set, update, remove, onValue, onDisconnect, serverTimestamp, get
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -2640,6 +2810,8 @@ const db = getDatabase(app);
 
 /* ===== 상수 ===== */
 const RESCUE_OP_CODE = 'DDC119';   // 동두천소방서 상시방 코드
+const FIREFIGHTER_CODE = '119';     // 로비에서 소방관 판정 코드
+const SESSION_KEY = 'ddc-lobby';    // sessionStorage 키
 
 /* ===== 상태 ===== */
 const OpState = {
@@ -2649,8 +2821,17 @@ const OpState = {
   nickname: null,
   watchId: null,
   unsubscribe: null,
+  unsubscribeDisaster: null,
   peers: {},          // uid -> { marker, label, info }
+  lastPos: null,      // bearing 계산용 직전 좌표
 };
+
+const LobbyState = {
+  name: null,
+  role: null,         // 'rescuer' | 'civilian'
+};
+
+let disasterActive = false;          // 재난 진행 여부 (로컬 캐시)
 
 const ROLE_LABEL = { rescuer: '구조자', victim: '조난자', command: '지휘부' };
 const ROLE_ICON = { rescuer: 'R', victim: 'S', command: 'C' };
@@ -2674,6 +2855,16 @@ function hav(a, b) {
   const s = Math.sin(dLat/2)**2 +
             Math.cos(tr(a.lat)) * Math.cos(tr(b.lat)) * Math.sin(dLng/2)**2;
   return 2 * R * Math.asin(Math.sqrt(s));
+}
+function bearing(from, to) {
+  // 두 좌표 사이의 진행 방향(도, 0=북, 시계방향)
+  if (!from || !to) return null;
+  const tr = d => d * Math.PI / 180;
+  const dLng = tr(to.lng - from.lng);
+  const y = Math.sin(dLng) * Math.cos(tr(to.lat));
+  const x = Math.cos(tr(from.lat)) * Math.sin(tr(to.lat)) -
+            Math.sin(tr(from.lat)) * Math.cos(tr(to.lat)) * Math.cos(dLng);
+  return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
 }
 function fmtDist(m) {
   if (m == null) return '';
@@ -2711,8 +2902,158 @@ $('op-join-default').onclick = () => {
   joinOp(RESCUE_OP_CODE, $('op-role-input').value);
 };
 $('op-leave').onclick = leaveOp;
-$('op-share-victim').onclick = () => shareOp('victim');
+$('op-share-victim').onclick = () => {
+  if ($('op-share-victim').disabled) return;
+  shareOp('victim');
+};
 $('op-share-teammate').onclick = () => shareOp('teammate');
+
+/* ===== 로비 ===== */
+function readSession() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function writeSession(data) {
+  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch {}
+}
+
+function applyMode(name, role) {
+  LobbyState.name = name;
+  LobbyState.role = role;
+  if (role === 'civilian') {
+    document.body.classList.add('civilian-mode');
+  } else {
+    // 소방관 — 재난 플래그 구독 시작
+    subscribeDisasterFlag();
+  }
+}
+
+function showLobby() {
+  $('lobby-overlay').classList.remove('hidden');
+  setTimeout(() => $('lobby-name').focus(), 100);
+}
+
+$('lobby-form').onsubmit = (e) => {
+  e.preventDefault();
+  const name = $('lobby-name').value.trim();
+  const code = $('lobby-code').value.trim();
+  if (!name) {
+    $('lobby-name').focus();
+    return;
+  }
+  const role = (code === FIREFIGHTER_CODE) ? 'rescuer' : 'civilian';
+  writeSession({ name, role });
+  $('lobby-overlay').classList.add('hidden');
+  applyMode(name, role);
+};
+
+function initLobby() {
+  const params = new URLSearchParams(location.search);
+  // 공유 링크 (?op= 또는 ?mode=rescue) 로 들어온 경우 로비 스킵
+  if (params.get('op') || params.get('mode') === 'rescue') {
+    // role 파라미터로 추정
+    const role = (params.get('mode') === 'rescue') ? 'victim'
+               : (params.get('role') === 'rescuer') ? 'rescuer' : 'rescuer';
+    applyMode(null, role === 'victim' ? 'civilian' : 'rescuer');
+    return;
+  }
+  // 세션 복원
+  const saved = readSession();
+  if (saved && saved.name && saved.role) {
+    applyMode(saved.name, saved.role);
+    return;
+  }
+  // 로비 표시
+  showLobby();
+}
+
+/* ===== 재난 플래그 구독/관리 (소방관 전용) ===== */
+function subscribeDisasterFlag() {
+  if (OpState.unsubscribeDisaster) return;
+  const flagRef = ref(db, `operations/${RESCUE_OP_CODE}/meta/disasterActive`);
+  let firstSnapshot = true;
+  const off = onValue(flagRef, async snap => {
+    const active = snap.val() === true;
+    disasterActive = active;
+    updateDisasterUI(active);
+
+    if (active && !OpState.opCode) {
+      if (firstSnapshot) {
+        // 페이지 진입 시점에 이미 활성 — 참여자 수 확인
+        const partsSnap = await get(ref(db, `operations/${RESCUE_OP_CODE}/participants`));
+        const count = partsSnap.exists() ? Object.keys(partsSnap.val()).length : 0;
+        if (count === 0) {
+          // 좀비 플래그 — 마지막 사람이 강제 종료한 흔적 → 정리
+          await update(ref(db, `operations/${RESCUE_OP_CODE}/meta`), { disasterActive: false });
+        } else if (confirm('🚨 재난이 진행중입니다.\n자동으로 합류하시겠습니까?')) {
+          autoJoinAsFirefighter();
+        }
+      } else {
+        showToast('🚨 재난시작 — 자동 합류 중...', 3000);
+        autoJoinAsFirefighter();
+      }
+    }
+    firstSnapshot = false;
+  });
+  OpState.unsubscribeDisaster = off;
+}
+
+function updateDisasterUI(active) {
+  // 재난시작/종료 버튼 토글
+  const startBtn = $('op-disaster-start');
+  const endBtn = $('op-disaster-end');
+  const shareVictim = $('op-share-victim');
+  if (startBtn) startBtn.disabled = active;
+  if (endBtn) endBtn.classList.toggle('hidden', !active);
+  if (shareVictim) {
+    shareVictim.disabled = !active;
+    shareVictim.title = active ? '' : '재난시작 후 사용 가능';
+  }
+  // 진행중 배지
+  const wrap = $('op-disaster-badge-wrap');
+  if (wrap) {
+    wrap.innerHTML = active ? '<span class="disaster-active-badge">🚨 재난 진행중</span>' : '';
+  }
+}
+
+async function autoJoinAsFirefighter() {
+  if (OpState.opCode) return;
+  $('op-panel').classList.add('show');
+  await joinOp(RESCUE_OP_CODE, 'rescuer');
+}
+
+$('op-disaster-start').onclick = async () => {
+  if (disasterActive) {
+    alert('이미 재난이 진행중입니다.');
+    return;
+  }
+  if (!confirm('재난을 시작하시겠습니까?\n페이지에 접속한 모든 소방관이 자동 합류합니다.')) return;
+  try {
+    await update(ref(db, `operations/${RESCUE_OP_CODE}/meta`), {
+      disasterActive: true,
+      startedAt: serverTimestamp(),
+      startedBy: LobbyState.name || '익명',
+    });
+    if (!OpState.opCode) await autoJoinAsFirefighter();
+  } catch (e) {
+    alert('재난시작 실패: ' + e.message);
+  }
+};
+
+$('op-disaster-end').onclick = async () => {
+  if (!confirm('재난을 종료하시겠습니까?\n현재 참여자들은 출동을 직접 종료해야 합니다.')) return;
+  try {
+    await update(ref(db, `operations/${RESCUE_OP_CODE}/meta`), {
+      disasterActive: false,
+      endedAt: serverTimestamp(),
+    });
+    showToast('🛑 재난 종료됨', 3000);
+  } catch (e) {
+    alert('재난종료 실패: ' + e.message);
+  }
+};
 
 /* 구조위치송신 — 조난자 배너에서 호출. URL 의 ?op= 있으면 그 코드, 없으면 상시방 */
 window.joinRescueOp = function() {
@@ -2737,7 +3078,11 @@ async function joinOp(code, role) {
   OpState.opCode = code;
   OpState.uid = randomUid();
   OpState.role = role;
-  OpState.nickname = ROLE_LABEL[role] + ' ' + OpState.uid.slice(-3).toUpperCase();
+  // 로비에서 입력한 이름 우선, 없으면 기존 랜덤 닉네임
+  OpState.nickname = LobbyState.name
+    ? LobbyState.name + (role === 'victim' ? ' (요구조자)' : '')
+    : (ROLE_LABEL[role] + ' ' + OpState.uid.slice(-3).toUpperCase());
+  OpState.lastPos = null;
 
   // DB 노드 경로
   const myRef = ref(db, `operations/${code}/participants/${OpState.uid}`);
@@ -2749,6 +3094,7 @@ async function joinOp(code, role) {
       nickname: OpState.nickname,
       lat: 0, lng: 0,                // 위치 받기 전 0 (UI 에서 필터링)
       accuracy: 0,
+      heading: null,                 // 신규: 진행 방향 (0~360 도)
       updatedAt: serverTimestamp(),
     });
   } catch (e) {
@@ -2779,13 +3125,14 @@ async function joinOp(code, role) {
   subscribeParticipants(code);
 }
 
-function leaveOp() {
+async function leaveOp() {
   if (!OpState.opCode) {
     $('op-panel').classList.remove('show');
     return;
   }
-  const myRef = ref(db, `operations/${OpState.opCode}/participants/${OpState.uid}`);
-  remove(myRef).catch(() => {});
+  const code = OpState.opCode;
+  const myRef = ref(db, `operations/${code}/participants/${OpState.uid}`);
+  await remove(myRef).catch(() => {});
 
   if (OpState.watchId != null) navigator.geolocation.clearWatch(OpState.watchId);
   if (OpState.unsubscribe) OpState.unsubscribe();
@@ -2803,6 +3150,7 @@ function leaveOp() {
   OpState.role = null;
   OpState.watchId = null;
   OpState.unsubscribe = null;
+  OpState.lastPos = null;
 
   // UI 초기화
   $('op-section-active').classList.add('hidden');
@@ -2810,6 +3158,19 @@ function leaveOp() {
   $('op-status').classList.remove('show');
   $('op-people-list').innerHTML = '';
   $('op-people-count').textContent = '0';
+
+  // 마지막 참여자였다면 재난 자동 종료
+  if (code === RESCUE_OP_CODE) {
+    try {
+      const partsSnap = await get(ref(db, `operations/${code}/participants`));
+      const count = partsSnap.exists() ? Object.keys(partsSnap.val()).length : 0;
+      if (count === 0) {
+        await update(ref(db, `operations/${code}/meta`), { disasterActive: false });
+      }
+    } catch (e) {
+      console.warn('disaster auto-end check failed', e);
+    }
+  }
 }
 
 /* ===== 위치 송신 ===== */
@@ -2820,9 +3181,18 @@ function startWatchingPosition(myRef) {
   }
   OpState.watchId = navigator.geolocation.watchPosition(
     pos => {
-      const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+      const { latitude: lat, longitude: lng, accuracy, heading: gpsHeading } = pos.coords;
+      // 진행 방향 계산: GPS heading 우선, 없으면 직전 좌표 → 현재 bearing
+      let heading = (gpsHeading != null && !isNaN(gpsHeading)) ? gpsHeading : null;
+      if (heading == null && OpState.lastPos) {
+        const dist = hav(OpState.lastPos, { lat, lng });
+        if (dist != null && dist >= 5) heading = bearing(OpState.lastPos, { lat, lng });
+      }
+      OpState.lastPos = { lat, lng };
+
       update(myRef, {
         lat, lng, accuracy: accuracy || 0,
+        heading,
         updatedAt: serverTimestamp(),
       }).catch(() => {});
       // 본인 위치 마커만 갱신 (지도 중심 강제 이동 X — 동료/조난자 보려면 사용자가 지도 조작 가능해야)
@@ -2905,36 +3275,73 @@ function renderPeers(all) {
   });
 }
 
+function buildMarkerContent(role, info) {
+  const hasHeading = (info.heading != null && !isNaN(info.heading));
+  const cls = ['peer-marker', role, hasHeading ? 'heading' : ''].filter(Boolean).join(' ');
+  const inner = hasHeading
+    ? `<div class="peer-arrow" style="--heading:${info.heading}deg">▲</div>`
+    : (ROLE_ICON[role] || '?');
+  const overlay = (role === 'victim') ? '<div class="victim-overlay">🆘</div>' : '';
+  return `<div class="${cls}">${inner}${overlay}</div>`;
+}
+function buildLabelContent(role, info) {
+  const labelClass = (role === 'victim') ? 'peer-label victim-label' : 'peer-label';
+  const prefix = (role === 'victim') ? '🆘 ' : '';
+  const name = info.nickname || ROLE_LABEL[role];
+  return `<div class="${labelClass}">${prefix}${name}</div>`;
+}
+
 function upsertPeerMarker(uid, info) {
   const role = info.role || 'rescuer';
   const ll = new naver.maps.LatLng(info.lat, info.lng);
   const peer = OpState.peers[uid];
+  const isVictimNew = (role === 'victim') && !peer;
+
+  const markerContent = buildMarkerContent(role, info);
+  const labelContent = buildLabelContent(role, info);
+
   if (peer && peer.marker) {
     peer.marker.setPosition(ll);
-    if (peer.label) peer.label.setPosition(ll);
+    // 아이콘 갱신 (방향/역할 변화 반영)
+    peer.marker.setIcon({
+      content: markerContent,
+      anchor: new naver.maps.Point(19, 19),
+    });
+    if (peer.label) {
+      peer.label.setPosition(ll);
+      peer.label.setIcon({
+        content: labelContent,
+        anchor: new naver.maps.Point(40, -10),
+      });
+    }
     return;
   }
   const marker = new naver.maps.Marker({
     position: ll,
     map: window.map,
     icon: {
-      content: '<div class="peer-marker ' + role + '">' + (ROLE_ICON[role] || '?') + '</div>',
-      anchor: new naver.maps.Point(15, 15),
+      content: markerContent,
+      anchor: new naver.maps.Point(19, 19),
     },
-    zIndex: 900,
+    zIndex: (role === 'victim') ? 950 : 900,
     title: info.nickname || ROLE_LABEL[role],
   });
   const label = new naver.maps.Marker({
     position: ll,
     map: window.map,
     icon: {
-      content: '<div class="peer-label">' + (info.nickname || ROLE_LABEL[role]) + '</div>',
+      content: labelContent,
       anchor: new naver.maps.Point(40, -10),
     },
     clickable: false,
-    zIndex: 901,
+    zIndex: (role === 'victim') ? 951 : 901,
   });
   OpState.peers[uid] = { marker, label };
+
+  // 신규 요구조자 합류 — 다른 참여자에게 알림 토스트
+  if (isVictimNew && OpState.role !== 'victim') {
+    showToast('🆘 요구조자 ' + (info.nickname || '') + ' 합류 — 위치 추적 시작', 4500);
+  }
 }
 
 /* ===== 공유 (대상 종류에 따라 다른 링크) ===== */
@@ -2946,7 +3353,7 @@ function shareOp(audience) {
 
   const title = '동두천시 재난안전지도 — 출동';
   const text = isVictim
-    ? '동두천소방서입니다. 링크를 열고 GPS 를 허용한 뒤 [🆘 구조위치송신] 을 눌러주세요.'
+    ? '동두천소방서입니다. 요구조자 위치확인 요청입니다.\n링크 열고 GPS 허용 후 🆘 구조위치송신 버튼을 눌러주세요.'
     : '출동 위치공유 링크입니다. 페이지 열고 GPS 허용 후 [참여] 눌러주세요.';
 
   if (navigator.share) {
@@ -2959,7 +3366,7 @@ function shareOp(audience) {
   );
 }
 
-/* ===== URL 파라미터 처리: ?op= 자동 참여 안내 + ?mode=rescue 조난자 모드 ===== */
+/* ===== URL 파라미터 처리: ?op= 자동 참여 안내 + ?mode=rescue 조난자 모드 + 로비 ===== */
 window.addEventListener('load', () => {
   const params = new URLSearchParams(location.search);
 
@@ -2982,6 +3389,9 @@ window.addEventListener('load', () => {
   if (role && ['rescuer', 'victim', 'command'].includes(role)) {
     $('op-role-input').value = role;
   }
+
+  // 로비 진입/스킵 처리 — 공유 링크 (op/mode) 가 없으면 로비 표시
+  initLobby();
 });
 
 /* ===== 페이지 닫힐 때 cleanup ===== */
