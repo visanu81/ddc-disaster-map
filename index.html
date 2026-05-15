@@ -1066,6 +1066,22 @@
   }
   .info-share-btn:hover { background: #f3f4f6; border-color: #9ca3af; }
 
+  /* 조난자 모드 (URL ?mode=rescue) — UI 단순화 */
+  body.rescue-mode .sidebar,
+  body.rescue-mode .sidebar-backdrop,
+  body.rescue-mode .weather-strip,
+  body.rescue-mode .op-panel,
+  body.rescue-mode #sidebar-toggle,
+  body.rescue-mode #measure-btn,
+  body.rescue-mode #cadastral-toggle,
+  body.rescue-mode #op-toggle,
+  body.rescue-mode #recenter-btn { display: none !important; }
+  body.rescue-mode .rescue-banner { /* 더 강조 */
+    padding: 14px 20px;
+  }
+  body.rescue-mode .rescue-banner .msg { font-size: 14px; }
+  body.rescue-mode .rescue-banner .rescue-btn { padding: 11px 16px; font-size: 13.5px; }
+
   /* 모바일 */
   @media (max-width: 720px) {
     /* main 은 가로 유지. 사이드바를 fixed overlay 로 좌측 슬라이드 */
@@ -2869,29 +2885,38 @@ function upsertPeerMarker(uid, info) {
 /* ===== 공유 ===== */
 function shareOp() {
   if (!OpState.opCode) return;
-  const url = location.origin + location.pathname + '?op=' + OpState.opCode;
+  // 받는 사람은 조난자/일반인이므로 mode=rescue 자동 첨부 (단순 화면 + 구조위치송신 큰 버튼)
+  const url = location.origin + location.pathname + '?op=' + OpState.opCode + '&mode=rescue';
   if (navigator.share) {
     navigator.share({
       title: '동두천시 재난안전지도 — 출동',
-      text: '출동 코드 ' + OpState.opCode + ' 로 위치 공유. 페이지 열고 GPS 허용해주세요.',
+      text: '동두천소방서 위치공유 링크입니다. 페이지 열고 GPS 허용 후 [구조위치송신] 을 눌러주세요.',
       url: url,
     }).catch(() => {});
   } else {
     navigator.clipboard.writeText(url).then(
-      () => alert('출동 링크 복사됨:\n' + url),
+      () => alert('조난자용 링크 복사됨 (조난자 모드 자동 적용):\n' + url),
       () => prompt('이 링크를 복사하세요:', url),
     );
   }
 }
 
-/* ===== URL ?op= 자동 참여 안내 ===== */
+/* ===== URL 파라미터 처리: ?op= 자동 참여 안내 + ?mode=rescue 조난자 모드 ===== */
 window.addEventListener('load', () => {
   const params = new URLSearchParams(location.search);
+
+  // 조난자 모드 진입 (받은 링크에 mode=rescue 가 있으면 UI 단순화)
+  if (params.get('mode') === 'rescue') {
+    document.body.classList.add('rescue-mode');
+  }
+
+  // op 코드 진입 — 패널 미리 채워두기 (조난자 모드면 패널은 안 보이지만 코드 값은 유지)
   const op = params.get('op');
   if (op && /^[A-Z0-9]{4,8}$/.test(op.toUpperCase())) {
-    // 패널 열고 코드만 미리 채워둠. 역할 선택 + 참여 누르도록 (자동 참여는 GPS 권한 때문에 의도적 클릭이 안전)
     $('op-code-input').value = op.toUpperCase();
-    $('op-panel').classList.add('show');
+    if (!document.body.classList.contains('rescue-mode')) {
+      $('op-panel').classList.add('show');
+    }
   }
 });
 
