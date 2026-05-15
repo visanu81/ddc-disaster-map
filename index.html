@@ -302,6 +302,9 @@
     font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji',
                  'Pretendard Variable', sans-serif;
   }
+  /* 칩에서 SVG 마커 아이콘을 작게 표시 (마커와 시각적 일관성) */
+  .cat-svg-icon { display: inline-flex; align-items: center; flex-shrink: 0; line-height: 0; }
+  .cat-svg-icon svg { width: 14px !important; height: 14px !important; display: block; }
   .cat-count {
     font-size: 10px;
     color: var(--text-sub);
@@ -1037,8 +1040,12 @@ function renderChips() {
     chip.className = 'cat-chip';
     chip.dataset.cat = key;
     chip.style.setProperty('--chip-color', cat.color);
+    const svg = svgFor(key);
+    const iconHtml = svg
+      ? '<span class="cat-svg-icon">' + svg + '</span>'
+      : '<span class="cat-emoji">' + iconFor(key) + '</span>';
     chip.innerHTML =
-      '<span class="cat-emoji">' + iconFor(key) + '</span>' +
+      iconHtml +
       '<span class="cat-name">' + escapeHtml(cat.label || key) + '</span>' +
       '<span class="cat-count">' + count + '</span>';
     chip.onclick = () => setActiveCategory(key);
