@@ -884,10 +884,15 @@ const CATEGORY_SVGS = {
       '<rect x="13.5" y="7" width="5" height="18" fill="white"/>' +
       '<rect x="7" y="13.5" width="18" height="5" fill="white"/>' +
     '</svg>',
-  // 산악위치표지판: 갈색 ▲ 봉우리 (미니멀)
+  // 산악위치표지판: 국가지점번호 표지판 양식 (상·하 빨간 띠 + 중앙 흰 번호판)
   '산악위치표지판':
-    '<svg viewBox="0 0 32 32" width="32" height="32" aria-label="산악위치표지판">' +
-      '<polygon points="16,5 28,26 4,26" fill="#78350f" stroke="white" stroke-width="1.2" stroke-linejoin="round"/>' +
+    '<svg viewBox="0 0 32 32" width="32" height="32" aria-label="국가지점번호 표지판">' +
+      '<rect x="6" y="2" width="20" height="28" rx="2" fill="white" stroke="#111" stroke-width="1.2"/>' +
+      '<rect x="7" y="3" width="18" height="6" fill="#dc2626"/>' +     /* 상단 빨강(호국사림지) */
+      '<rect x="7" y="23" width="18" height="6" fill="#dc2626"/>' +    /* 하단 빨강(산악119) */
+      '<rect x="11" y="13" width="10" height="1.3" fill="#111"/>' +    /* 중앙 번호 줄 1 */
+      '<rect x="11" y="16" width="10" height="1.3" fill="#111"/>' +    /* 줄 2 */
+      '<rect x="11" y="19" width="10" height="1.3" fill="#111"/>' +    /* 줄 3 */
     '</svg>',
 };
 function svgFor(catKey) {
