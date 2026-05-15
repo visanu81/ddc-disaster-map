@@ -1100,8 +1100,25 @@
     }
     body.sb-open .sidebar-backdrop { display: block; }
 
-    /* 도구 모음: 좌상단 세로 (데스크탑과 동일 레이아웃) */
-    .map-tools { top: 14px; bottom: auto; left: 14px; flex-direction: column; flex-wrap: nowrap; max-width: none; }
+    /* 도구 모음: 화면 좌측에 fixed (배너 높이 무관, 항상 보임) */
+    .map-tools {
+      position: fixed;
+      top: 50%;
+      left: 10px;
+      bottom: auto;
+      transform: translateY(-50%);
+      flex-direction: column;
+      flex-wrap: nowrap;
+      max-width: none;
+      gap: 5px;
+      z-index: 30;
+    }
+    .map-tool-btn {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 8px;
+      font-size: 12px;
+    }
 
     /* 헤더 컴팩트화 */
     .header { padding: 8px 12px; gap: 8px; }
