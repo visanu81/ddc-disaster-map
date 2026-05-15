@@ -470,6 +470,31 @@
   }
   .op-code-share:hover { background: rgba(255,255,255,0.4); }
 
+  /* 공유 버튼 그룹 (조난자/동료) */
+  .op-share-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .op-share-btn {
+    padding: 8px 10px;
+    border: none;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    font-family: inherit;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .op-share-btn:hover { filter: brightness(0.92); }
+  .op-share-btn.victim { background: #dc2626; }
+  .op-share-btn.teammate { background: #2563eb; }
+  .op-share-btn small { opacity: 0.85; font-weight: 500; font-size: 10.5px; }
+
   .op-people {
     display: flex; flex-direction: column; gap: 6px;
     max-height: 200px; overflow-y: auto;
@@ -1223,7 +1248,14 @@
         <div class="label">출동 코드</div>
         <div class="code" id="op-active-code">----</div>
       </div>
-      <button class="op-code-share" id="op-share">공유</button>
+    </div>
+    <div class="op-share-group">
+      <button class="op-share-btn victim" id="op-share-victim">
+        🚨 조난자에게 공유 <small>(단순 화면 + 위치송신)</small>
+      </button>
+      <button class="op-share-btn teammate" id="op-share-teammate">
+        👮 동료에게 공유 <small>(같이 출동중 — 풀 화면)</small>
+      </button>
     </div>
     <div class="hint" id="op-self-info">나: <strong id="op-self-role">구조자</strong></div>
     <div class="op-people-header">
@@ -2657,7 +2689,8 @@ $('op-join-default').onclick = () => {
   joinOp(RESCUE_OP_CODE, $('op-role-input').value);
 };
 $('op-leave').onclick = leaveOp;
-$('op-share').onclick = shareOp;
+$('op-share-victim').onclick = () => shareOp('victim');
+$('op-share-teammate').onclick = () => shareOp('teammate');
 
 /* 구조위치송신 — 조난자 배너에서 호출. URL 의 ?op= 있으면 그 코드, 없으면 상시방 */
 window.joinRescueOp = function() {
@@ -2882,23 +2915,26 @@ function upsertPeerMarker(uid, info) {
   OpState.peers[uid] = { marker, label };
 }
 
-/* ===== 공유 ===== */
-function shareOp() {
+/* ===== 공유 (대상 종류에 따라 다른 링크) ===== */
+function shareOp(audience) {
   if (!OpState.opCode) return;
-  // 받는 사람은 조난자/일반인이므로 mode=rescue 자동 첨부 (단순 화면 + 구조위치송신 큰 버튼)
-  const url = location.origin + location.pathname + '?op=' + OpState.opCode + '&mode=rescue';
+  const base = location.origin + location.pathname + '?op=' + OpState.opCode;
+  const isVictim = audience === 'victim';
+  const url = base + (isVictim ? '&mode=rescue' : '&role=rescuer');
+
+  const title = '동두천시 재난안전지도 — 출동';
+  const text = isVictim
+    ? '동두천소방서입니다. 링크를 열고 GPS 를 허용한 뒤 [🆘 구조위치송신] 을 눌러주세요.'
+    : '출동 위치공유 링크입니다. 페이지 열고 GPS 허용 후 [참여] 눌러주세요.';
+
   if (navigator.share) {
-    navigator.share({
-      title: '동두천시 재난안전지도 — 출동',
-      text: '동두천소방서 위치공유 링크입니다. 페이지 열고 GPS 허용 후 [구조위치송신] 을 눌러주세요.',
-      url: url,
-    }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(url).then(
-      () => alert('조난자용 링크 복사됨 (조난자 모드 자동 적용):\n' + url),
-      () => prompt('이 링크를 복사하세요:', url),
-    );
+    navigator.share({ title, text, url }).catch(() => {});
+    return;
   }
+  navigator.clipboard.writeText(url).then(
+    () => alert((isVictim ? '조난자용' : '동료용') + ' 링크 복사됨:\n' + url),
+    () => prompt('이 링크를 복사하세요:', url),
+  );
 }
 
 /* ===== URL 파라미터 처리: ?op= 자동 참여 안내 + ?mode=rescue 조난자 모드 ===== */
@@ -2917,6 +2953,12 @@ window.addEventListener('load', () => {
     if (!document.body.classList.contains('rescue-mode')) {
       $('op-panel').classList.add('show');
     }
+  }
+
+  // role 파라미터 — 동료용 링크는 role=rescuer 로 들어오므로 select 자동 선택
+  const role = params.get('role');
+  if (role && ['rescuer', 'victim', 'command'].includes(role)) {
+    $('op-role-input').value = role;
   }
 });
 
