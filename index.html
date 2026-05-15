@@ -224,8 +224,42 @@
     opacity: 0;
     transition: all 0.25s;
     pointer-events: none;
+    max-width: calc(100vw - 40px);
+    text-align: center;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* 지도 위치 직접 찍기 모드 */
+  body.pick-mode #map { cursor: crosshair !important; }
+  .pick-banner {
+    position: fixed;
+    top: 60px; left: 50%;
+    transform: translateX(-50%);
+    background: #2563eb;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(37,99,235,0.4);
+    z-index: 9998;
+    display: none;
+    align-items: center;
+    gap: 10px;
+  }
+  body.pick-mode .pick-banner { display: inline-flex; }
+  .pick-banner button {
+    background: rgba(255,255,255,0.25);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .pick-banner button:hover { background: rgba(255,255,255,0.4); }
 
   /* ===== 메인 ===== */
   .main {
@@ -761,6 +795,12 @@
   </div>
 </header>
 
+<!-- 지도 위치 직접 찍기 모드 배너 -->
+<div class="pick-banner" id="pick-banner">
+  📍 지도에서 현재 위치를 한 번 탭하세요
+  <button id="pick-cancel" type="button">취소</button>
+</div>
+
 <!-- 조난자 안내 배너 (닫기 가능) -->
 <div class="rescue-banner" id="rescue-banner">
   <div class="msg">
@@ -976,8 +1016,17 @@ function initMap() {
   // 지적편집도 레이어 (토글 가능, 기본은 OFF)
   cadastralLayer = new naver.maps.CadastralLayer();
 
-  // 빈 지도(마커/InfoWindow 아닌 곳) 클릭 시 열린 InfoWindow 닫기
-  naver.maps.Event.addListener(map, 'click', () => {
+  // 지도 클릭: pick 모드면 좌표 잡기, 아니면 열린 InfoWindow 닫기
+  naver.maps.Event.addListener(map, 'click', (e) => {
+    if (pickMode && e && e.coord) {
+      const lat = e.coord.lat();
+      const lng = e.coord.lng();
+      exitPickLocationMode();
+      setUserLocation(lat, lng, 0);              // accuracy 0 → 정확도 원 안 그림
+      navigateToNearestFrom(lat, lng);
+      showToast('지정한 위치 기준으로 가장 가까운 표지판을 찾습니다');
+      return;
+    }
     if (openInfoWindow) {
       openInfoWindow.close();
       openInfoWindow = null;
@@ -1247,39 +1296,78 @@ function bindRescueBanner() {
 
 function guideToNearest() {
   if (!navigator.geolocation) {
-    alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+    handleNoLocation('이 브라우저는 위치 정보를 지원하지 않습니다.');
     return;
   }
-  showToast('현재 위치를 받는 중입니다...');
+  showToast('현재 위치를 받는 중... (최대 6초)');
   navigator.geolocation.getCurrentPosition(
     pos => {
       const { latitude: lat, longitude: lng, accuracy } = pos.coords;
       setUserLocation(lat, lng, accuracy);
-
-      // 산악표지판 카테고리에서 가장 가까운 항목 찾기 (없으면 모든 카테고리에서)
-      let target = findNearest('산악위치표지판', lat, lng) || findNearest(null, lat, lng);
-      if (!target) {
-        showToast('지도에 등록된 표지판이 없습니다.');
-        return;
-      }
-      // 활성 카테고리 풀고 그 마커로 줌인 + 팝업
-      setActiveCategory(null);
-      map.setCenter(new naver.maps.LatLng(target.item.lat, target.item.lng));
-      map.setZoom(17);
-      setTimeout(() => {
-        if (openInfoWindow) openInfoWindow.close();
-        const html = buildInfoWindowHtml(target.catKey, target.cat, target.item);
-        target.info.setContent(html);
-        target.info.open(map, target.marker);
-        openInfoWindow = target.info;
-      }, 400);
-      showToast('가장 가까운 표지판: ' + target.item.name + ' (' + formatDistance(target.distance) + ')', 4000);
+      navigateToNearestFrom(lat, lng);
     },
-    err => {
-      alert('위치를 받을 수 없습니다. 브라우저 위치 권한을 허용해주세요.');
-    },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
+    err => handleLocationError(err),
+    { enableHighAccuracy: true, timeout: 6000, maximumAge: 30000 }   // 15s → 6s
   );
+}
+
+function navigateToNearestFrom(lat, lng) {
+  let target = findNearest('산악위치표지판', lat, lng) || findNearest(null, lat, lng);
+  if (!target) {
+    showToast('지도에 등록된 표지판이 없습니다.');
+    return;
+  }
+  setActiveCategory(null);
+  map.setCenter(new naver.maps.LatLng(target.item.lat, target.item.lng));
+  map.setZoom(17);
+  setTimeout(() => {
+    if (openInfoWindow) openInfoWindow.close();
+    const html = buildInfoWindowHtml(target.catKey, target.cat, target.item);
+    target.info.setContent(html);
+    target.info.open(map, target.marker);
+    openInfoWindow = target.info;
+  }, 400);
+  showToast('가장 가까운 표지판: ' + target.item.name + ' (' + formatDistance(target.distance) + ')', 4500);
+}
+
+/* ----- GPS 에러 코드별 안내 + 지도 직접 찍기 폴백 ----- */
+function handleLocationError(err) {
+  const code = err && err.code;
+  const messages = {
+    1: 'GPS 권한이 차단됐어요.\n\n' +
+       '• iPhone: 설정 → Safari → 위치 → 허용\n' +
+       '• Android: 주소창 자물쇠/ⓘ → 권한 → 위치 → 허용\n\n' +
+       '권한을 허용한 뒤 다시 누르시거나, [확인]을 누르면 지도에서 위치를 직접 찍을 수 있어요.',
+    2: 'GPS가 꺼져 있어요.\n\n' +
+       '휴대폰 설정 → 위치 서비스(또는 GPS) → 켜기\n\n' +
+       'GPS를 켠 뒤 다시 누르시거나, [확인]을 누르면 지도에서 위치를 직접 찍을 수 있어요.',
+    3: '위치 받기에 시간이 너무 오래 걸려요.\n\n' +
+       '실내·지하에서는 GPS 신호가 약합니다.\n\n' +
+       '잠시 후 다시 시도하시거나, [확인]을 누르면 지도에서 위치를 직접 찍을 수 있어요.',
+  };
+  const msg = messages[code] || ('위치를 받을 수 없습니다.\n' + (err && err.message || '') +
+    '\n\n[확인]을 누르면 지도에서 위치를 직접 찍을 수 있어요.');
+  if (confirm(msg)) {
+    enterPickLocationMode();
+  }
+}
+
+function handleNoLocation(msg) {
+  if (confirm(msg + '\n\n[확인]을 누르면 지도에서 위치를 직접 찍을 수 있어요.')) {
+    enterPickLocationMode();
+  }
+}
+
+let pickMode = false;
+function enterPickLocationMode() {
+  if (pickMode) return;
+  pickMode = true;
+  document.body.classList.add('pick-mode');
+  document.getElementById('pick-cancel').onclick = exitPickLocationMode;
+}
+function exitPickLocationMode() {
+  pickMode = false;
+  document.body.classList.remove('pick-mode');
 }
 
 function findNearest(catKey, lat, lng) {
