@@ -250,7 +250,7 @@ def main():
         item = {'name': name}
 
         # 선택 필드들
-        for k in ('address', 'phone', 'type', 'note', 'code'):
+        for k in ('address', 'phone', 'type', 'note', 'code', 'region'):
             v = row.get(k, '').strip()
             if v:
                 item[k] = v

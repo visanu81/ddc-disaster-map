@@ -2,7 +2,7 @@
    데이터를 추가/수정하려면 구글 시트(.env GOOGLE_SHEET_ID)를 편집하세요. */
 
 window.DDC_DATA = {
-  "updatedAt": "2026-05-14 17:42",
+  "updatedAt": "2026-05-15 11:11",
   "sheetId": "1KnTps9EUg2cTZ286GO6E0KYdUmmZu482kD2GAXs7cb8",
   "categories": {
     "소방서": {

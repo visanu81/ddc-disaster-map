@@ -324,6 +324,48 @@
     line-height: 1.6;
   }
 
+  /* region 그룹 헤더 (카테고리 선택 + region 컬럼 있을 때만 표시) */
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-top: 8px;
+    cursor: pointer;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text);
+    user-select: none;
+  }
+  .group-header:first-of-type { margin-top: 0; }
+  .group-header:hover { color: var(--accent); border-color: var(--accent); }
+  .group-name { flex: 1; letter-spacing: 0.2px; }
+  .group-count {
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--bg-card);
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-weight: 700;
+  }
+  .group-toggle {
+    transition: transform 0.18s;
+    font-size: 10px;
+    color: var(--text-dim);
+    display: inline-block;
+  }
+  .group-header.collapsed .group-toggle { transform: rotate(-90deg); }
+  .group-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 0 2px;
+  }
+  .group-body.collapsed { display: none; }
+
   /* 지도 위 도구 모음 (좌상단) */
   .map-tools {
     position: absolute;
@@ -423,6 +465,27 @@
     line-height: 1;
     font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
   }
+
+  /* 클러스터(여러 마커 묶음) */
+  .cluster-marker {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.88);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    border: 2.5px solid white;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.12s ease-out;
+  }
+  .cluster-marker:hover { transform: scale(1.12); }
+  .cluster-marker.size-l { width: 44px; height: 44px; font-size: 14px; }
+  .cluster-marker.size-xl { width: 52px; height: 52px; font-size: 15px; background: rgba(220,38,38,0.92); }
 
   /* 정보창 (InfoWindow 내부 컨텐츠) */
   .info-window {
@@ -657,6 +720,8 @@ let map;
 let cadastralLayer;
 const markers = {}; // catKey -> [{marker, info, item, cat}, ...]
 let openInfoWindow = null;
+let clusterMarkers = [];   // 줌 아웃 시 묶음 마커들
+let zoomChangeListener = null;
 
 // 사용자 현재 위치 상태
 let userLatLng = null;        // { lat, lng } or null
@@ -711,6 +776,9 @@ function initMap() {
       openInfoWindow = null;
     }
   });
+
+  // 줌 변경시 클러스터링 다시 계산
+  zoomChangeListener = naver.maps.Event.addListener(map, 'zoom_changed', recomputeClusters);
 
   // 카테고리 UI + 마커 렌더
   renderChips();
@@ -899,17 +967,81 @@ function formatDistance(m) {
 /* ----- 필터 적용 (카테고리 + 검색) ----- */
 function applyFilter() {
   if (openInfoWindow) { openInfoWindow.close(); openInfoWindow = null; }
+  recomputeClusters();
+  renderPlaceList();
+}
 
-  // 마커 표시/숨김
+/* ----- 클러스터링 (자체 격자 기반) ----- */
+function getVisibleRecs() {
+  const out = [];
   Object.entries(markers).forEach(([key, list]) => {
     list.forEach(rec => {
       const showByCat = !activeCategory || activeCategory === key;
       const showBySearch = !searchQuery || matchSearch(rec.item, rec.cat);
-      rec.marker.setMap(showByCat && showBySearch ? map : null);
+      if (showByCat && showBySearch) out.push(rec);
     });
   });
+  return out;
+}
 
-  renderPlaceList();
+function recomputeClusters() {
+  // 기존 클러스터 마커 제거
+  clusterMarkers.forEach(m => m.setMap(null));
+  clusterMarkers = [];
+
+  const zoom = map.getZoom();
+  // 줌 15 이상이면 클러스터링 안 함 (개별 마커 그대로)
+  const cellSize = zoom <= 11 ? 0.040
+                 : zoom === 12 ? 0.020
+                 : zoom === 13 ? 0.010
+                 : zoom === 14 ? 0.005
+                 : 0;  // 15+ 클러스터링 OFF
+
+  const visible = getVisibleRecs();
+  const hiddenSet = new Set();   // 클러스터로 흡수된 rec
+
+  if (cellSize > 0) {
+    const grid = {};
+    visible.forEach(rec => {
+      const gx = Math.floor(rec.item.lng / cellSize);
+      const gy = Math.floor(rec.item.lat / cellSize);
+      const key = gx + ',' + gy;
+      (grid[key] = grid[key] || []).push(rec);
+    });
+
+    Object.values(grid).forEach(group => {
+      if (group.length < 2) return;
+      // 그룹 내 마커는 숨기고, 클러스터 한 개 표시
+      group.forEach(rec => hiddenSet.add(rec));
+      const lat = group.reduce((s, r) => s + r.item.lat, 0) / group.length;
+      const lng = group.reduce((s, r) => s + r.item.lng, 0) / group.length;
+      const sizeClass = group.length >= 30 ? ' size-xl'
+                      : group.length >= 10 ? ' size-l' : '';
+      const cluster = new naver.maps.Marker({
+        position: new naver.maps.LatLng(lat, lng),
+        map: map,
+        icon: {
+          content: '<div class="cluster-marker' + sizeClass + '">' + group.length + '</div>',
+          anchor: new naver.maps.Point(19, 19),
+        },
+        zIndex: 50,
+      });
+      naver.maps.Event.addListener(cluster, 'click', () => {
+        const z = Math.min(map.getZoom() + 2, 18);
+        map.setCenter(new naver.maps.LatLng(lat, lng));
+        map.setZoom(z);
+      });
+      clusterMarkers.push(cluster);
+    });
+  }
+
+  // 모든 rec 마커 visibility 설정
+  Object.values(markers).forEach(list => {
+    list.forEach(rec => {
+      const show = visible.includes(rec) && !hiddenSet.has(rec);
+      rec.marker.setMap(show ? map : null);
+    });
+  });
 }
 
 function matchSearch(item, cat) {
@@ -1042,32 +1174,88 @@ function renderPlaceList() {
     return;
   }
 
-  filtered.forEach(({ catKey, cat, item, distance }) => {
-    const el = document.createElement('div');
-    el.className = 'place-item';
-    const distHtml = (typeof distance === 'number')
-      ? '<span class="place-distance">' + formatDistance(distance) + '</span>'
-      : '';
-    el.innerHTML =
-      '<div class="place-name-row">' +
-        '<div class="place-name">' +
-          '<span class="pdot" style="background:' + cat.color + '"></span>' +
-          escapeHtml(item.name) +
-        '</div>' + distHtml +
-      '</div>' +
-      (item.address ? '<div class="place-addr">' + escapeHtml(item.address) + '</div>' : '');
-    el.onclick = () => {
-      map.setCenter(new naver.maps.LatLng(item.lat, item.lng));
-      map.setZoom(Math.max(map.getZoom(), 15));
-      const rec = (markers[catKey] || []).find(r => r.item === item);
-      if (rec) {
-        if (openInfoWindow) openInfoWindow.close();
-        rec.info.open(map, rec.marker);
-        openInfoWindow = rec.info;
-      }
-    };
-    wrap.appendChild(el);
+  // 카테고리 1개만 선택됐고 region 컬럼이 두 가지 이상이면 region 그룹화
+  const regions = new Set(filtered.map(r => (r.item.region || '').trim() || '기타'));
+  if (activeCategory && regions.size > 1) {
+    renderGroupedByRegion(filtered, wrap);
+  } else {
+    filtered.forEach(rec => wrap.appendChild(buildPlaceEl(rec)));
+  }
+}
+
+function renderGroupedByRegion(filtered, wrap) {
+  const groups = {};
+  filtered.forEach(rec => {
+    const region = (rec.item.region || '').trim() || '기타';
+    (groups[region] = groups[region] || []).push(rec);
   });
+
+  // 기타는 맨 뒤로
+  const ordered = Object.keys(groups).sort((a, b) => {
+    if (a === '기타') return 1;
+    if (b === '기타') return -1;
+    return a.localeCompare(b, 'ko');
+  });
+
+  // 접힘 상태 기억 (사이드바 통째로)
+  const collapsedKey = 'ddc-collapsed-' + activeCategory;
+  const collapsedSet = new Set(JSON.parse(localStorage.getItem(collapsedKey) || '[]'));
+
+  ordered.forEach(region => {
+    const recs = groups[region];
+    const header = document.createElement('div');
+    header.className = 'group-header';
+    if (collapsedSet.has(region)) header.classList.add('collapsed');
+    header.innerHTML =
+      '<span class="group-name">' + escapeHtml(region) + '</span>' +
+      '<span class="group-count">' + recs.length + '</span>' +
+      '<span class="group-toggle">▾</span>';
+
+    const body = document.createElement('div');
+    body.className = 'group-body';
+    if (collapsedSet.has(region)) body.classList.add('collapsed');
+    recs.forEach(rec => body.appendChild(buildPlaceEl(rec)));
+
+    header.onclick = () => {
+      const willCollapse = !header.classList.contains('collapsed');
+      header.classList.toggle('collapsed', willCollapse);
+      body.classList.toggle('collapsed', willCollapse);
+      if (willCollapse) collapsedSet.add(region);
+      else collapsedSet.delete(region);
+      localStorage.setItem(collapsedKey, JSON.stringify([...collapsedSet]));
+    };
+
+    wrap.appendChild(header);
+    wrap.appendChild(body);
+  });
+}
+
+function buildPlaceEl({ catKey, cat, item, distance }) {
+  const el = document.createElement('div');
+  el.className = 'place-item';
+  const distHtml = (typeof distance === 'number')
+    ? '<span class="place-distance">' + formatDistance(distance) + '</span>'
+    : '';
+  el.innerHTML =
+    '<div class="place-name-row">' +
+      '<div class="place-name">' +
+        '<span class="pdot" style="background:' + cat.color + '"></span>' +
+        escapeHtml(item.name) +
+      '</div>' + distHtml +
+    '</div>' +
+    (item.address ? '<div class="place-addr">' + escapeHtml(item.address) + '</div>' :
+     item.note    ? '<div class="place-addr">' + escapeHtml(item.note) + '</div>' : '');
+  el.onclick = () => {
+    map.setCenter(new naver.maps.LatLng(item.lat, item.lng));
+    map.setZoom(Math.max(map.getZoom(), 15));
+    const rec = (markers[catKey] || []).find(r => r.item === item);
+    if (rec) {
+      if (openInfoWindow) openInfoWindow.close();
+      rec.info.open(map, rec.marker);
+      openInfoWindow = rec.info;
+    }
+  };
+  return el;
 }
 
 /* ----- 유틸 ----- */
