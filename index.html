@@ -1100,8 +1100,8 @@
     }
     body.sb-open .sidebar-backdrop { display: block; }
 
-    /* 도구 모음 위치 */
-    .map-tools { top: auto; bottom: 14px; left: 14px; flex-direction: row; flex-wrap: wrap; max-width: calc(100vw - 28px); }
+    /* 도구 모음: 좌상단 세로 (데스크탑과 동일 레이아웃) */
+    .map-tools { top: 14px; bottom: auto; left: 14px; flex-direction: column; flex-wrap: nowrap; max-width: none; }
 
     /* 헤더 컴팩트화 */
     .header { padding: 8px 12px; gap: 8px; }
@@ -1478,6 +1478,29 @@ function initMap() {
   // Firebase 모듈에서 사용할 글로벌 노출
   window.map = map;
   window.setUserLocation = setUserLocation;
+
+  // 창 크기 바뀌면 지도 타일 다시 그리기 (브라우저 리사이즈·모바일↔데스크탑 모드 전환)
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (map) naver.maps.Event.trigger(map, 'resize');
+    }, 150);
+  });
+  // 모바일/데스크탑 경계를 넘나들 때 사이드바 상태 정리
+  const mql = window.matchMedia('(max-width: 720px)');
+  mql.addEventListener('change', e => {
+    const sb = document.getElementById('sidebar');
+    if (e.matches) {
+      // 모바일 진입 → 사이드바 닫고 백드롭 정리
+      sb.classList.add('collapsed');
+      document.body.classList.remove('sb-open');
+    } else {
+      // 데스크탑 진입 → 사이드바 열기
+      sb.classList.remove('collapsed');
+      document.body.classList.remove('sb-open');
+    }
+  });
 }
 
 /* ----- 기상·산림·하천 위험도 띠 ----- */
