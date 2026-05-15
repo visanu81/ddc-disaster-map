@@ -379,6 +379,20 @@
     font-family: 'Pretendard Variable', sans-serif;
   }
 
+  /* 가장 가까운 마커 안내선 라벨 */
+  .nearest-label {
+    background: #dc2626;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 800;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    white-space: nowrap;
+    font-family: 'Pretendard Variable', sans-serif;
+  }
+
   /* ===== 메인 ===== */
   .main {
     flex: 1;
@@ -1125,6 +1139,8 @@ let userLatLng = null;        // { lat, lng } or null
 let userMarker = null;
 let userCircle = null;
 let userWatchId = null;       // 모바일 등 연속 위치 갱신용 (선택적으로 사용)
+let nearestLine = null;       // 내 위치 → 가장 가까운 마커 연결선
+let nearestLabel = null;      // 그 중간에 표시되는 거리·도보시간 배지
 
 function initMap() {
   if (typeof naver === 'undefined' || !naver.maps) {
@@ -1437,7 +1453,53 @@ function setUserLocation(lat, lng, accuracy) {
 
   map.setCenter(ll);
   map.setZoom(Math.max(map.getZoom(), 14));
-  renderPlaceList();  // 거리 갱신
+  renderPlaceList();         // 사이드바 거리 갱신
+  updateNearestLine();       // 가장 가까운 마커까지 자동 안내선
+}
+
+/* ----- 내 위치 → 가장 가까운 마커 연결선 ----- */
+function updateNearestLine() {
+  // 기존 선·라벨 제거
+  if (nearestLine) { nearestLine.setMap(null); nearestLine = null; }
+  if (nearestLabel) { nearestLabel.setMap(null); nearestLabel = null; }
+  if (!userLatLng) return;
+
+  // 우선순위: 활성 카테고리 → 산악위치표지판 → 전체
+  const target = (activeCategory && findNearest(activeCategory, userLatLng.lat, userLatLng.lng))
+              || findNearest('산악위치표지판', userLatLng.lat, userLatLng.lng)
+              || findNearest(null, userLatLng.lat, userLatLng.lng);
+  if (!target) return;
+
+  const from = new naver.maps.LatLng(userLatLng.lat, userLatLng.lng);
+  const to = new naver.maps.LatLng(target.item.lat, target.item.lng);
+
+  nearestLine = new naver.maps.Polyline({
+    map: map,
+    path: [from, to],
+    strokeColor: '#dc2626',
+    strokeWeight: 3,
+    strokeOpacity: 0.75,
+    strokeStyle: 'shortdash',
+    clickable: false,
+    zIndex: 700,
+  });
+
+  // 중간 지점 라벨
+  const midLat = (userLatLng.lat + target.item.lat) / 2;
+  const midLng = (userLatLng.lng + target.item.lng) / 2;
+  const walk = Math.max(1, Math.round((target.distance / 1000) / 2.5 * 60));
+  const labelText = formatDistance(target.distance) + ' · 도보 ' + walk + '분';
+
+  nearestLabel = new naver.maps.Marker({
+    position: new naver.maps.LatLng(midLat, midLng),
+    map: map,
+    icon: {
+      content: '<div class="nearest-label">' + escapeHtml(labelText) + '</div>',
+      anchor: new naver.maps.Point(50, 12),
+    },
+    clickable: false,
+    zIndex: 701,
+  });
 }
 
 // Haversine 거리 (미터)
@@ -1815,6 +1877,7 @@ function applyFilter() {
   if (openInfoWindow) { openInfoWindow.close(); openInfoWindow = null; }
   recomputeClusters();
   renderPlaceList();
+  updateNearestLine();   // 카테고리 바뀌면 '가장 가까운 마커' 도 바뀜 → 선·라벨 재계산
 }
 
 /* ----- 클러스터링 (자체 격자 기반) ----- */
