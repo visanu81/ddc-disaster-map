@@ -16,9 +16,16 @@ echo.
 python tools\update_places.py
 if errorlevel 1 (
   echo.
-  echo  [오류] 스크립트 실행 실패. .env 와 시트 권한을 확인하세요.
+  echo  [오류] 마커 데이터 수집 실패. .env 와 시트 권한을 확인하세요.
   pause
   exit /b 1
+)
+
+echo.
+echo   기상·산림·하천 위험도 갱신 중...
+python tools\update_weather.py
+if errorlevel 1 (
+  echo  [경고] 기상 데이터 수집 실패. 마커 데이터만 업로드합니다.
 )
 
 echo.
@@ -26,7 +33,7 @@ echo  ------------------------------------------------------------
 echo   GitHub 에 업로드 중...
 echo  ------------------------------------------------------------
 
-git add data.js
+git add data.js weather.js
 git diff --cached --quiet
 if errorlevel 1 (
   git commit -m "데이터 갱신 %DATE% %TIME:~0,5%"
@@ -34,7 +41,7 @@ if errorlevel 1 (
   echo.
   echo   ✓ 업로드 완료. GitHub Pages 가 1~2분 뒤 반영됩니다.
 ) else (
-  echo   · 시트에 변경사항이 없어 업로드 생략.
+  echo   · 변경사항 없어 업로드 생략.
 )
 
 echo.

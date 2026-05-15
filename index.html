@@ -207,6 +207,44 @@
     .rescue-banner .msg { flex-basis: 100%; font-size: 12px; }
   }
 
+  /* 기상·산림·하천 위험도 가로 띠 (헤더 아래) */
+  .weather-strip {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding: 8px 20px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+  .weather-strip.empty { display: none; }
+  .w-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1.2;
+  }
+  .w-item strong { font-weight: 800; color: var(--text); }
+  .w-item small { color: var(--text-dim); font-size: 11px; margin-left: 2px; }
+  .w-sep { color: var(--border); user-select: none; }
+  .w-time { margin-left: auto; font-size: 10.5px; color: var(--text-sub); }
+
+  /* 위험도 색상 */
+  .w-fire-1 strong, .w-river-0 strong { color: var(--text); }
+  .w-fire-2 strong, .w-river-1 strong { color: #eab308; }
+  .w-fire-3 strong, .w-river-2 strong { color: #f59e0b; }
+  .w-fire-4 strong, .w-river-3 strong { color: #dc2626; }
+  .w-rain-on strong { color: #3b82f6; }
+
+  @media (max-width: 720px) {
+    .weather-strip { padding: 7px 12px; font-size: 11.5px; gap: 4px 8px; }
+    .w-time { display: none; }
+    .w-item small { display: none; }
+  }
+
   /* 토스트 알림 (좌표 복사 등) */
   .toast {
     position: fixed;
@@ -795,6 +833,9 @@
   </div>
 </header>
 
+<!-- 동두천 기상·산림·하천 위험도 가로 띠 -->
+<div class="weather-strip empty" id="weather-strip"></div>
+
 <!-- 지도 위치 직접 찍기 모드 배너 -->
 <div class="pick-banner" id="pick-banner">
   📍 지도에서 현재 위치를 한 번 탭하세요
@@ -863,6 +904,7 @@
 
 <!-- 데이터 (별도 파일에서 로드) -->
 <script src="data.js"></script>
+<script src="weather.js"></script>
 
 <!-- 네이버맵 v3 SDK -->
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=nk07ypv156"></script>
@@ -1045,7 +1087,62 @@ function initMap() {
   bindListHeader();
   bindRescueBanner();
   bindCoordDisplay();
+  renderWeatherStrip();
   handleUrlParams();
+}
+
+/* ----- 기상·산림·하천 위험도 띠 ----- */
+function renderWeatherStrip() {
+  const w = window.DDC_WEATHER;
+  const strip = document.getElementById('weather-strip');
+  if (!w) { strip.classList.add('empty'); return; }
+
+  const parts = [];
+
+  // 현재 기온·강수
+  if (w.current) {
+    const c = w.current;
+    const icon = c.icon || '🌤';
+    const tempPart = '<span class="w-item"><span>' + icon + '</span>' +
+      (c.temp != null ? '<strong>' + c.temp + '°C</strong>' : '') +
+      (c.humid != null ? '<small>습도 ' + c.humid + '%</small>' : '') +
+      '</span>';
+    parts.push(tempPart);
+
+    // 강수 또는 12시간 강수확률 요약
+    const hasRain = c.rain > 0;
+    let rainText = '';
+    if (hasRain) rainText = c.rain + 'mm/h';
+    else if (Array.isArray(w.forecast) && w.forecast.length) {
+      const maxPop = Math.max(...w.forecast.map(f => f.pop || 0));
+      const rainHours = w.forecast.filter(f => f.pcp > 0).length;
+      rainText = rainHours > 0
+        ? '12h 비 ' + rainHours + 'h (최대 ' + maxPop + '%)'
+        : '12h 강수 없음';
+    }
+    if (rainText) {
+      parts.push('<span class="w-item ' + (hasRain ? 'w-rain-on' : '') + '"><span>💧</span><strong>' + rainText + '</strong></span>');
+    }
+  }
+
+  // 산불 위험
+  if (w.fire) {
+    parts.push('<span class="w-item w-fire-' + w.fire.level + '"><span>🔥</span>산불 <strong>' + w.fire.levelText + '</strong></span>');
+  }
+
+  // 신천 수위
+  if (w.river) {
+    parts.push('<span class="w-item w-river-' + w.river.level + '"><span>💦</span>신천 <strong>' +
+      w.river.wl + 'm</strong><small>' + w.river.status + '</small></span>');
+  }
+
+  if (parts.length === 0) { strip.classList.add('empty'); return; }
+
+  // 부분 사이 구분점
+  const html = parts.join('<span class="w-sep">·</span>') +
+    (w.updatedAt ? '<span class="w-time">' + escapeHtml(w.updatedAt.slice(11)) + ' 갱신</span>' : '');
+  strip.innerHTML = html;
+  strip.classList.remove('empty');
 }
 
 /* ----- 장소 목록 접기/펼치기 (헤더 클릭) ----- */
