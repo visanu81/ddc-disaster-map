@@ -338,6 +338,22 @@
     line-height: 1.6;
   }
 
+  /* 사이드바 푸터 (제작자) */
+  .sidebar-footer {
+    margin-top: 10px;
+    padding: 10px 4px 12px;
+    border-top: 1px solid var(--border);
+    font-size: 10.5px;
+    color: var(--text-sub);
+    text-align: center;
+    letter-spacing: 0.2px;
+    flex-shrink: 0;
+  }
+  .sidebar-footer strong {
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+
   /* region 그룹 헤더 (카테고리 선택 + region 컬럼 있을 때만 표시) */
   .group-header {
     display: flex;
@@ -603,6 +619,10 @@
         <span class="list-toggle">▾</span>
       </div>
       <div class="place-list" id="place-list"></div>
+
+      <div class="sidebar-footer">
+        제작자 <strong>한경승</strong>
+      </div>
     </div>
   </aside>
 
