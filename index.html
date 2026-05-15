@@ -1189,6 +1189,7 @@
     <h3>🆘 출동 위치 공유</h3>
     <div class="hint">동료·조난자와 실시간 위치를 공유해 같이 수색합니다.<br>익명, 출동 종료시 자동 삭제.</div>
     <button class="op-btn primary" id="op-create">새 출동 시작</button>
+    <button class="op-btn" id="op-join-default">상시방 (DDC119) 참여</button>
     <div class="op-divider">또는</div>
     <input type="text" class="op-input" id="op-code-input" placeholder="코드 입력 (예: H3K7)" maxlength="8">
     <select class="op-select" id="op-role-input">
@@ -1231,6 +1232,7 @@
     <small>현재 위치에서 가장 가까운 산악표지판으로 즉시 안내해드립니다.</small>
   </div>
   <button class="rescue-btn" id="rescue-go">📍 가장 가까운 표지판 안내</button>
+  <button class="rescue-btn" id="rescue-beacon">🆘 구조위치송신</button>
   <button class="rescue-close" id="rescue-close" title="닫기">✕</button>
 </div>
 
@@ -1917,6 +1919,14 @@ function bindRescueBanner() {
     banner.classList.add('hidden');
   };
   document.getElementById('rescue-go').onclick = guideToNearest;
+  // 🆘 구조위치송신 — Firebase 모듈의 window.joinRescueOp 호출
+  document.getElementById('rescue-beacon').onclick = () => {
+    if (typeof window.joinRescueOp === 'function') {
+      window.joinRescueOp();
+    } else {
+      alert('출동 모듈 로드를 기다려주세요.');
+    }
+  };
 }
 
 function guideToNearest() {
@@ -2562,6 +2572,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+/* ===== 상수 ===== */
+const RESCUE_OP_CODE = 'DDC119';   // 동두천소방서 상시방 코드
+
 /* ===== 상태 ===== */
 const OpState = {
   opCode: null,
@@ -2624,8 +2637,29 @@ $('op-join').onclick = () => {
   }
   joinOp(code, $('op-role-input').value);
 };
+$('op-join-default').onclick = () => {
+  joinOp(RESCUE_OP_CODE, $('op-role-input').value);
+};
 $('op-leave').onclick = leaveOp;
 $('op-share').onclick = shareOp;
+
+/* 구조위치송신 — 조난자 배너에서 호출. URL 의 ?op= 있으면 그 코드, 없으면 상시방 */
+window.joinRescueOp = function() {
+  if (OpState.opCode) {
+    // 이미 참여 중이면 패널만 열기
+    $('op-panel').classList.add('show');
+    alert('이미 출동 ' + OpState.opCode + ' 에 위치를 송신 중입니다.');
+    return;
+  }
+  const params = new URLSearchParams(location.search);
+  const code = (params.get('op') || RESCUE_OP_CODE).toUpperCase();
+  if (!/^[A-Z0-9]{4,8}$/.test(code)) {
+    alert('출동 코드가 올바르지 않습니다.');
+    return;
+  }
+  $('op-panel').classList.add('show');
+  joinOp(code, 'victim');
+};
 
 /* ===== 출동 참여 ===== */
 async function joinOp(code, role) {
