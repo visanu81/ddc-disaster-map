@@ -111,6 +111,122 @@
   }
   .theme-btn:hover { color: var(--accent); border-color: var(--accent); }
 
+  /* GPS 좌표 표시 (헤더) */
+  .coord-display {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 11.5px;
+    font-weight: 700;
+    font-feature-settings: 'tnum';
+    transition: all 0.15s;
+  }
+  .coord-display.visible { display: inline-flex; }
+  .coord-display:hover { border-color: var(--accent); color: var(--accent); }
+  .coord-display.copied { background: var(--safe, #00d68f); color: white; border-color: transparent; }
+  .coord-display .ico { font-size: 10px; opacity: 0.7; }
+
+  /* 119 직통 전화 버튼 */
+  .sos-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    background: #dc2626;
+    color: white !important;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 6px rgba(220,38,38,0.35);
+    transition: transform 0.12s;
+  }
+  .sos-btn:hover { transform: scale(1.04); }
+  .sos-btn .ico { font-size: 13px; }
+
+  /* 조난자 안내 배너 */
+  .rescue-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: linear-gradient(90deg, #dc2626, #f59e0b);
+    color: white;
+    font-weight: 700;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+  .rescue-banner.hidden { display: none; }
+  .rescue-banner .msg {
+    flex: 1;
+    font-size: 13px;
+    letter-spacing: -0.2px;
+  }
+  .rescue-banner .msg small {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.92;
+    margin-top: 2px;
+  }
+  .rescue-btn {
+    background: white;
+    color: #b91c1c;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: -0.1px;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .rescue-btn:hover { background: #fef3c7; }
+  .rescue-close {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+  }
+  .rescue-close:hover { background: rgba(255,255,255,0.35); }
+  @media (max-width: 600px) {
+    .rescue-banner { padding: 9px 12px; flex-wrap: wrap; }
+    .rescue-banner .msg { flex-basis: 100%; font-size: 12px; }
+  }
+
+  /* 토스트 알림 (좌표 복사 등) */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: #111827;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.25s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   /* ===== 메인 ===== */
   .main {
     flex: 1;
@@ -576,6 +692,20 @@
   .info-nav-btn.nav-naver  { background: #03c75a; }
   .info-nav-btn.nav-kakao  { background: #fee500; color: #381f1f !important; }
   .info-nav-btn.nav-tmap   { background: #ed174c; }
+  .info-share-btn {
+    margin-top: 6px;
+    width: 100%;
+    padding: 7px 8px;
+    background: transparent;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #374151 !important;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .info-share-btn:hover { background: #f3f4f6; border-color: #9ca3af; }
 
   /* 모바일 */
   @media (max-width: 720px) {
@@ -598,10 +728,27 @@
     </div>
   </div>
   <div class="header-right">
+    <button class="coord-display" id="coord-display" title="내 GPS 좌표 (클릭해서 복사)">
+      <span class="ico">📍</span>
+      <span id="coord-text">-</span>
+    </button>
+    <a href="tel:119" class="sos-btn" title="119 직통 전화">
+      <span class="ico">📞</span>119
+    </a>
     <div class="updated-at">갱신 <strong id="updated-at">-</strong></div>
     <button class="theme-btn" id="theme-toggle" title="테마 전환">🌓</button>
   </div>
 </header>
+
+<!-- 조난자 안내 배너 (닫기 가능) -->
+<div class="rescue-banner" id="rescue-banner">
+  <div class="msg">
+    ⚠️ 조난·응급상황이신가요?
+    <small>현재 위치에서 가장 가까운 산악표지판으로 즉시 안내해드립니다.</small>
+  </div>
+  <button class="rescue-btn" id="rescue-go">📍 가장 가까운 표지판 안내</button>
+  <button class="rescue-close" id="rescue-close" title="닫기">✕</button>
+</div>
 
 <main class="main">
   <aside class="sidebar" id="sidebar">
@@ -822,6 +969,9 @@ function initMap() {
   bindSearch();
   bindMapTools();
   bindListHeader();
+  bindRescueBanner();
+  bindCoordDisplay();
+  handleUrlParams();
 }
 
 /* ----- 장소 목록 접기/펼치기 (헤더 클릭) ----- */
@@ -956,6 +1106,7 @@ function requestUserLocation() {
 
 function setUserLocation(lat, lng, accuracy) {
   userLatLng = { lat, lng };
+  updateCoordDisplay(lat, lng);
   const ll = new naver.maps.LatLng(lat, lng);
 
   if (userMarker) userMarker.setMap(null);
@@ -1016,6 +1167,193 @@ function formatDistance(m) {
   if (m < 10000) return (m / 1000).toFixed(1) + 'km';
   return Math.round(m / 1000) + 'km';
 }
+
+/* ----- 헤더 GPS 좌표 표시 + 클릭 복사 ----- */
+function updateCoordDisplay(lat, lng) {
+  const el = document.getElementById('coord-display');
+  document.getElementById('coord-text').textContent =
+    lat.toFixed(5) + ', ' + lng.toFixed(5);
+  el.classList.add('visible');
+}
+
+function bindCoordDisplay() {
+  document.getElementById('coord-display').onclick = async () => {
+    if (!userLatLng) return;
+    const text = userLatLng.lat.toFixed(6) + ', ' + userLatLng.lng.toFixed(6);
+    try {
+      await navigator.clipboard.writeText(text);
+      const el = document.getElementById('coord-display');
+      el.classList.add('copied');
+      showToast('좌표 복사됨: ' + text + '  (119 신고 시 읽어주세요)');
+      setTimeout(() => el.classList.remove('copied'), 1500);
+    } catch (e) {
+      showToast('복사 실패. ' + text);
+    }
+  };
+}
+
+function showToast(msg, ms) {
+  let t = document.getElementById('ddc-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'ddc-toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._hideT);
+  t._hideT = setTimeout(() => t.classList.remove('show'), ms || 2200);
+}
+
+/* ----- 조난자 배너 + 가장 가까운 산악표지판 안내 ----- */
+function bindRescueBanner() {
+  const banner = document.getElementById('rescue-banner');
+  // 닫기 상태 기억 (이번 세션만 — 새로고침하면 다시 보임)
+  if (sessionStorage.getItem('ddc-rescue-closed') === '1') {
+    banner.classList.add('hidden');
+  }
+  document.getElementById('rescue-close').onclick = () => {
+    banner.classList.add('hidden');
+    sessionStorage.setItem('ddc-rescue-closed', '1');
+  };
+  document.getElementById('rescue-go').onclick = guideToNearest;
+}
+
+function guideToNearest() {
+  if (!navigator.geolocation) {
+    alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+    return;
+  }
+  showToast('현재 위치를 받는 중입니다...');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+      setUserLocation(lat, lng, accuracy);
+
+      // 산악표지판 카테고리에서 가장 가까운 항목 찾기 (없으면 모든 카테고리에서)
+      let target = findNearest('산악위치표지판', lat, lng) || findNearest(null, lat, lng);
+      if (!target) {
+        showToast('지도에 등록된 표지판이 없습니다.');
+        return;
+      }
+      // 활성 카테고리 풀고 그 마커로 줌인 + 팝업
+      setActiveCategory(null);
+      map.setCenter(new naver.maps.LatLng(target.item.lat, target.item.lng));
+      map.setZoom(17);
+      setTimeout(() => {
+        if (openInfoWindow) openInfoWindow.close();
+        const html = buildInfoWindowHtml(target.catKey, target.cat, target.item);
+        target.info.setContent(html);
+        target.info.open(map, target.marker);
+        openInfoWindow = target.info;
+      }, 400);
+      showToast('가장 가까운 표지판: ' + target.item.name + ' (' + formatDistance(target.distance) + ')', 4000);
+    },
+    err => {
+      alert('위치를 받을 수 없습니다. 브라우저 위치 권한을 허용해주세요.');
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
+  );
+}
+
+function findNearest(catKey, lat, lng) {
+  let best = null;
+  const lists = catKey
+    ? [[catKey, markers[catKey] || []]]
+    : Object.entries(markers);
+  lists.forEach(([key, list]) => {
+    list.forEach(rec => {
+      const d = haversine(lat, lng, rec.item.lat, rec.item.lng);
+      if (!best || d < best.distance) {
+        best = { catKey: key, item: rec.item, cat: rec.cat, marker: rec.marker, info: rec.info, distance: d };
+      }
+    });
+  });
+  return best;
+}
+
+/* ----- URL 파라미터 처리 (마커 직접 링크, 좌표 공유) ----- */
+function handleUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+
+  // ?m=마커이름  — 부분 일치, 첫 번째 매치
+  const m = params.get('m');
+  if (m) {
+    const target = findMarkerByName(decodeURIComponent(m));
+    if (target) {
+      setTimeout(() => {
+        map.setCenter(new naver.maps.LatLng(target.item.lat, target.item.lng));
+        map.setZoom(17);
+        target.info.setContent(buildInfoWindowHtml(target.catKey, target.cat, target.item));
+        target.info.open(map, target.marker);
+        openInfoWindow = target.info;
+      }, 300);
+    }
+  }
+
+  // ?p=lat,lng — 임시 핀 (조난자/신고자 위치)
+  const p = params.get('p');
+  if (p) {
+    const [lat, lng] = p.split(',').map(Number);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      const ll = new naver.maps.LatLng(lat, lng);
+      const reportMarker = new naver.maps.Marker({
+        position: ll,
+        map: map,
+        icon: {
+          content:
+            '<div class="user-loc-marker">' +
+              '<svg viewBox="0 0 32 32" width="32" height="32">' +
+                '<circle cx="16" cy="16" r="11" fill="white" stroke="#dc2626" stroke-width="3"/>' +
+                '<circle cx="16" cy="16" r="4" fill="#dc2626"/>' +
+              '</svg>' +
+            '</div>',
+          anchor: new naver.maps.Point(16, 16),
+        },
+        zIndex: 999,
+        title: '공유된 위치',
+      });
+      map.setCenter(ll);
+      map.setZoom(16);
+      showToast('공유받은 위치: ' + lat.toFixed(5) + ', ' + lng.toFixed(5), 3500);
+    }
+  }
+}
+
+function findMarkerByName(query) {
+  const q = query.toLowerCase();
+  let found = null;
+  Object.entries(markers).some(([key, list]) =>
+    list.some(rec => {
+      if (rec.item.name && rec.item.name.toLowerCase().includes(q)) {
+        found = { catKey: key, item: rec.item, cat: rec.cat, marker: rec.marker, info: rec.info };
+        return true;
+      }
+      return false;
+    })
+  );
+  return found;
+}
+
+/* ----- 좌표 공유 (URL 복사 + Web Share API) ----- */
+function shareCoord(lat, lng) {
+  const baseUrl = location.origin + location.pathname;
+  const url = baseUrl + '?p=' + Number(lat).toFixed(6) + ',' + Number(lng).toFixed(6);
+  if (navigator.share) {
+    navigator.share({
+      title: '동두천시 재난안전지도',
+      text: '이 위치로 와주세요',
+      url: url,
+    }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url).then(
+      () => showToast('위치 링크 복사됨: ' + url, 3000),
+      () => prompt('이 링크를 복사하세요:', url),
+    );
+  }
+}
+window.shareCoord = shareCoord;  // InfoWindow 안 onclick 에서 호출용
 
 /* ----- 필터 적용 (카테고리 + 검색) ----- */
 function applyFilter() {
@@ -1194,7 +1532,8 @@ function buildNavButtons(item) {
     '<div class="info-nav">' +
       '<a href="' + nmap + '" class="info-nav-btn nav-naver" target="_blank" rel="noopener">🚶 네이버맵</a>' +
       '<a href="' + kakao + '" class="info-nav-btn nav-kakao" target="_blank" rel="noopener">🚶 카카오맵</a>' +
-    '</div>'
+    '</div>' +
+    '<button class="info-share-btn" onclick="window.shareCoord(' + lat + ',' + lng + ')">🔗 이 위치 링크 복사·공유</button>'
   );
 }
 
