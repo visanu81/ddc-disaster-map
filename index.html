@@ -1068,11 +1068,40 @@
 
   /* 모바일 */
   @media (max-width: 720px) {
-    .main { flex-direction: column; }
-    .sidebar { width: 100%; max-height: 45vh; border-right: none; border-bottom: 1px solid var(--border); }
-    .sidebar-inner { min-width: 0; padding: 12px 12px 0; }
-    .sidebar.collapsed { max-height: 0; }
-    .map-tools { top: auto; bottom: 14px; left: 14px; flex-direction: row; }
+    /* main 은 가로 유지. 사이드바를 fixed overlay 로 좌측 슬라이드 */
+    .main { flex-direction: row; }
+
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 300px !important;
+      max-width: 85%;
+      max-height: none;
+      z-index: 100;
+      border-right: 1px solid var(--border) !important;
+      border-bottom: none;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.35);
+      transition: transform 0.25s ease;
+    }
+    .sidebar.collapsed {
+      transform: translateX(-100%);
+      width: 300px !important;
+      border-right: 1px solid var(--border) !important;
+    }
+    .sidebar-inner { min-width: 0; padding: 14px 14px 0; }
+
+    /* 사이드바 열려있을 때 지도 영역 어둡게 (백드롭) */
+    .sidebar-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 99;
+      display: none;
+    }
+    body.sb-open .sidebar-backdrop { display: block; }
+
+    /* 도구 모음 위치 */
+    .map-tools { top: auto; bottom: 14px; left: 14px; flex-direction: row; flex-wrap: wrap; max-width: calc(100vw - 28px); }
 
     /* 헤더 컴팩트화 */
     .header { padding: 8px 12px; gap: 8px; }
@@ -1080,7 +1109,7 @@
     .header-left { gap: 9px; flex: 1; min-width: 0; }
     .title { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .header-right { gap: 8px; flex-shrink: 0; }
-    .updated-at { display: none; }            /* 갱신 표시는 모바일에서 숨김 */
+    .updated-at { display: none; }
     .coord-display { padding: 4px 8px; font-size: 10.5px; }
     .coord-display .ico { display: none; }
     .sos-btn { padding: 5px 10px; font-size: 12px; }
@@ -1187,6 +1216,8 @@
   <button class="rescue-btn" id="rescue-go">📍 가장 가까운 표지판 안내</button>
   <button class="rescue-close" id="rescue-close" title="닫기">✕</button>
 </div>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
 <main class="main">
   <aside class="sidebar" id="sidebar">
@@ -1586,11 +1617,24 @@ function bindSearch() {
 
 /* ----- 지도 좌상단 도구 모음 ----- */
 function bindMapTools() {
-  // 사이드바 접기/펼치기
-  document.getElementById('sidebar-toggle').onclick = () => {
-    document.getElementById('sidebar').classList.toggle('collapsed');
+  // 사이드바 접기/펼치기 (모바일에선 fixed overlay + 백드롭)
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  function toggleSidebar() {
+    const willOpen = sidebar.classList.contains('collapsed');
+    sidebar.classList.toggle('collapsed', !willOpen);
+    document.body.classList.toggle('sb-open', willOpen);
     setTimeout(() => { if (map) naver.maps.Event.trigger(map, 'resize'); }, 280);
+  }
+  document.getElementById('sidebar-toggle').onclick = toggleSidebar;
+  backdrop.onclick = () => {
+    sidebar.classList.add('collapsed');
+    document.body.classList.remove('sb-open');
   };
+  // 모바일 첫 진입 시 사이드바 기본 닫힘 (지도 풀스크린)
+  if (window.innerWidth <= 720) {
+    sidebar.classList.add('collapsed');
+  }
 
   // 지적편집도 ON/OFF
   const cBtn = document.getElementById('cadastral-toggle');
