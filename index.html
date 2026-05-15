@@ -1606,8 +1606,8 @@ function bindMapTools() {
     map.setZoom(DEFAULT_ZOOM);
   };
 
-  // 내 현재 위치
-  document.getElementById('locate-btn').onclick = requestUserLocation;
+  // 내 현재 위치 (토글: 누르면 켜고/끄기)
+  document.getElementById('locate-btn').onclick = toggleUserLocation;
 
   // 지도 모드 순환 (일반 → 지형 → 위성 → 일반...)
   const MAP_TYPES = [
@@ -1630,6 +1630,27 @@ function bindMapTools() {
 }
 
 /* ----- 사용자 위치 / 거리 계산 ----- */
+function toggleUserLocation() {
+  // 이미 위치 마커가 떠 있으면 → 끄기
+  if (userMarker) {
+    clearUserLocation();
+    return;
+  }
+  // 안 떠 있으면 → 새로 위치 요청
+  requestUserLocation();
+}
+
+function clearUserLocation() {
+  if (userMarker) { userMarker.setMap(null); userMarker = null; }
+  if (userCircle) { userCircle.setMap(null); userCircle = null; }
+  if (nearestLine) { nearestLine.setMap(null); nearestLine = null; }
+  if (nearestLabel) { nearestLabel.setMap(null); nearestLabel = null; }
+  userLatLng = null;
+  document.getElementById('locate-btn').classList.remove('active');
+  document.getElementById('coord-display').classList.remove('visible');
+  renderPlaceList();  // 거리 배지 제거 + 가까운 순 정렬 해제
+}
+
 function requestUserLocation() {
   const btn = document.getElementById('locate-btn');
   if (!navigator.geolocation) {
