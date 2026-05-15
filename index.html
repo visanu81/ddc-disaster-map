@@ -2951,12 +2951,13 @@ $('lobby-form').onsubmit = (e) => {
 
 function initLobby() {
   const params = new URLSearchParams(location.search);
-  // 공유 링크 (?op= 또는 ?mode=rescue) 로 들어온 경우 로비 스킵
-  if (params.get('op') || params.get('mode') === 'rescue') {
-    // role 파라미터로 추정
-    const role = (params.get('mode') === 'rescue') ? 'victim'
-               : (params.get('role') === 'rescuer') ? 'rescuer' : 'rescuer';
-    applyMode(null, role === 'victim' ? 'civilian' : 'rescuer');
+  // 요구조자 초대 링크 — rescue-banner 가 이미 표시됨, 로비/모드 적용 모두 스킵
+  if (params.get('mode') === 'rescue') {
+    return;
+  }
+  // 동료 출동 공유 링크 — 소방관으로 간주
+  if (params.get('op')) {
+    applyMode(null, 'rescuer');
     return;
   }
   // 세션 복원
