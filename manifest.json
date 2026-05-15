@@ -1,0 +1,21 @@
+{
+  "name": "동두천시 재난안전지도",
+  "short_name": "재난안전지도",
+  "description": "동두천시 소방서·구급함·산악표지판 + 실시간 기상·산불·신천 수위. 산악구조 출동과 조난자 안내에 사용.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#060a18",
+  "theme_color": "#0a1530",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "navigation", "safety"]
+}

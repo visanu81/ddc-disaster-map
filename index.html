@@ -2,8 +2,30 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>동두천시 재난안전지도</title>
+
+<!-- PWA 설치/홈화면 추가 메타 -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a1530">
+<meta name="description" content="동두천시 재난안전지도 — 소방서·구급함·산악표지판 + 실시간 기상·산불·신천 수위">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="재난안전지도">
+<meta name="mobile-web-app-capable" content="yes">
+
+<script>
+  // Service Worker 등록 (오프라인 캐싱)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => {
+        console.warn('SW register failed', err);
+      });
+    });
+  }
+</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
