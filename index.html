@@ -321,6 +321,64 @@
   }
   .pick-banner button:hover { background: rgba(255,255,255,0.4); }
 
+  /* 거리 측정 모드 */
+  body.measure-mode #map { cursor: crosshair !important; }
+  .measure-banner {
+    position: fixed;
+    top: 60px; left: 50%;
+    transform: translateX(-50%);
+    background: #2563eb;
+    color: white;
+    padding: 8px 12px 8px 16px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(37,99,235,0.4);
+    z-index: 9998;
+    display: none;
+    align-items: center;
+    gap: 10px;
+  }
+  body.measure-mode .measure-banner { display: inline-flex; }
+  .measure-banner button {
+    background: rgba(255,255,255,0.25);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 4px 11px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .measure-banner button:hover { background: rgba(255,255,255,0.4); }
+
+  /* 측정 점 마커 (번호 배지) */
+  .measure-dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #2563eb;
+    border: 2.5px solid white;
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    font-family: 'Pretendard Variable', sans-serif;
+  }
+  .measure-label {
+    background: white;
+    color: #1e293b;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 800;
+    border: 1.5px solid #2563eb;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    white-space: nowrap;
+    font-family: 'Pretendard Variable', sans-serif;
+  }
+
   /* ===== 메인 ===== */
   .main {
     flex: 1;
@@ -864,6 +922,14 @@
   <button id="pick-cancel" type="button">취소</button>
 </div>
 
+<!-- 거리 측정 모드 배너 -->
+<div class="measure-banner" id="measure-banner">
+  <span>📏</span>
+  <span id="measure-text">시작점을 탭하세요</span>
+  <button id="measure-clear" type="button">지우기</button>
+  <button id="measure-done" type="button">완료</button>
+</div>
+
 <!-- 조난자 안내 배너 (닫기 가능) -->
 <div class="rescue-banner" id="rescue-banner">
   <div class="msg">
@@ -900,6 +966,16 @@
   <div class="map-wrap">
     <div class="map-tools">
       <button class="map-tool-btn" id="sidebar-toggle" title="사이드바 접기/펼치기">☰</button>
+      <button class="map-tool-btn icon-btn" id="measure-btn" title="두 지점 직선거리 측정">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="20" x2="20" y2="4"/>
+          <circle cx="4" cy="20" r="2" fill="currentColor"/>
+          <circle cx="20" cy="4" r="2" fill="currentColor"/>
+          <line x1="9" y1="9" x2="11" y2="11"/>
+          <line x1="13" y1="13" x2="15" y2="15"/>
+        </svg>
+      </button>
       <button class="map-tool-btn icon-btn" id="locate-btn" title="내 현재 위치 표시 (장소까지 거리도 함께 계산)">
         <svg viewBox="0 0 32 32" width="20" height="20" aria-label="내 위치">
           <circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2.4"/>
@@ -1080,13 +1156,18 @@ function initMap() {
   // 지적편집도 레이어 (토글 가능, 기본은 OFF)
   cadastralLayer = new naver.maps.CadastralLayer();
 
-  // 지도 클릭: pick 모드면 좌표 잡기, 아니면 열린 InfoWindow 닫기
+  // 지도 클릭: 모드별 분기
   naver.maps.Event.addListener(map, 'click', (e) => {
-    if (pickMode && e && e.coord) {
+    if (!e || !e.coord) return;
+    if (measureMode) {
+      addMeasurePoint(e.coord.lat(), e.coord.lng());
+      return;
+    }
+    if (pickMode) {
       const lat = e.coord.lat();
       const lng = e.coord.lng();
       exitPickLocationMode();
-      setUserLocation(lat, lng, 0);              // accuracy 0 → 정확도 원 안 그림
+      setUserLocation(lat, lng, 0);
       navigateToNearestFrom(lat, lng);
       showToast('지정한 위치 기준으로 가장 가까운 표지판을 찾습니다');
       return;
@@ -1110,6 +1191,7 @@ function initMap() {
   bindRescueBanner();
   bindCoordDisplay();
   renderWeatherStrip();
+  bindMeasureTool();
   handleUrlParams();
 }
 
@@ -1475,6 +1557,137 @@ function handleNoLocation(msg) {
   if (confirm(msg + '\n\n[확인]을 누르면 지도에서 위치를 직접 찍을 수 있어요.')) {
     enterPickLocationMode();
   }
+}
+
+/* ----- 거리 측정 모드 (다중 지점 누적) ----- */
+let measureMode = false;
+const measurePoints = [];   // [{lat, lng, marker, label}]
+let measurePolyline = null;
+
+function bindMeasureTool() {
+  document.getElementById('measure-btn').onclick = () => {
+    if (measureMode) exitMeasureMode();
+    else enterMeasureMode();
+  };
+  document.getElementById('measure-clear').onclick = clearMeasure;
+  document.getElementById('measure-done').onclick = exitMeasureMode;
+}
+
+function enterMeasureMode() {
+  if (measureMode) return;
+  // 다른 모드와 충돌 방지
+  if (pickMode) exitPickLocationMode();
+  measureMode = true;
+  document.body.classList.add('measure-mode');
+  document.getElementById('measure-btn').classList.add('active');
+  updateMeasureText();
+}
+
+function exitMeasureMode() {
+  measureMode = false;
+  document.body.classList.remove('measure-mode');
+  document.getElementById('measure-btn').classList.remove('active');
+  clearMeasure();
+}
+
+function clearMeasure() {
+  measurePoints.forEach(p => {
+    p.marker.setMap(null);
+    if (p.label) p.label.setMap(null);
+  });
+  measurePoints.length = 0;
+  if (measurePolyline) {
+    measurePolyline.setMap(null);
+    measurePolyline = null;
+  }
+  updateMeasureText();
+}
+
+function addMeasurePoint(lat, lng) {
+  const ll = new naver.maps.LatLng(lat, lng);
+  const idx = measurePoints.length + 1;
+
+  const marker = new naver.maps.Marker({
+    position: ll,
+    map: map,
+    icon: {
+      content: '<div class="measure-dot">' + idx + '</div>',
+      anchor: new naver.maps.Point(11, 11),
+    },
+    clickable: false,
+    zIndex: 800,
+  });
+
+  // 2번째 이상 점이면, 이 점 옆에 누적 거리 라벨
+  let label = null;
+  if (measurePoints.length >= 1) {
+    const segDist = haversine(
+      measurePoints[measurePoints.length - 1].lat,
+      measurePoints[measurePoints.length - 1].lng,
+      lat, lng,
+    );
+    const totalSoFar = totalMeasureDistance() + segDist;
+    const text = '+' + formatDistance(segDist) + (idx > 2 ? ' (총 ' + formatDistance(totalSoFar) + ')' : '');
+    label = new naver.maps.Marker({
+      position: ll,
+      map: map,
+      icon: {
+        content: '<div class="measure-label">' + text + '</div>',
+        anchor: new naver.maps.Point(-14, 12),
+      },
+      clickable: false,
+      zIndex: 801,
+    });
+  }
+
+  measurePoints.push({ lat, lng, marker, label });
+
+  // 폴리라인 갱신
+  if (measurePolyline) measurePolyline.setMap(null);
+  if (measurePoints.length >= 2) {
+    measurePolyline = new naver.maps.Polyline({
+      map: map,
+      path: measurePoints.map(p => new naver.maps.LatLng(p.lat, p.lng)),
+      strokeColor: '#2563eb',
+      strokeWeight: 4,
+      strokeOpacity: 0.85,
+      strokeStyle: 'solid',
+      clickable: false,
+      zIndex: 799,
+    });
+  }
+
+  updateMeasureText();
+}
+
+function totalMeasureDistance() {
+  let total = 0;
+  for (let i = 1; i < measurePoints.length; i++) {
+    total += haversine(
+      measurePoints[i - 1].lat, measurePoints[i - 1].lng,
+      measurePoints[i].lat, measurePoints[i].lng,
+    );
+  }
+  return total;
+}
+
+function updateMeasureText() {
+  const el = document.getElementById('measure-text');
+  if (!el) return;
+  const n = measurePoints.length;
+  if (n === 0) el.textContent = '시작점을 탭하세요';
+  else if (n === 1) el.textContent = '두 번째 점을 탭하세요';
+  else {
+    const total = totalMeasureDistance();
+    el.innerHTML = '총 <strong>' + formatDistance(total) + '</strong> · ' + n + '점' +
+      ' (도보 약 ' + estimateWalkMin(total) + '분)';
+  }
+}
+
+function estimateWalkMin(meters) {
+  // 산악 평균 도보 속도 약 2.5km/h (오르막·내리막 포함 보수적)
+  const minutes = (meters / 1000) / 2.5 * 60;
+  return Math.round(minutes);
 }
 
 let pickMode = false;
