@@ -564,21 +564,30 @@
     transform: translateY(-22px);
   }
 
-  /* 출동 상태 배지 (헤더 아래 또는 weather strip 옆) */
+  /* 출동 상태 배지 (헤더 아래 또는 weather strip 옆) — 클릭하면 패널 다시 열림 */
   .op-status {
     display: none;
     align-items: center;
     gap: 6px;
-    padding: 4px 10px;
+    padding: 5px 12px;
     background: #dc2626;
     color: white;
     border-radius: 999px;
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 800;
-    box-shadow: 0 2px 6px rgba(220,38,38,0.3);
+    box-shadow: 0 2px 8px rgba(220,38,38,0.45);
     animation: pulse-status 2s ease-in-out infinite;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
   }
+  .op-status:hover { filter: brightness(1.1); }
   .op-status.show { display: inline-flex; }
+  .op-status::after {
+    content: '↗';
+    margin-left: 4px;
+    opacity: 0.8;
+  }
   @keyframes pulse-status {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.65; }
@@ -1267,11 +1276,13 @@
   </div>
 </div>
 
-<!-- 헤더에 출동 진행중 표시 -->
-<div class="op-status" id="op-status" style="position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 15;">
+<!-- 헤더에 출동 진행중 표시 (클릭하면 패널 다시 열림) -->
+<button class="op-status" id="op-status" type="button"
+        style="position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 15;"
+        title="클릭하면 출동 패널 다시 열림">
   <span>🆘 출동중</span>
   <strong id="op-status-code">----</strong>
-</div>
+</button>
 
 <!-- 조난자 안내 배너 (닫기 가능) -->
 <div class="rescue-banner" id="rescue-banner">
@@ -2671,6 +2682,10 @@ $('op-toggle').onclick = () => {
 };
 $('op-close').onclick = () => {
   $('op-panel').classList.remove('show');
+};
+// 🆘 출동중 배지 클릭하면 출동 패널 다시 열기
+$('op-status').onclick = () => {
+  $('op-panel').classList.add('show');
 };
 $('op-create').onclick = () => {
   const code = randomCode();
