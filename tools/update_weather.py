@@ -11,6 +11,7 @@
 실행: python tools/update_weather.py
 """
 import json
+import os
 import sys
 import time
 from datetime import datetime, timedelta
@@ -44,8 +45,9 @@ def load_env(p=ENV_PATH):
 
 
 ENV = load_env()
-DATA_KEY = ENV.get('DATA_GO_KR_KEY', '')
-HRFCO_KEY = ENV.get('HRFCO_KEY', '')
+# .env 우선, 없으면 환경변수 (GitHub Actions Secrets) 사용
+DATA_KEY = ENV.get('DATA_GO_KR_KEY') or os.environ.get('DATA_GO_KR_KEY', '')
+HRFCO_KEY = ENV.get('HRFCO_KEY') or os.environ.get('HRFCO_KEY', '')
 
 # 동두천 기상청 격자 좌표 + 산불 시군구명 + HRFCO 관측소 코드
 DDC_NX, DDC_NY = 61, 134

@@ -22,7 +22,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo   기상·산림·하천 위험도 갱신 중...
+echo   로컬 확인용 기상 데이터 갱신 (Pages 는 매시간 자동 갱신됨)...
 python tools\update_weather.py
 if errorlevel 1 (
   echo  [경고] 기상 데이터 수집 실패. 마커 데이터만 업로드합니다.
@@ -30,10 +30,10 @@ if errorlevel 1 (
 
 echo.
 echo  ------------------------------------------------------------
-echo   GitHub 에 업로드 중...
+echo   GitHub 에 업로드 중... (weather.js 는 GitHub Actions 이 자동 갱신)
 echo  ------------------------------------------------------------
 
-git add data.js weather.js
+git add data.js
 git diff --cached --quiet
 if errorlevel 1 (
   git commit -m "데이터 갱신 %DATE% %TIME:~0,5%"
@@ -41,7 +41,7 @@ if errorlevel 1 (
   echo.
   echo   ✓ 업로드 완료. GitHub Pages 가 1~2분 뒤 반영됩니다.
 ) else (
-  echo   · 변경사항 없어 업로드 생략.
+  echo   · 마커 변경사항 없어 업로드 생략. (기상은 1시간 안에 자동 갱신)
 )
 
 echo.

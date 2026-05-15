@@ -9,6 +9,9 @@ token.json
 # 임시 작업 공간
 .tmp/
 
+# 자동 생성되는 기상 데이터 (GitHub Actions cron 이 매시간 새로 생성)
+weather.js
+
 # Python
 __pycache__/
 *.pyc
