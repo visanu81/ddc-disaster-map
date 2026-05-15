@@ -1243,6 +1243,7 @@
           <path d="M14 19c0-2 1.6-3.5 3.5-3.5S21 17 21 19"/>
         </svg>
       </button>
+      <button class="map-tool-btn" id="maptype-toggle" title="지도 모드 (일반·지형·위성 순환)">일반</button>
       <button class="map-tool-btn" id="cadastral-toggle" title="지적편집도 표시/숨김">지적</button>
       <button class="map-tool-btn icon-btn" id="recenter-btn" title="동두천소방서 기준으로 되돌리기">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-label="소방서로 복귀">
@@ -1386,18 +1387,8 @@ function initMap() {
   map = new naver.maps.Map('map', {
     center: new naver.maps.LatLng(DDC_CENTER.lat, DDC_CENTER.lng),
     zoom: DEFAULT_ZOOM,
-    // 일반/위성/지형/하이브리드 모드 토글 (우상단)
-    mapTypeControl: true,
-    mapTypeControlOptions: {
-      position: naver.maps.Position.TOP_RIGHT,
-      style: naver.maps.MapTypeControlStyle.BUTTON,
-      mapTypeIds: [
-        naver.maps.MapTypeId.NORMAL,
-        naver.maps.MapTypeId.TERRAIN,
-        naver.maps.MapTypeId.SATELLITE,
-        naver.maps.MapTypeId.HYBRID,
-      ],
-    },
+    // 네이버 기본 mapTypeControl 끔 (우리 도구 모음에 통합)
+    mapTypeControl: false,
     // 줌 컨트롤 (우측 중앙)
     zoomControl: true,
     zoomControlOptions: {
@@ -1617,6 +1608,25 @@ function bindMapTools() {
 
   // 내 현재 위치
   document.getElementById('locate-btn').onclick = requestUserLocation;
+
+  // 지도 모드 순환 (일반 → 지형 → 위성 → 일반...)
+  const MAP_TYPES = [
+    { id: 'normal',    label: '일반' },
+    { id: 'terrain',   label: '지형' },
+    { id: 'satellite', label: '위성' },
+  ];
+  let mtIdx = 0;
+  const mtBtn = document.getElementById('maptype-toggle');
+  mtBtn.onclick = () => {
+    mtIdx = (mtIdx + 1) % MAP_TYPES.length;
+    const t = MAP_TYPES[mtIdx];
+    const naverType = t.id === 'normal' ? naver.maps.MapTypeId.NORMAL
+                    : t.id === 'terrain' ? naver.maps.MapTypeId.TERRAIN
+                    : naver.maps.MapTypeId.SATELLITE;
+    map.setMapTypeId(naverType);
+    mtBtn.textContent = t.label;
+    mtBtn.classList.toggle('active', t.id !== 'normal');
+  };
 }
 
 /* ----- 사용자 위치 / 거리 계산 ----- */
