@@ -811,6 +811,16 @@
     line-height: 1;
     font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
   }
+  /* InfoWindow 배지에 SVG 마커 아이콘 (마커와 동일 디자인 작게) */
+  .info-cat-svg {
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+    background: white;
+    border-radius: 3px;
+    padding: 1px;
+  }
+  .info-cat-svg svg { width: 14px !important; height: 14px !important; display: block; }
   .info-name { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
   .info-row {
     font-size: 12px;
@@ -1939,10 +1949,14 @@ function buildInfoWindowHtml(catKey, cat, item) {
   if (item.note) rows.push(row('비고', escapeHtml(item.note)));
 
   const catLabel = escapeHtml(cat.label || catKey);
+  const catSvg = svgFor(catKey);
+  const catIconHtml = catSvg
+    ? '<span class="info-cat-svg">' + catSvg + '</span>'
+    : '<span class="info-cat-icon">' + iconFor(catKey) + '</span>';
   return (
     '<div class="info-window">' +
       '<span class="info-cat" style="background:' + cat.color + '">' +
-        '<span class="info-cat-icon">' + iconFor(catKey) + '</span>' + catLabel +
+        catIconHtml + catLabel +
       '</span>' +
       '<div class="info-name">' + escapeHtml(item.name) + '</div>' +
       rows.join('') +
