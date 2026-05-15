@@ -1700,8 +1700,8 @@ function setUserLocation(lat, lng, accuracy) {
 
   map.setCenter(ll);
   map.setZoom(Math.max(map.getZoom(), 14));
-  renderPlaceList();         // 사이드바 거리 갱신
-  updateNearestLine();       // 가장 가까운 마커까지 자동 안내선
+  renderPlaceList();         // 사이드바 거리 갱신 (가까운 순 정렬)
+  // 안내선은 여기서 자동으로 안 그림 — '가장 가까운 표지판 안내' 또는 카테고리 변경시에만
 }
 
 /* ----- 내 위치 → 가장 가까운 마커 연결선 ----- */
@@ -1847,6 +1847,8 @@ function navigateToNearestFrom(lat, lng) {
     target.info.open(map, target.marker);
     openInfoWindow = target.info;
   }, 400);
+  // 내 위치 → 그 표지판 직선 안내선 그리기 (조난자 안내 흐름에서만)
+  updateNearestLine();
   showToast('가장 가까운 표지판: ' + target.item.name + ' (' + formatDistance(target.distance) + ')', 4500);
 }
 
@@ -2124,7 +2126,11 @@ function applyFilter() {
   if (openInfoWindow) { openInfoWindow.close(); openInfoWindow = null; }
   recomputeClusters();
   renderPlaceList();
-  updateNearestLine();   // 카테고리 바뀌면 '가장 가까운 마커' 도 바뀜 → 선·라벨 재계산
+  // 안내선이 그어져 있던 상태였다면 카테고리 바뀔 때 무효화 (자동 재계산은 안 함)
+  if (nearestLine) {
+    nearestLine.setMap(null); nearestLine = null;
+    if (nearestLabel) { nearestLabel.setMap(null); nearestLabel = null; }
+  }
 }
 
 /* ----- 클러스터링 (자체 격자 기반) ----- */
