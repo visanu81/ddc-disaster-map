@@ -1822,7 +1822,12 @@ function requestUserLocation() {
   );
 }
 
-function setUserLocation(lat, lng, accuracy) {
+function setUserLocation(lat, lng, accuracy, opts) {
+  // opts.recenter: 지도 중심을 내 위치로 이동할지 여부 (기본 true = '내 위치' 버튼 흐름)
+  // watchPosition 처럼 자주 호출되는 흐름은 { recenter: false } 로 마커만 갱신
+  opts = opts || {};
+  const recenter = opts.recenter !== false;
+
   userLatLng = { lat, lng };
   updateCoordDisplay(lat, lng);
   const ll = new naver.maps.LatLng(lat, lng);
@@ -1864,8 +1869,10 @@ function setUserLocation(lat, lng, accuracy) {
     });
   }
 
-  map.setCenter(ll);
-  map.setZoom(Math.max(map.getZoom(), 14));
+  if (recenter) {
+    map.setCenter(ll);
+    map.setZoom(Math.max(map.getZoom(), 14));
+  }
   renderPlaceList();         // 사이드바 거리 갱신 (가까운 순 정렬)
   // 안내선은 여기서 자동으로 안 그림 — '가장 가까운 표지판 안내' 또는 카테고리 변경시에만
 }
@@ -2818,9 +2825,9 @@ function startWatchingPosition(myRef) {
         lat, lng, accuracy: accuracy || 0,
         updatedAt: serverTimestamp(),
       }).catch(() => {});
-      // 본인 위치도 기존 user marker 로 표시
+      // 본인 위치 마커만 갱신 (지도 중심 강제 이동 X — 동료/조난자 보려면 사용자가 지도 조작 가능해야)
       if (typeof window.setUserLocation === 'function') {
-        window.setUserLocation(lat, lng, accuracy);
+        window.setUserLocation(lat, lng, accuracy, { recenter: false });
       }
     },
     err => {
