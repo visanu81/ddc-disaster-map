@@ -1,0 +1,30 @@
+# Cloudflare Pages — HTTP 헤더 (성능·보안)
+# https://developers.cloudflare.com/pages/configuration/headers/
+
+# 데이터 파일은 캐시 최소 — 항상 최신 표시
+/data.js
+  Cache-Control: public, max-age=60, must-revalidate
+
+/weather.js
+  Cache-Control: public, max-age=60, must-revalidate
+
+# HTML 은 짧은 캐시
+/
+  Cache-Control: public, max-age=300, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=300, must-revalidate
+
+# 정적 자산(icon, sw)은 캐시 길게
+/icon.svg
+  Cache-Control: public, max-age=86400
+
+# Service Worker 는 캐시 없음 (갱신 빠르게 반영)
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# 보안 헤더
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(self), camera=(), microphone=()

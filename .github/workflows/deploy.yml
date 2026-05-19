@@ -1,59 +1,55 @@
-name: Deploy to GitHub Pages
+name: Auto Update Weather
 
-# 트리거:
-# - push: 사장님이 갱신.bat 으로 시트 데이터를 푸시할 때
-# - schedule: 매시간 cron 으로 기상·산림·하천 위험도 자동 갱신
-# - workflow_dispatch: 수동 실행
+# 매시간 정각 기상·산림·하천 위험도를 새로 받아서 weather.js 를 갱신·push.
+# 배포는 Cloudflare Pages 가 git push 를 감지해 자동으로 처리 (이 워크플로우는 데이터 갱신만 담당).
 
 on:
-  push:
-    branches: [main]
   schedule:
-    - cron: '0 * * * *'        # 매시간 정각 (UTC 기준이지만 콘텐츠 갱신엔 무관)
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
+  group: auto-update
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  update:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: pip install requests
 
-      - name: Update weather/fire/river data
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run weather collection
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
           HRFCO_KEY: ${{ secrets.HRFCO_KEY }}
         run: python tools/update_weather.py
-        continue-on-error: true   # API 일시 장애시에도 배포는 계속
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Commit and push if changed
+        run: |
+          git add weather.js || true
+          if ! git diff --cached --quiet; then
+            git commit -m "기상 자동 갱신 $(date '+%Y-%m-%d %H:%M UTC')"
+            git push
+          else
+            echo "No weather changes to commit."
+          fi
