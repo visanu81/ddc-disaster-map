@@ -17,10 +17,22 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <script>
-  // Service Worker 등록 (오프라인 캐싱)
+  // Service Worker 등록 (오프라인 캐싱) + 새 버전 발견시 자동 갱신
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(err => {
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        // 새 SW 발견 시 즉시 활성화 + 페이지 한 번 자동 새로고침
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          if (!newSW) return;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              // 이전 SW 가 활성화돼 있는 상태에서 새 SW 가 설치됨 → 한 번 새로고침
+              window.location.reload();
+            }
+          });
+        });
+      }).catch(err => {
         console.warn('SW register failed', err);
       });
     });
@@ -1314,16 +1326,18 @@
     }
 
     /* 헤더 컴팩트화 */
-    .header { padding: 8px 12px; gap: 8px; }
+    .header { padding: 8px 12px; gap: 6px; flex-wrap: wrap; }
     .logo-mark { width: 32px; height: 32px; font-size: 14px; }
     .header-left { gap: 9px; flex: 1; min-width: 0; }
     .title { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .header-right { gap: 8px; flex-shrink: 0; }
+    .header-right { gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
     .updated-at { display: none; }
     .coord-display { padding: 4px 8px; font-size: 10.5px; }
     .coord-display .ico { display: none; }
     .sos-btn { padding: 5px 10px; font-size: 12px; }
     .theme-btn { width: 30px; height: 30px; font-size: 13px; }
+    .user-badge { padding: 4px 8px; font-size: 10.5px; }
+    .user-badge .role { font-size: 9px; padding: 1px 5px; }
   }
 </style>
 </head>
