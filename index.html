@@ -1918,10 +1918,16 @@ function initMap() {
   });
 }
 
-/* ----- 기상·산림·하천 위험도 띠 ----- */
+/* ----- 기상·산림·하천 위험도 띠 (현재 선택한 지역) ----- */
 function renderWeatherStrip() {
-  const w = window.DDC_WEATHER;
+  const root = window.DDC_WEATHER;
   const strip = document.getElementById('weather-strip');
+  if (!root) { strip.classList.add('empty'); return; }
+
+  // 새 구조(regions.{key}) 우선, 옛 구조(current/fire/river 직접)는 fallback
+  const regionKey = (window.DDC_USER && window.DDC_USER.region) || 'dongducheon';
+  const w = (root.regions && root.regions[regionKey])
+         || (root.current || root.fire || root.river ? root : null);
   if (!w) { strip.classList.add('empty'); return; }
 
   const parts = [];
@@ -1936,7 +1942,6 @@ function renderWeatherStrip() {
       '</span>';
     parts.push(tempPart);
 
-    // 강수 또는 12시간 강수확률 요약
     const hasRain = c.rain > 0;
     let rainText = '';
     if (hasRain) rainText = c.rain + 'mm/h';
@@ -1957,17 +1962,18 @@ function renderWeatherStrip() {
     parts.push('<span class="w-item w-fire-' + w.fire.level + '"><span>🔥</span>산불 <strong>' + w.fire.levelText + '</strong></span>');
   }
 
-  // 신천 수위
+  // 하천 수위 (시군별 관측소 — 동두천은 신천, 의정부는 중랑천 ...)
   if (w.river) {
-    parts.push('<span class="w-item w-river-' + w.river.level + '"><span>💦</span>신천 <strong>' +
-      w.river.wl + 'm</strong><small>' + w.river.status + '</small></span>');
+    const riverShort = (w.river.name || '').replace(/\s*\([^)]+\)\s*$/, '').trim() || '하천';
+    parts.push('<span class="w-item w-river-' + w.river.level + '"><span>💦</span>' +
+      escapeHtml(riverShort) + ' <strong>' + w.river.wl + 'm</strong>' +
+      '<small>' + w.river.status + '</small></span>');
   }
 
   if (parts.length === 0) { strip.classList.add('empty'); return; }
 
-  // 부분 사이 구분점
   const html = parts.join('<span class="w-sep">·</span>') +
-    (w.updatedAt ? '<span class="w-time">' + escapeHtml(w.updatedAt.slice(11)) + ' 갱신</span>' : '');
+    (root.updatedAt ? '<span class="w-time">' + escapeHtml(root.updatedAt.slice(11)) + ' 갱신</span>' : '');
   strip.innerHTML = html;
   strip.classList.remove('empty');
 }

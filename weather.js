@@ -1,106 +1,1170 @@
 /* 자동 생성 — tools/update_weather.py 실행시 갱신.
-   동두천시 실시간 기상·산림·하천 위험도. */
+   경기북부 시군별 실시간 기상·산림·하천 위험도. */
 
 window.DDC_WEATHER = {
-  "updatedAt": "2026-05-19 23:59",
-  "current": {
-    "pty": "0",
-    "ptyText": "없음",
-    "icon": "🌤",
-    "humid": 58,
-    "rain": 0.0,
-    "temp": 20.1,
-    "wind": 1.5
-  },
-  "forecast": [
-    {
-      "hour": 0,
-      "pop": 30,
-      "pcp": 0,
-      "pty": "0",
-      "temp": 20.0
+  "updatedAt": "2026-05-20 12:15",
+  "regions": {
+    "dongducheon": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 87,
+        "rain": 2.0,
+        "temp": 15.6,
+        "wind": 0.5
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 17,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 18,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 19,
+          "pop": 70,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 20,
+          "pop": 70,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 21,
+          "pop": 70,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 22,
+          "pop": 70,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 23,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": {
+        "name": "신천 송천교 (동두천)",
+        "wl": 1.28,
+        "status": "정상",
+        "level": 0,
+        "attwl": 3.4,
+        "wrnwl": 4.0,
+        "almwl": 5.0
+      }
     },
-    {
-      "hour": 1,
-      "pop": 30,
-      "pcp": 0,
-      "pty": "0",
-      "temp": 19.0
+    "uijeongbu": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 92,
+        "rain": 1.5,
+        "temp": 15.7,
+        "wind": 1.1
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 17,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 18,
+          "pop": 60,
+          "pcp": 6.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 19,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 20,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 21,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 22,
+          "pop": 60,
+          "pcp": 6.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 23,
+          "pop": 70,
+          "pcp": 7.0,
+          "pty": "1",
+          "temp": 15.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": {
+        "name": "중랑천 신곡교 (의정부)",
+        "wl": 0.38,
+        "status": "정상",
+        "level": 0,
+        "attwl": 2.6,
+        "wrnwl": 4.0,
+        "almwl": 6.0
+      }
     },
-    {
-      "hour": 2,
-      "pop": 30,
-      "pcp": 0,
-      "pty": "0",
-      "temp": 19.0
+    "yangju": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 92,
+        "rain": 1.5,
+        "temp": 15.7,
+        "wind": 1.1
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 17,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 18,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 19,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 20,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 21,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 22,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 23,
+          "pop": 70,
+          "pcp": 7.0,
+          "pty": "1",
+          "temp": 15.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": null
     },
-    {
-      "hour": 3,
-      "pop": 30,
-      "pcp": 0,
-      "pty": "0",
-      "temp": 19.0
+    "pocheon": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 92,
+        "rain": 1.0,
+        "temp": 15.6,
+        "wind": 0.7
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 17,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 18,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 19,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 14.0
+        },
+        {
+          "hour": 20,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 14.0
+        },
+        {
+          "hour": 21,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 14.0
+        },
+        {
+          "hour": 22,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 14.0
+        },
+        {
+          "hour": 23,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 14.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": {
+        "name": "한탄강 용담교 (포천)",
+        "wl": 0.84,
+        "status": "정상",
+        "level": 0,
+        "attwl": 9.5,
+        "wrnwl": 15.0,
+        "almwl": 18.0
+      }
     },
-    {
-      "hour": 4,
-      "pop": 30,
-      "pcp": 0,
-      "pty": "0",
-      "temp": 19.0
+    "yeoncheon": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 91,
+        "rain": 1.5,
+        "temp": 16.1,
+        "wind": 1.2
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 17,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 18,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 19,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 20,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 21,
+          "pop": 70,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 22,
+          "pop": 80,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 23,
+          "pop": 70,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": {
+        "name": "신천 (연천)",
+        "wl": 0.85,
+        "status": "정상",
+        "level": 0,
+        "attwl": 3.5,
+        "wrnwl": 4.8,
+        "almwl": 5.5
+      }
     },
-    {
-      "hour": 5,
-      "pop": 30,
-      "pcp": 0,
-      "pty": "0",
-      "temp": 19.0
+    "gapyeong": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 88,
+        "rain": 1.5,
+        "temp": 16.8,
+        "wind": 1.5
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 17,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 18,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 19,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 20,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 21,
+          "pop": 70,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 22,
+          "pop": 70,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 23,
+          "pop": 70,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": null
     },
-    {
-      "hour": 6,
-      "pop": 30,
-      "pcp": 0,
-      "pty": "0",
-      "temp": 19.0
+    "namyangju": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 86,
+        "rain": 2.0,
+        "temp": 16.4,
+        "wind": 2.0
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 17,
+          "pop": 70,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 18,
+          "pop": 70,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 19,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 20,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 21,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 22,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 23,
+          "pop": 70,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 15.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": {
+        "name": "왕숙천 왕숙교 (남양주)",
+        "wl": 0.99,
+        "status": "정상",
+        "level": 0,
+        "attwl": 4.9,
+        "wrnwl": 6.5,
+        "almwl": 8.0
+      }
     },
-    {
-      "hour": 7,
-      "pop": 30,
-      "pcp": 0,
-      "pty": "0",
-      "temp": 19.0
+    "guri": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 82,
+        "rain": 2.0,
+        "temp": 16.3,
+        "wind": 4.6
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 17,
+          "pop": 70,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 18,
+          "pop": 70,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 19,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 20,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 21,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 22,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 23,
+          "pop": 70,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 16.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": null
     },
-    {
-      "hour": 8,
-      "pop": 30,
-      "pcp": 0,
-      "pty": "0",
-      "temp": 19.0
+    "paju": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 92,
+        "rain": 1.5,
+        "temp": 16.3,
+        "wind": 4.0
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 17,
+          "pop": 60,
+          "pcp": 6.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 18,
+          "pop": 70,
+          "pcp": 6.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 19,
+          "pop": 60,
+          "pcp": 6.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 20,
+          "pop": 60,
+          "pcp": 6.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 21,
+          "pop": 70,
+          "pcp": 6.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 22,
+          "pop": 70,
+          "pcp": 7.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 23,
+          "pop": 70,
+          "pcp": 6.0,
+          "pty": "1",
+          "temp": 15.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": null
     },
-    {
-      "hour": 9,
-      "pop": 60,
-      "pcp": 0,
-      "pty": "1",
-      "temp": 20.0
+    "goyang": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 89,
+        "rain": 2.0,
+        "temp": 16.4,
+        "wind": 1.9
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 17,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 18,
+          "pop": 70,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 19,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 20,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 21,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 22,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 23,
+          "pop": 70,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": null
     },
-    {
-      "hour": 10,
-      "pop": 60,
-      "pcp": 0,
-      "pty": "1",
-      "temp": 19.0
-    },
-    {
-      "hour": 11,
-      "pop": 60,
-      "pcp": 1.0,
-      "pty": "1",
-      "temp": 19.0
+    "ilsan": {
+      "current": {
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 89,
+        "rain": 2.0,
+        "temp": 16.4,
+        "wind": 1.9
+      },
+      "forecast": [
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 17.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 16,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 17,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 18,
+          "pop": 70,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 19,
+          "pop": 60,
+          "pcp": 3.0,
+          "pty": "1",
+          "temp": 16.0
+        },
+        {
+          "hour": 20,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 21,
+          "pop": 60,
+          "pcp": 4.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 22,
+          "pop": 60,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        },
+        {
+          "hour": 23,
+          "pop": 70,
+          "pcp": 5.0,
+          "pty": "1",
+          "temp": 15.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": null
     }
-  ],
-  "fire": {
-    "level": 1,
-    "levelText": "낮음"
-  },
-  "river": null
+  }
 };
