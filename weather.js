@@ -2,322 +2,306 @@
    경기북부 시군별 실시간 기상·산림·하천 위험도. */
 
 window.DDC_WEATHER = {
-  "updatedAt": "2026-05-20 12:15",
+  "updatedAt": "2026-05-20 04:24",
   "regions": {
     "dongducheon": {
       "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 87,
-        "rain": 2.0,
-        "temp": 15.6,
-        "wind": 0.5
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 60,
+        "rain": 0.0,
+        "temp": 19.1,
+        "wind": 0.3
       },
       "forecast": [
         {
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 8,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 20.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
           "hour": 12,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 17.0
+          "temp": 19.0
         },
         {
           "hour": 13,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 17.0
+          "temp": 18.0
         },
         {
           "hour": 14,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 18.0
         },
         {
           "hour": 15,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 16,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 17,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 18,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 19,
-          "pop": 70,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 20,
-          "pop": 70,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 21,
-          "pop": 70,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 22,
-          "pop": 70,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 23,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
+          "temp": 17.0
         }
       ],
       "fire": {
         "level": 1,
         "levelText": "낮음"
       },
-      "river": {
-        "name": "신천 송천교 (동두천)",
-        "wl": 1.28,
-        "status": "정상",
-        "level": 0,
-        "attwl": 3.4,
-        "wrnwl": 4.0,
-        "almwl": 5.0
-      }
+      "river": null
     },
     "uijeongbu": {
       "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 92,
-        "rain": 1.5,
-        "temp": 15.7,
-        "wind": 1.1
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 70,
+        "rain": 0.0,
+        "temp": 18.6,
+        "wind": 0.4
       },
       "forecast": [
         {
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
           "hour": 12,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 18.0
         },
         {
           "hour": 13,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 17.0
         },
         {
           "hour": 14,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 17.0
         },
         {
           "hour": 15,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 16,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 17,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 18,
-          "pop": 60,
-          "pcp": 6.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 19,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 20,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 21,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 22,
-          "pop": 60,
-          "pcp": 6.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 23,
-          "pop": 70,
-          "pcp": 7.0,
-          "pty": "1",
-          "temp": 15.0
+          "temp": 16.0
         }
       ],
       "fire": {
         "level": 1,
         "levelText": "낮음"
       },
-      "river": {
-        "name": "중랑천 신곡교 (의정부)",
-        "wl": 0.38,
-        "status": "정상",
-        "level": 0,
-        "attwl": 2.6,
-        "wrnwl": 4.0,
-        "almwl": 6.0
-      }
+      "river": null
     },
     "yangju": {
       "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 92,
-        "rain": 1.5,
-        "temp": 15.7,
-        "wind": 1.1
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 70,
+        "rain": 0.0,
+        "temp": 18.6,
+        "wind": 0.4
       },
       "forecast": [
         {
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
           "hour": 12,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 18.0
         },
         {
           "hour": 13,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 17.0
         },
         {
           "hour": 14,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 17.0
         },
         {
           "hour": 15,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 3.0,
           "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 16,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 17,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 18,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 19,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 20,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 21,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 22,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 23,
-          "pop": 70,
-          "pcp": 7.0,
-          "pty": "1",
-          "temp": 15.0
+          "temp": 17.0
         }
       ],
       "fire": {
@@ -328,235 +312,71 @@ window.DDC_WEATHER = {
     },
     "pocheon": {
       "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 92,
-        "rain": 1.0,
-        "temp": 15.6,
-        "wind": 0.7
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 73,
+        "rain": 0.0,
+        "temp": 18.0,
+        "wind": 0.1
       },
       "forecast": [
         {
-          "hour": 12,
-          "pop": 60,
-          "pcp": 2.0,
-          "pty": "1",
-          "temp": 16.0
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
         },
         {
-          "hour": 13,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 14,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 15,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 16,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 17,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 18,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 19,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 14.0
-        },
-        {
-          "hour": 20,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 14.0
-        },
-        {
-          "hour": 21,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 14.0
-        },
-        {
-          "hour": 22,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 14.0
-        },
-        {
-          "hour": 23,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 14.0
-        }
-      ],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
-      "river": {
-        "name": "한탄강 용담교 (포천)",
-        "wl": 0.84,
-        "status": "정상",
-        "level": 0,
-        "attwl": 9.5,
-        "wrnwl": 15.0,
-        "almwl": 18.0
-      }
-    },
-    "yeoncheon": {
-      "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 91,
-        "rain": 1.5,
-        "temp": 16.1,
-        "wind": 1.2
-      },
-      "forecast": [
-        {
-          "hour": 12,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
           "temp": 17.0
         },
         {
-          "hour": 13,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
           "temp": 17.0
         },
         {
-          "hour": 14,
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 17.0
+        },
+        {
+          "hour": 8,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 17.0
+        },
+        {
+          "hour": 9,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 18.0
         },
         {
-          "hour": 15,
+          "hour": 10,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 18.0
         },
         {
-          "hour": 16,
+          "hour": 11,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 1.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 18.0
         },
-        {
-          "hour": 17,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 18,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 19,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 20,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 21,
-          "pop": 70,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 22,
-          "pop": 80,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 23,
-          "pop": 70,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        }
-      ],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
-      "river": {
-        "name": "신천 (연천)",
-        "wl": 0.85,
-        "status": "정상",
-        "level": 0,
-        "attwl": 3.5,
-        "wrnwl": 4.8,
-        "almwl": 5.5
-      }
-    },
-    "gapyeong": {
-      "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 88,
-        "rain": 1.5,
-        "temp": 16.8,
-        "wind": 1.5
-      },
-      "forecast": [
         {
           "hour": 12,
           "pop": 60,
@@ -567,16 +387,16 @@ window.DDC_WEATHER = {
         {
           "hour": 13,
           "pop": 60,
-          "pcp": 2.0,
+          "pcp": 1.0,
           "pty": "1",
           "temp": 17.0
         },
         {
           "hour": 14,
           "pop": 60,
-          "pcp": 2.0,
+          "pcp": 1.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 17.0
         },
         {
           "hour": 15,
@@ -584,62 +404,210 @@ window.DDC_WEATHER = {
           "pcp": 2.0,
           "pty": "1",
           "temp": 16.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": null
+    },
+    "yeoncheon": {
+      "current": {
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 81,
+        "rain": 0.0,
+        "temp": 17.3,
+        "wind": 0.2
+      },
+      "forecast": [
+        {
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
         },
         {
-          "hour": 16,
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
+        },
+        {
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
+        },
+        {
+          "hour": 8,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
+        },
+        {
+          "hour": 9,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 10,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 19.0
         },
         {
-          "hour": 17,
+          "hour": 11,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 19.0
         },
         {
-          "hour": 18,
+          "hour": 12,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 1.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 18.0
         },
         {
-          "hour": 19,
+          "hour": 13,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 1.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 18.0
         },
         {
-          "hour": 20,
+          "hour": 14,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 15.0
+          "temp": 17.0
         },
         {
-          "hour": 21,
-          "pop": 70,
-          "pcp": 3.0,
+          "hour": 15,
+          "pop": 60,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 15.0
+          "temp": 17.0
+        }
+      ],
+      "fire": {
+        "level": 1,
+        "levelText": "낮음"
+      },
+      "river": null
+    },
+    "gapyeong": {
+      "current": {
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 73,
+        "rain": 0.0,
+        "temp": 18.4,
+        "wind": 1.7
+      },
+      "forecast": [
+        {
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 17.0
         },
         {
-          "hour": 22,
-          "pop": 70,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 17.0
         },
         {
-          "hour": 23,
-          "pop": 70,
-          "pcp": 4.0,
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 17.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 17.0
+        },
+        {
+          "hour": 8,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
           "pty": "1",
-          "temp": 15.0
+          "temp": 18.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 12,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 14,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 15,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 17.0
         }
       ],
       "fire": {
@@ -650,208 +618,200 @@ window.DDC_WEATHER = {
     },
     "namyangju": {
       "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 86,
-        "rain": 2.0,
-        "temp": 16.4,
-        "wind": 2.0
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 52,
+        "rain": 0.0,
+        "temp": 21.2,
+        "wind": 1.6
       },
       "forecast": [
+        {
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 18.0
+        },
         {
           "hour": 12,
           "pop": 60,
           "pcp": 1.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 18.0
         },
         {
           "hour": 13,
           "pop": 60,
-          "pcp": 2.0,
+          "pcp": 1.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 17.0
         },
         {
           "hour": 14,
           "pop": 60,
           "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 17.0
         },
         {
           "hour": 15,
           "pop": 60,
           "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 16,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 17,
-          "pop": 70,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 18,
-          "pop": 70,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 19,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 20,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 21,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 22,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 23,
-          "pop": 70,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 15.0
+          "temp": 17.0
         }
       ],
       "fire": {
         "level": 1,
         "levelText": "낮음"
       },
-      "river": {
-        "name": "왕숙천 왕숙교 (남양주)",
-        "wl": 0.99,
-        "status": "정상",
-        "level": 0,
-        "attwl": 4.9,
-        "wrnwl": 6.5,
-        "almwl": 8.0
-      }
+      "river": null
     },
     "guri": {
       "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 82,
-        "rain": 2.0,
-        "temp": 16.3,
-        "wind": 4.6
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 48,
+        "rain": 0.0,
+        "temp": 21.7,
+        "wind": 2.0
       },
       "forecast": [
+        {
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 19.0
+        },
         {
           "hour": 12,
           "pop": 60,
           "pcp": 2.0,
           "pty": "1",
-          "temp": 17.0
+          "temp": 19.0
         },
         {
           "hour": 13,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 17.0
+          "temp": 18.0
         },
         {
           "hour": 14,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
+          "temp": 18.0
         },
         {
           "hour": 15,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 16,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 17,
-          "pop": 70,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 18,
-          "pop": 70,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 19,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 20,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 21,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 22,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 23,
-          "pop": 70,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 16.0
+          "temp": 17.0
         }
       ],
       "fire": {
@@ -862,98 +822,98 @@ window.DDC_WEATHER = {
     },
     "paju": {
       "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 92,
-        "rain": 1.5,
-        "temp": 16.3,
-        "wind": 4.0
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 67,
+        "rain": 0.0,
+        "temp": 19.5,
+        "wind": 1.2
       },
       "forecast": [
         {
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
+        },
+        {
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 18.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 19.0
+        },
+        {
+          "hour": 8,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 20.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
           "hour": 12,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
           "temp": 18.0
         },
         {
           "hour": 13,
           "pop": 60,
-          "pcp": 4.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 17.0
+          "temp": 18.0
         },
         {
           "hour": 14,
           "pop": 60,
-          "pcp": 5.0,
+          "pcp": 3.0,
           "pty": "1",
-          "temp": 17.0
+          "temp": 18.0
         },
         {
           "hour": 15,
           "pop": 60,
-          "pcp": 5.0,
+          "pcp": 3.0,
           "pty": "1",
           "temp": 17.0
-        },
-        {
-          "hour": 16,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 17,
-          "pop": 60,
-          "pcp": 6.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 18,
-          "pop": 70,
-          "pcp": 6.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 19,
-          "pop": 60,
-          "pcp": 6.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 20,
-          "pop": 60,
-          "pcp": 6.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 21,
-          "pop": 70,
-          "pcp": 6.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 22,
-          "pop": 70,
-          "pcp": 7.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 23,
-          "pop": 70,
-          "pcp": 6.0,
-          "pty": "1",
-          "temp": 15.0
         }
       ],
       "fire": {
@@ -964,98 +924,98 @@ window.DDC_WEATHER = {
     },
     "goyang": {
       "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 89,
-        "rain": 2.0,
-        "temp": 16.4,
-        "wind": 1.9
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 53,
+        "rain": 0.0,
+        "temp": 22.0,
+        "wind": 1.2
       },
       "forecast": [
         {
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 20.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 20.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
           "hour": 12,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 14,
           "pop": 60,
           "pcp": 2.0,
           "pty": "1",
           "temp": 17.0
         },
         {
-          "hour": 13,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 17.0
-        },
-        {
-          "hour": 14,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 17.0
-        },
-        {
           "hour": 15,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 16,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 17,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 18,
-          "pop": 70,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 19,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 20,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 21,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 22,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 23,
-          "pop": 70,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
+          "temp": 17.0
         }
       ],
       "fire": {
@@ -1066,98 +1026,98 @@ window.DDC_WEATHER = {
     },
     "ilsan": {
       "current": {
-        "pty": "1",
-        "ptyText": "비",
-        "icon": "🌧",
-        "humid": 89,
-        "rain": 2.0,
-        "temp": 16.4,
-        "wind": 1.9
+        "pty": "0",
+        "ptyText": "없음",
+        "icon": "🌤",
+        "humid": 53,
+        "rain": 0.0,
+        "temp": 22.0,
+        "wind": 1.2
       },
       "forecast": [
         {
+          "hour": 4,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 5,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 20.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 20.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 20.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 1.0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
           "hour": 12,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 19.0
+        },
+        {
+          "hour": 13,
+          "pop": 60,
+          "pcp": 2.0,
+          "pty": "1",
+          "temp": 18.0
+        },
+        {
+          "hour": 14,
           "pop": 60,
           "pcp": 2.0,
           "pty": "1",
           "temp": 17.0
         },
         {
-          "hour": 13,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 17.0
-        },
-        {
-          "hour": 14,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 17.0
-        },
-        {
           "hour": 15,
           "pop": 60,
-          "pcp": 3.0,
+          "pcp": 2.0,
           "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 16,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 17,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 18,
-          "pop": 70,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 19,
-          "pop": 60,
-          "pcp": 3.0,
-          "pty": "1",
-          "temp": 16.0
-        },
-        {
-          "hour": 20,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 21,
-          "pop": 60,
-          "pcp": 4.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 22,
-          "pop": 60,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
-        },
-        {
-          "hour": 23,
-          "pop": 70,
-          "pcp": 5.0,
-          "pty": "1",
-          "temp": 15.0
+          "temp": 17.0
         }
       ],
       "fire": {
