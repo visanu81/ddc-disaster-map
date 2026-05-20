@@ -1,0 +1,11 @@
+# Cloudflare Workers (Static Assets) 설정
+# Cloudflare 대시보드의 워커 이름과 일치해야 함
+
+name = "ddc-disaster-map"
+compatibility_date = "2024-09-25"
+compatibility_flags = ["nodejs_compat"]
+
+# 정적 자산을 그대로 서빙 (HTML/JS/CSS/이미지)
+[assets]
+directory = "."
+not_found_handling = "single-page-application"
