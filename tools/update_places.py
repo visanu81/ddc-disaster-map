@@ -52,11 +52,13 @@ def load_env(path=ENV_PATH):
     return env
 
 
+import os as _os
 ENV = load_env()
-SHEET_ID = ENV.get('GOOGLE_SHEET_ID', '')
-NAVER_ID = ENV.get('NAVER_MAP_CLIENT_ID', '')
-NAVER_SECRET = ENV.get('NAVER_MAP_CLIENT_SECRET', '')
-HRFCO_KEY = ENV.get('HRFCO_KEY', '')
+# .env 우선, 없으면 환경변수 (GitHub Actions Secrets)
+SHEET_ID = ENV.get('GOOGLE_SHEET_ID') or _os.environ.get('GOOGLE_SHEET_ID', '')
+NAVER_ID = ENV.get('NAVER_MAP_CLIENT_ID') or _os.environ.get('NAVER_MAP_CLIENT_ID', '')
+NAVER_SECRET = ENV.get('NAVER_MAP_CLIENT_SECRET') or _os.environ.get('NAVER_MAP_CLIENT_SECRET', '')
+HRFCO_KEY = ENV.get('HRFCO_KEY') or _os.environ.get('HRFCO_KEY', '')
 
 
 # ============================================================

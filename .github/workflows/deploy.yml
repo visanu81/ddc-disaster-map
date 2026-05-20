@@ -43,13 +43,23 @@ jobs:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
           HRFCO_KEY: ${{ secrets.HRFCO_KEY }}
         run: python tools/update_weather.py
+        continue-on-error: true
+
+      - name: Run sheet sync (marker data)
+        env:
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          NAVER_MAP_CLIENT_ID: ${{ secrets.NAVER_MAP_CLIENT_ID }}
+          NAVER_MAP_CLIENT_SECRET: ${{ secrets.NAVER_MAP_CLIENT_SECRET }}
+          HRFCO_KEY: ${{ secrets.HRFCO_KEY }}
+        run: python tools/update_places.py
+        continue-on-error: true
 
       - name: Commit and push if changed
         run: |
-          git add weather.js || true
+          git add weather.js data.js || true
           if ! git diff --cached --quiet; then
-            git commit -m "기상 자동 갱신 $(date '+%Y-%m-%d %H:%M UTC')"
+            git commit -m "자동 갱신 $(date '+%Y-%m-%d %H:%M UTC')"
             git push
           else
-            echo "No weather changes to commit."
+            echo "No changes to commit."
           fi
