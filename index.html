@@ -1306,12 +1306,37 @@
   body.role-public .sidebar,
   body.role-public .sidebar-backdrop,
   body.role-public .weather-strip,
-  body.role-public .op-panel,
   body.role-public #sidebar-toggle,
   body.role-public #measure-btn,
   body.role-public #cadastral-toggle,
   body.role-public #op-toggle,
   body.role-public #recenter-btn { display: none !important; }
+
+  /* 일반인 모드: 출동 패널의 시작 화면(새 출동/코드 입력)은 숨김.
+     활성 화면(참여자 + 종료)만 보임 — 위치 송신 상태 확인용 */
+  body.role-public #op-section-start { display: none !important; }
+  body.role-public .op-share-group { display: none !important; }
+  body.role-public #op-self-info { display: none !important; }
+  body.role-public .op-panel.show { display: flex; }
+
+  /* 종료 버튼 라벨 권한별 */
+  .leave-public { display: none; }
+  body.role-public .leave-fire { display: none; }
+  body.role-public .leave-public { display: inline; }
+
+  /* 일반인 활성 화면 상단 안내문구 */
+  .public-rescue-notice {
+    display: none;
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    color: #92400e;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.55;
+    margin-bottom: 4px;
+  }
+  body.role-public .public-rescue-notice { display: block; }
   body.rescue-mode .rescue-banner { /* 더 강조 */
     padding: 14px 20px;
   }
@@ -1501,6 +1526,13 @@
 
   <!-- 출동 활성 화면 -->
   <div class="op-section hidden" id="op-section-active">
+    <!-- 일반인(요구조자) 전용 안내. 소방관에겐 CSS 로 숨김 -->
+    <div class="public-rescue-notice">
+      📡 <strong>내 위치를 동두천소방서에 송신 중</strong>입니다.<br>
+      소방관이 마커를 보고 곧 출동합니다. 가능하면 같은 자리에서 기다려주세요.<br>
+      구조 완료되거나 위치 송신을 중지하려면 아래 <strong>종료</strong> 버튼을 누르세요.
+    </div>
+
     <div class="op-code-box">
       <div>
         <div class="label">출동 코드</div>
@@ -1521,7 +1553,7 @@
       <span id="op-people-count">0</span>
     </div>
     <div class="op-people" id="op-people-list"></div>
-    <button class="op-btn danger" id="op-leave">출동 종료</button>
+    <button class="op-btn danger" id="op-leave"><span class="leave-fire">출동 종료</span><span class="leave-public">위치 송신 종료</span></button>
   </div>
 </div>
 
