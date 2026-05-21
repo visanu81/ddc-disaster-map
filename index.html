@@ -264,7 +264,27 @@
   .w-item strong { font-weight: 800; color: var(--text); }
   .w-item small { color: var(--text-dim); font-size: 11px; margin-left: 2px; }
   .w-sep { color: var(--border); user-select: none; }
-  .w-time { margin-left: auto; font-size: 10.5px; color: var(--text-sub); }
+  .w-time { font-size: 10.5px; color: var(--text-sub); }
+  /* 좌표를 weather strip 우측에 통합 표시 (위치 활성 시) */
+  .w-coord {
+    margin-left: auto;
+    font-feature-settings: 'tnum';
+    font-weight: 800;
+    font-size: 11.5px;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+  }
+  .w-coord:hover { border-color: var(--accent); color: var(--accent); }
+  .w-coord.copied { background: #00d68f; color: white; border-color: transparent; }
+  /* 헤더의 좌표 표시는 weather strip 으로 옮겼으므로 숨김 */
+  .header .coord-display { display: none !important; }
 
   /* 위험도 색상 */
   .w-fire-1 strong, .w-river-0 strong { color: var(--text); }
@@ -2338,12 +2358,38 @@ function renderWeatherStrip() {
       '<small>' + w.river.status + '</small></span>');
   }
 
-  if (parts.length === 0) { strip.classList.add('empty'); return; }
+  // 좌표는 위치 활성 시 우측에 별도 표시 (헤더 자리 안 차지)
+  const coordHtml = userLatLng
+    ? '<span class="w-coord" id="w-coord" title="클릭해서 좌표 복사"><span>📍</span>' +
+      userLatLng.lat.toFixed(5) + ', ' + userLatLng.lng.toFixed(5) + '</span>'
+    : '';
 
-  const html = parts.join('<span class="w-sep">·</span>') +
-    (root.updatedAt ? '<span class="w-time">' + escapeHtml(root.updatedAt.slice(11)) + ' 갱신</span>' : '');
+  if (parts.length === 0 && !coordHtml) { strip.classList.add('empty'); return; }
+
+  const timeHtml = root.updatedAt ? '<span class="w-time">' + escapeHtml(root.updatedAt.slice(11)) + ' 갱신</span>' : '';
+  const html = parts.join('<span class="w-sep">·</span>') + coordHtml + timeHtml;
   strip.innerHTML = html;
   strip.classList.remove('empty');
+
+  // 좌표 클릭 시 복사
+  const cEl = document.getElementById('w-coord');
+  if (cEl) cEl.onclick = copyCoordToClipboard;
+}
+
+function copyCoordToClipboard() {
+  if (!userLatLng) return;
+  const text = userLatLng.lat.toFixed(6) + ', ' + userLatLng.lng.toFixed(6);
+  navigator.clipboard.writeText(text).then(
+    () => {
+      const cEl = document.getElementById('w-coord');
+      if (cEl) {
+        cEl.classList.add('copied');
+        showToast('좌표 복사됨: ' + text + '  (119 신고 시 읽어주세요)');
+        setTimeout(() => cEl.classList.remove('copied'), 1500);
+      }
+    },
+    () => showToast('복사 실패. ' + text)
+  );
 }
 
 /* ----- 장소 목록 접기/펼치기 (헤더 클릭) ----- */
@@ -2502,7 +2548,8 @@ function clearUserLocation() {
   userLatLng = null;
   document.getElementById('locate-btn').classList.remove('active');
   document.getElementById('coord-display').classList.remove('visible');
-  renderPlaceList();  // 거리 배지 제거 + 가까운 순 정렬 해제
+  renderPlaceList();      // 거리 배지 제거 + 가까운 순 정렬 해제
+  renderWeatherStrip();   // weather strip 우측 좌표 표시 제거
 }
 
 function requestUserLocation() {
@@ -2583,6 +2630,7 @@ function setUserLocation(lat, lng, accuracy, opts) {
     map.setZoom(Math.max(map.getZoom(), 14));
   }
   renderPlaceList();         // 사이드바 거리 갱신 (가까운 순 정렬)
+  renderWeatherStrip();      // weather strip 우측에 좌표 표시 갱신
   // 안내선은 여기서 자동으로 안 그림 — '가장 가까운 표지판 안내' 또는 카테고리 변경시에만
 }
 
