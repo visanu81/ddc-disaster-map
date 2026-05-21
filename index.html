@@ -2024,25 +2024,38 @@ const DDC_USER = (function setupLobby() {
 
     form.onsubmit = (e) => {
       e.preventDefault();
-      const user = parseCode(input.value, regionSel.value);
-      if (!user || !user.nickname) {
-        errBox.textContent = '이름을 입력해주세요';
-        errBox.classList.add('show');
-        return;
-      }
-      errBox.classList.remove('show');
+      try {
+        const user = parseCode(input.value, regionSel.value);
+        if (!user || !user.nickname) {
+          errBox.textContent = '이름을 입력해주세요';
+          errBox.classList.add('show');
+          return;
+        }
+        errBox.classList.remove('show');
 
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
-      localStorage.setItem('ddc-last-region', user.region);   // 지역은 항상 기억
-      if (rememberBox.checked) {
-        localStorage.setItem(REMEMBER_KEY, '1');
-        localStorage.setItem(LAST_NAME_KEY, user.rawCode);
-      } else {
-        localStorage.setItem(REMEMBER_KEY, '0');
-        localStorage.removeItem(LAST_NAME_KEY);
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        localStorage.setItem('ddc-last-region', user.region);   // 지역은 항상 기억
+        if (rememberBox.checked) {
+          localStorage.setItem(REMEMBER_KEY, '1');
+          localStorage.setItem(LAST_NAME_KEY, user.rawCode);
+        } else {
+          localStorage.setItem(REMEMBER_KEY, '0');
+          localStorage.removeItem(LAST_NAME_KEY);
+        }
+        applyUser(user);
+      } catch (err) {
+        // 입장 처리 중 에러 발생 — 사용자에게 노출
+        alert('입장 처리 오류:\n' + (err && err.message ? err.message : err) + '\n\n' +
+              '입력값: ' + input.value + '\n' +
+              '지역: ' + regionSel.value);
+        console.error('Lobby submit error:', err);
       }
-      applyUser(user);
     };
+
+    // 진단용: 입장 버튼 클릭이 form submit 으로 도달하는지 확인
+    document.querySelector('.lobby-enter').addEventListener('click', function() {
+      console.log('[lobby] enter clicked. input=', input.value, 'region=', regionSel.value);
+    });
   }
 })();
 
