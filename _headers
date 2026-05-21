@@ -8,12 +8,12 @@
 /weather.js
   Cache-Control: public, max-age=60, must-revalidate
 
-# HTML 은 짧은 캐시
+# HTML 은 캐시 짧게 (코드 갱신 즉시 반영)
 /
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=30, must-revalidate
 
 /index.html
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=30, must-revalidate
 
 # 정적 자산(icon, sw)은 캐시 길게
 /icon.svg
