@@ -1612,15 +1612,30 @@
       font-size: 12px;
     }
 
-    /* 헤더 컴팩트화 */
-    .header { padding: 8px 12px; gap: 6px; flex-wrap: wrap; }
+    /* 헤더 컴팩트화 — 윗줄: 제목+사용자 배지+119+테마 / 아래줄: 좌표 */
+    .header { padding: 8px 12px 6px; gap: 6px; flex-wrap: nowrap; align-items: center; }
     .logo-mark { width: 32px; height: 32px; font-size: 14px; }
     .header-left { gap: 9px; flex: 1; min-width: 0; }
     .title { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .header-right { gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+    .header-right {
+      gap: 6px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      row-gap: 4px;
+      align-items: center;
+    }
     .updated-at { display: none; }
-    .coord-display { padding: 4px 8px; font-size: 10.5px; }
-    .coord-display .ico { display: none; }
+    /* 좌표는 항상 새 줄 (윗줄 자리 안 차지) */
+    .coord-display {
+      padding: 3px 10px;
+      font-size: 11px;
+      flex-basis: 100%;
+      justify-content: center;
+      order: 100;       /* 항상 header-right 의 마지막 = 아래줄 */
+      margin-top: 2px;
+    }
+    .coord-display .ico { display: inline; font-size: 10px; }
     .sos-btn { padding: 5px 10px; font-size: 12px; }
     .theme-btn { width: 30px; height: 30px; font-size: 13px; }
     .user-badge { padding: 4px 8px; font-size: 10.5px; }
