@@ -860,8 +860,14 @@
     50% { box-shadow: 0 0 0 6px rgba(239,68,68,0.15); }
   }
   .ops-card.empty {
-    opacity: 0.5;
+    opacity: 0.4;
     border-style: dashed;
+    background: rgba(255,255,255,0.04);
+  }
+  .ops-card.active {
+    background: rgba(255,255,255,0.13);
+    border-color: rgba(167, 139, 250, 0.55);
+    box-shadow: 0 4px 18px rgba(124, 58, 237, 0.18);
   }
   .ops-card-head {
     display: flex;
@@ -3434,6 +3440,9 @@ function initAdminDashboard() {
   // 헤더 사용자 배지 옆에 대시보드 다시 열기 버튼 (admin 전용) 추가
   ensureAdminReopenButton();
 
+  // 즉시 빈 데이터로 한 번 렌더 (11개 시군 카드 표시 — onValue 첫 응답 대기 시간 없음)
+  renderAdminCards(window._adminLastData || {});
+
   // operations/ 전체 onValue 구독
   if (adminUnsub) { adminUnsub(); adminUnsub = null; }
   const opsRef = ref(db, 'operations');
@@ -3441,6 +3450,10 @@ function initAdminDashboard() {
     const data = snap.val() || {};
     window._adminLastData = data;
     renderAdminCards(data);
+  }, err => {
+    // 권한 등 에러시에도 빈 카드라도 보여줌
+    console.warn('[admin] onValue error:', err);
+    renderAdminCards({});
   });
 }
 
@@ -3494,7 +3507,9 @@ function renderAdminCards(data) {
     if (!isStanding && total === 0) return;
 
     const card = document.createElement('div');
-    card.className = 'ops-card' + (hasVictim ? ' has-victim' : '') + (total === 0 ? ' empty' : '');
+    card.className = 'ops-card' +
+      (hasVictim ? ' has-victim' : '') +
+      (total > 0 ? ' active' : ' empty');
     const regionLabel = codeToRegion[code] || '임시';
     card.innerHTML =
       '<div class="ops-card-head">' +
@@ -3573,7 +3588,10 @@ window.initAdminDashboard = initAdminDashboard;
 // 로비 통과 후 사용자 정보 확정 시점에 관리자면 자동 대시보드
 (function setupAdminAutoOpen() {
   const tryStart = setInterval(() => {
-    if (document.body.classList.contains('lobby-passed') && window.DDC_USER) {
+    // SUPPORTED_REGIONS 도 같이 체크 — 카드 렌더에 필요
+    if (document.body.classList.contains('lobby-passed') &&
+        window.DDC_USER &&
+        window.SUPPORTED_REGIONS) {
       clearInterval(tryStart);
       if (window.DDC_USER.role === 'admin') {
         initAdminDashboard();
