@@ -22,6 +22,7 @@ venv/
 # 에디터
 .vscode/
 .idea/
+.claude/
 *.swp
 
 # OS

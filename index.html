@@ -3551,10 +3551,9 @@ $('op-join-default').onclick = () => {
   joinOp(getRescueOpCode(), $('op-role-input').value);
 };
 
-/* ===== 소방관: 자기 지역 상시방 감시 (자동 참여는 안 함) ===== */
-// 자동 참여를 하면 사이트 방문만으로 GPS 권한 요청·관리자 대시보드 노출됨
-// → 부담. 출동은 명시적 선택으로만.
-// 대신 다른 사람(특히 조난자)이 자기 지역 방에 들어오면 알림 배너로 알려줌.
+/* ===== 소방관: 자기 지역 상시방 감시 (명단·알림용) ===== */
+// 자동 참여는 아래 autoEnterStandingRoom 에서 처리(silent 모드 — admin 제외).
+// 이 watcher 는 다른 사람(특히 조난자)이 들어오면 배너로 알려주는 역할.
 let standingWatchUnsub = null;
 function watchStandingRoom() {
   const user = window.DDC_USER;
@@ -3620,6 +3619,43 @@ function hideDispatchAlert() {
   $('dispatch-alert').classList.remove('show');
 }
 window.startFirefighterWatch = watchStandingRoom;
+
+/* ===== 입장 즉시 자동 참여 — 재난 시작 전이라도 명단·GPS 자동 표시 ===== */
+// 사장님 요청 (2026-05-21): "사람들 들어오면 자동으로 gps 읽어오면 안되?"
+// → 사이트 들어오기만 하면 자기 지역 상시방(코드 SHORT+119)에 조용히 참여 +
+//   본인 GPS 송신 → 관리자 대시보드·소방관 명단에 즉시 표시됨.
+// 자동 참여 규칙:
+//   - admin : 본인 위치 송신 불필요 (대시보드만) → 제외
+//   - fire  : rescuer 역할로 자동 참여
+//   - public: victim 역할로 자동 참여 (산속 조난자 즉시 위치공유 목적)
+// silent:true → GPS 권한 거절해도 alert 안 띄움(부담 최소).
+// 출동 패널은 자동으로 안 열고 헤더 op-status 배지만 표시.
+let autoEnterAttempted = false;
+function autoEnterStandingRoom() {
+  if (autoEnterAttempted) return;
+  const user = window.DDC_USER;
+  if (!user) return;
+  if (user.role === 'admin') { autoEnterAttempted = true; return; }
+  if (OpState.opCode) { autoEnterAttempted = true; return; }   // 이미 참여 중
+  autoEnterAttempted = true;
+  const code = getRescueOpCode();
+  const role = user.role === 'fire' ? 'rescuer' : 'victim';
+  joinOp(code, role, { silent: true });
+}
+window.autoEnterStandingRoom = autoEnterStandingRoom;
+
+// 사용자 확정 시점에 자동 호출 (Firebase 모듈 로드·DDC_USER 준비 둘 다 기다림)
+(function setupAutoEnter() {
+  const tryStart = setInterval(() => {
+    if (document.body.classList.contains('lobby-passed') &&
+        window.DDC_USER &&
+        window.SUPPORTED_REGIONS) {
+      clearInterval(tryStart);
+      autoEnterStandingRoom();
+    }
+  }, 300);
+  setTimeout(() => clearInterval(tryStart), 30000);
+})();
 
 /* ===== 관리자 대시보드 ===== */
 let adminUnsub = null;
