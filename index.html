@@ -757,6 +757,184 @@
     .dispatch-join-btn { padding: 4px 10px; font-size: 11px; }
   }
 
+  /* ===== 관리자 권한 ===== */
+  body.role-admin .user-badge .role.admin {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: white;
+  }
+
+  /* 관리자 대시보드 (풀스크린) */
+  .admin-dashboard {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at top, #1e1b4b 0%, #0a0a1f 70%);
+    z-index: 9995;
+    display: none;
+    flex-direction: column;
+    color: #e6ebff;
+    overflow-y: auto;
+  }
+  body.role-admin .admin-dashboard.show { display: flex; }
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: rgba(124, 58, 237, 0.15);
+    border-bottom: 1px solid rgba(124, 58, 237, 0.35);
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(8px);
+    z-index: 2;
+  }
+  .admin-title { display: flex; align-items: center; gap: 12px; }
+  .admin-title .badge {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 16px rgba(124, 58, 237, 0.5);
+    font-size: 18px;
+  }
+  .admin-title h2 { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+  .admin-title .subtitle { font-size: 11px; color: #a5b4fc; margin-top: 2px; }
+  .admin-actions { display: flex; align-items: center; gap: 10px; }
+  .admin-btn {
+    padding: 7px 13px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    color: #e6ebff;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .admin-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.35); }
+  .admin-btn.primary {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border-color: transparent;
+  }
+
+  .admin-summary {
+    padding: 16px 24px 8px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .admin-stat {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 14px;
+    min-width: 140px;
+  }
+  .admin-stat .label { font-size: 11px; color: #a5b4fc; letter-spacing: 0.4px; }
+  .admin-stat .value { font-size: 22px; font-weight: 900; margin-top: 4px; }
+  .admin-stat.urgent .value { color: #ef4444; }
+
+  .admin-grid {
+    padding: 8px 24px 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .ops-card {
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.15s;
+  }
+  .ops-card:hover { border-color: rgba(167, 139, 250, 0.5); background: rgba(255,255,255,0.1); }
+  .ops-card.has-victim {
+    border-color: rgba(239, 68, 68, 0.7);
+    background: linear-gradient(135deg, rgba(239,68,68,0.18), rgba(255,255,255,0.05));
+    animation: ops-victim-pulse 2s ease-in-out infinite;
+  }
+  @keyframes ops-victim-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    50% { box-shadow: 0 0 0 6px rgba(239,68,68,0.15); }
+  }
+  .ops-card.empty {
+    opacity: 0.5;
+    border-style: dashed;
+  }
+  .ops-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ops-card-code {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 1px;
+  }
+  .ops-card-region {
+    font-size: 11.5px;
+    color: #c4b5fd;
+    background: rgba(124,58,237,0.25);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  .ops-card-counts {
+    display: flex;
+    gap: 14px;
+    font-size: 12.5px;
+  }
+  .ops-card-counts .pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 10px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 8px;
+    min-width: 50px;
+  }
+  .ops-card-counts .pill .num { font-size: 18px; font-weight: 900; }
+  .ops-card-counts .pill .lbl { font-size: 10px; color: #a5b4fc; }
+  .ops-card-counts .pill.victim .num { color: #ef4444; }
+  .ops-card-counts .pill.rescuer .num { color: #f59e0b; }
+  .ops-card-counts .pill.command .num { color: #3b82f6; }
+  .ops-card-time {
+    font-size: 10.5px;
+    color: #a5b4fc;
+    margin-top: -2px;
+  }
+  .ops-card-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .ops-card-actions button {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 7px;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .ops-card-actions .a-map { background: rgba(255,255,255,0.15); color: #e6ebff; }
+  .ops-card-actions .a-join { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; }
+  .ops-card-actions .a-end { background: #dc2626; color: white; }
+  .ops-card-actions button:hover { filter: brightness(1.12); }
+  .ops-card-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  @media (max-width: 720px) {
+    .admin-header { padding: 12px 14px; }
+    .admin-summary { padding: 12px 14px 6px; gap: 8px; }
+    .admin-stat { min-width: 100px; padding: 8px 10px; }
+    .admin-stat .value { font-size: 18px; }
+    .admin-grid { padding: 6px 14px 24px; grid-template-columns: 1fr; gap: 10px; }
+  }
+
   /* 출동 상태 배지 (헤더 아래 또는 weather strip 옆) — 클릭하면 패널 다시 열림 */
   .op-status {
     display: none;
@@ -1565,6 +1743,42 @@
   <strong id="op-status-code">----</strong>
 </button>
 
+<!-- 관리자 대시보드 (풀스크린) -->
+<div class="admin-dashboard" id="admin-dashboard">
+  <div class="admin-header">
+    <div class="admin-title">
+      <div class="badge">🛡</div>
+      <div>
+        <h2>관리자 대시보드</h2>
+        <div class="subtitle">경기북부 11개 시군 출동 통합 모니터링</div>
+      </div>
+    </div>
+    <div class="admin-actions">
+      <button class="admin-btn" id="admin-refresh" title="새로고침">↻ 새로고침</button>
+      <button class="admin-btn primary" id="admin-to-map">🗺 지도 보기</button>
+    </div>
+  </div>
+
+  <div class="admin-summary">
+    <div class="admin-stat">
+      <div class="label">활성 출동</div>
+      <div class="value" id="adm-active-count">0</div>
+    </div>
+    <div class="admin-stat urgent">
+      <div class="label">조난자 신고</div>
+      <div class="value" id="adm-victim-count">0</div>
+    </div>
+    <div class="admin-stat">
+      <div class="label">활동 인원</div>
+      <div class="value" id="adm-total-count">0</div>
+    </div>
+  </div>
+
+  <div class="admin-grid" id="admin-grid">
+    <!-- 동적으로 카드 채워짐 -->
+  </div>
+</div>
+
 <!-- 소방관 모드: 진행 중인 출동 자동 알림 -->
 <div class="dispatch-alert" id="dispatch-alert">
   <span class="ico">🆘</span>
@@ -1726,14 +1940,23 @@ const DDC_USER = (function setupLobby() {
   showLobby();
   return null;   // 로비 통과 전엔 user 없음
 
+  // 관리자 비밀번호 — 사장님 정한 값. 저장소가 Private 이라 plain text 박아도 안전.
+  const ADMIN_PASSWORD = '관리자119';
+
   function parseCode(raw, regionKey) {
     const code = (raw || '').trim();
     if (!code) return null;
     const region = regionKey || 'dongducheon';
+    // 관리자: 정확히 비밀번호와 일치
+    if (code === ADMIN_PASSWORD) {
+      return { role: 'admin', nickname: '관리자', rawCode: code, region };
+    }
+    // 소방관: 끝이 119
     if (/119$/.test(code)) {
       const name = code.replace(/119$/, '').trim();
       return { role: 'fire', nickname: name || '소방관', rawCode: code, region };
     }
+    // 그 외: 일반인
     return { role: 'public', nickname: code, rawCode: code, region };
   }
 
@@ -1756,8 +1979,9 @@ const DDC_USER = (function setupLobby() {
     const nameEl = document.getElementById('user-badge-name');
     badge.classList.add('visible');
     roleEl.className = 'role ' + user.role;
-    roleEl.textContent = user.role === 'fire' ? '소방관' : '일반';
-    nameEl.textContent = user.nickname + (region ? ' · ' + region.short : '');
+    roleEl.textContent = user.role === 'admin' ? '관리자'
+                       : user.role === 'fire' ? '소방관' : '일반';
+    nameEl.textContent = user.nickname + (region && user.role !== 'admin' ? ' · ' + region.short : '');
     badge.onclick = () => {
       if (confirm('로비로 돌아가서 다시 입장할까요?')) {
         sessionStorage.removeItem(SESSION_KEY);
@@ -3187,6 +3411,171 @@ function hideDispatchAlert() {
   $('dispatch-alert').classList.remove('show');
 }
 window.startFirefighterWatch = watchStandingRoom;
+
+/* ===== 관리자 대시보드 ===== */
+let adminUnsub = null;
+
+function initAdminDashboard() {
+  if (!window.DDC_USER || window.DDC_USER.role !== 'admin') return;
+
+  // 관리자 진입 시 자동으로 대시보드 표시
+  const dash = $('admin-dashboard');
+  dash.classList.add('show');
+
+  $('admin-to-map').onclick = () => dash.classList.remove('show');
+  $('admin-refresh').onclick = () => renderAdminCards(window._adminLastData || {});
+
+  // 헤더 사용자 배지 옆에 대시보드 다시 열기 버튼 (admin 전용) 추가
+  ensureAdminReopenButton();
+
+  // operations/ 전체 onValue 구독
+  if (adminUnsub) { adminUnsub(); adminUnsub = null; }
+  const opsRef = ref(db, 'operations');
+  adminUnsub = onValue(opsRef, snap => {
+    const data = snap.val() || {};
+    window._adminLastData = data;
+    renderAdminCards(data);
+  });
+}
+
+function ensureAdminReopenButton() {
+  if ($('admin-reopen')) return;
+  const headerRight = document.querySelector('.header-right');
+  if (!headerRight) return;
+  const btn = document.createElement('button');
+  btn.id = 'admin-reopen';
+  btn.className = 'admin-btn primary';
+  btn.style.cssText = 'padding:5px 10px;font-size:11.5px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;';
+  btn.title = '관리자 대시보드 열기';
+  btn.textContent = '🛡 대시보드';
+  btn.onclick = () => $('admin-dashboard').classList.add('show');
+  headerRight.insertBefore(btn, headerRight.firstChild);
+}
+
+function renderAdminCards(data) {
+  const grid = $('admin-grid');
+  grid.innerHTML = '';
+
+  // 지원 시군의 상시방 코드 + Firebase 에 존재하는 모든 임시 코드 통합
+  const regions = window.SUPPORTED_REGIONS || {};
+  const standingCodes = Object.values(regions).map(r => r.code + '119');
+  const allCodes = new Set([...standingCodes, ...Object.keys(data)]);
+  // 시군의 short 이름 매핑 (코드 → 지역)
+  const codeToRegion = {};
+  for (const [key, r] of Object.entries(regions)) {
+    codeToRegion[r.code + '119'] = r.short;
+  }
+
+  let totalActive = 0, totalVictim = 0, totalParticipants = 0;
+  const sortedCodes = [...allCodes].sort();
+  sortedCodes.forEach(code => {
+    const op = data[code];
+    const participants = (op && op.participants) ? Object.values(op.participants) : [];
+    const isStanding = standingCodes.includes(code);
+
+    const counts = { rescuer: 0, victim: 0, command: 0 };
+    participants.forEach(p => {
+      if (p && counts[p.role] != null) counts[p.role]++;
+    });
+    const total = participants.length;
+    const hasVictim = counts.victim > 0;
+
+    if (total > 0) totalActive++;
+    totalVictim += counts.victim;
+    totalParticipants += total;
+
+    // 비어있는 임시 코드(상시방 외)는 표시 안 함 — 노이즈 방지
+    if (!isStanding && total === 0) return;
+
+    const card = document.createElement('div');
+    card.className = 'ops-card' + (hasVictim ? ' has-victim' : '') + (total === 0 ? ' empty' : '');
+    const regionLabel = codeToRegion[code] || '임시';
+    card.innerHTML =
+      '<div class="ops-card-head">' +
+        '<div class="ops-card-code">' + code + '</div>' +
+        '<span class="ops-card-region">' + regionLabel + '</span>' +
+      '</div>' +
+      '<div class="ops-card-counts">' +
+        '<div class="pill rescuer"><span class="num">' + counts.rescuer + '</span><span class="lbl">구조자</span></div>' +
+        '<div class="pill victim"><span class="num">' + counts.victim + '</span><span class="lbl">조난자</span></div>' +
+        '<div class="pill command"><span class="num">' + counts.command + '</span><span class="lbl">지휘부</span></div>' +
+      '</div>' +
+      (total > 0 ? '<div class="ops-card-time">참여자 ' + total + '명' + (hasVictim ? ' · 🆘 긴급' : '') + '</div>' : '<div class="ops-card-time">대기 중 (참여자 없음)</div>') +
+      '<div class="ops-card-actions">' +
+        '<button class="a-map" data-act="map">🗺 지도</button>' +
+        '<button class="a-join" data-act="join">참여</button>' +
+        '<button class="a-end" data-act="end"' + (total === 0 ? ' disabled' : '') + '>종료</button>' +
+      '</div>';
+
+    card.querySelector('[data-act="map"]').onclick = () => adminViewOnMap(code, participants);
+    card.querySelector('[data-act="join"]').onclick = () => adminJoinOp(code);
+    card.querySelector('[data-act="end"]').onclick = () => adminEndOp(code, total);
+
+    grid.appendChild(card);
+  });
+
+  $('adm-active-count').textContent = totalActive;
+  $('adm-victim-count').textContent = totalVictim;
+  $('adm-total-count').textContent = totalParticipants;
+
+  if (grid.children.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#a5b4fc;font-size:13px;">현재 진행 중인 출동이 없습니다. 🕊</div>';
+  }
+}
+
+function adminViewOnMap(code, participants) {
+  $('admin-dashboard').classList.remove('show');
+  // 참여자 위치 평균으로 지도 중심 이동
+  if (participants.length > 0) {
+    const valid = participants.filter(p => p && typeof p.lat === 'number' && p.lat !== 0);
+    if (valid.length > 0 && window.map) {
+      const lat = valid.reduce((s, p) => s + p.lat, 0) / valid.length;
+      const lng = valid.reduce((s, p) => s + p.lng, 0) / valid.length;
+      window.map.setCenter(new naver.maps.LatLng(lat, lng));
+      window.map.setZoom(15);
+    }
+  }
+  // 그 방에 자동 참여 안 함. 별도 admin role 로 patrol 가능
+  // 임시 코드일 경우 사용자에게 알림
+  alert('출동 ' + code + ' 위치로 이동했습니다.\n참여자들 마커를 보려면 [참여] 를 누르세요.');
+}
+
+function adminJoinOp(code) {
+  $('admin-dashboard').classList.remove('show');
+  $('op-panel').classList.add('show');
+  joinOp(code, 'command');   // 관리자는 지휘부 역할로 참여
+}
+
+async function adminEndOp(code, total) {
+  if (total > 0) {
+    if (!confirm('출동 ' + code + ' 을(를) 강제 종료할까요?\n참여 중인 ' + total + '명의 위치 데이터가 모두 삭제됩니다.')) return;
+  } else {
+    if (!confirm('빈 출동 ' + code + ' 데이터를 정리할까요?')) return;
+  }
+  try {
+    await remove(ref(db, 'operations/' + code));
+    // 본인이 그 방 참여 중이었으면 자기 상태도 정리
+    if (OpState.opCode === code) leaveOp();
+  } catch (e) {
+    alert('종료 실패: ' + (e && e.message));
+  }
+}
+
+// 관리자 모드 진입 — applyUser 직후 또는 페이지 로드 후 호출
+window.initAdminDashboard = initAdminDashboard;
+
+// 로비 통과 후 사용자 정보 확정 시점에 관리자면 자동 대시보드
+(function setupAdminAutoOpen() {
+  const tryStart = setInterval(() => {
+    if (document.body.classList.contains('lobby-passed') && window.DDC_USER) {
+      clearInterval(tryStart);
+      if (window.DDC_USER.role === 'admin') {
+        initAdminDashboard();
+      }
+    }
+  }, 300);
+  setTimeout(() => clearInterval(tryStart), 30000);
+})();
 
 // 페이지 로드 후 + 사용자 정보 확정 후 호출
 if (document.body.classList.contains('lobby-passed') && window.DDC_USER && window.DDC_USER.role === 'fire') {
