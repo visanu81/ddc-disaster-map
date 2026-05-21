@@ -3475,30 +3475,42 @@ $('op-join-default').onclick = () => {
   joinOp(getRescueOpCode(), $('op-role-input').value);
 };
 
-/* ===== 소방관 자동 알림 — 자기 지역 상시방 감시 ===== */
-let standingWatchUnsub = null;
+/* ===== 소방관: 관내 진입 시 자동으로 상시방 참여 ===== */
 function watchStandingRoom() {
-  // 소방관 모드만, 이미 출동 참여 중이면 알림 X
+  // 소방관 모드만. 일반인·조난자는 별도 흐름(구조위치송신).
   const user = window.DDC_USER;
   if (!user || user.role !== 'fire') return;
-  if (standingWatchUnsub) { standingWatchUnsub(); standingWatchUnsub = null; }
+
+  // 이미 다른 방 참여 중이면 그대로 둠 (사용자 명시적 선택 존중)
+  if (OpState.opCode) return;
 
   const code = getRescueOpCode();
+  // 약간 지연 — initMap·Firebase SDK·DDC_USER 다 안정된 후
+  setTimeout(() => {
+    if (OpState.opCode) return;   // 사이에 다른 방 들어갔으면 패스
+    joinOp(code, 'rescuer', { silent: true }).then(() => {
+      hideDispatchAlert();   // 본인 참여했으니 알림 배너 더는 필요 없음
+    }).catch(err => {
+      console.warn('[standing] auto-join failed:', err);
+    });
+  }, 1500);
+}
+
+// 조난자 등 다른 사람이 같은 방에 들어왔을 때도 알림 (기존 dispatch-alert 보존)
+// — 본인이 이미 참여 중이면 알림 자동 숨김
+function listenForVictims(code) {
   const partsRef = ref(db, `operations/${code}/participants`);
-  standingWatchUnsub = onValue(partsRef, snap => {
+  onValue(partsRef, snap => {
     const all = snap.val() || {};
-    // 자기가 이미 참여 중이면 알림 안 띄움
-    if (OpState.opCode === code) {
-      hideDispatchAlert();
-      return;
-    }
+    // 본인 외 참여자
     const others = Object.entries(all).filter(([uid]) => uid !== OpState.uid);
-    if (others.length === 0) {
+    if (others.length === 0 || OpState.opCode === code) {
       hideDispatchAlert();
       return;
     }
     const hasVictim = others.some(([_, p]) => p && p.role === 'victim');
-    showDispatchAlert(others.length, hasVictim, code);
+    if (hasVictim) showDispatchAlert(others.length, true, code);
+    else hideDispatchAlert();
   });
 }
 
@@ -3761,7 +3773,8 @@ window.joinRescueOp = function() {
 };
 
 /* ===== 출동 참여 ===== */
-async function joinOp(code, role) {
+async function joinOp(code, role, opts) {
+  opts = opts || {};
   OpState.opCode = code;
   OpState.uid = randomUid();
   OpState.role = role;
@@ -3804,8 +3817,8 @@ async function joinOp(code, role) {
   $('op-status').classList.add('show');
   $('op-self-role').textContent = ROLE_LABEL[role];
 
-  // 위치 송신 시작
-  startWatchingPosition(myRef);
+  // 위치 송신 시작 (자동 참여면 silent — 거절해도 alert 없음)
+  startWatchingPosition(myRef, !!opts.silent);
 
   // 다른 참여자 구독
   subscribeParticipants(code);
@@ -3845,9 +3858,9 @@ function leaveOp() {
 }
 
 /* ===== 위치 송신 ===== */
-function startWatchingPosition(myRef) {
+function startWatchingPosition(myRef, silent) {
   if (!navigator.geolocation) {
-    alert('이 브라우저는 GPS 를 지원하지 않습니다.');
+    if (!silent) alert('이 브라우저는 GPS 를 지원하지 않습니다.');
     return;
   }
   OpState.watchId = navigator.geolocation.watchPosition(
@@ -3857,15 +3870,15 @@ function startWatchingPosition(myRef) {
         lat, lng, accuracy: accuracy || 0,
         updatedAt: serverTimestamp(),
       }).catch(() => {});
-      // 본인 위치 마커만 갱신 (지도 중심 강제 이동 X — 동료/조난자 보려면 사용자가 지도 조작 가능해야)
+      // 본인 위치 마커만 갱신 (지도 중심 강제 이동 X)
       if (typeof window.setUserLocation === 'function') {
         window.setUserLocation(lat, lng, accuracy, { recenter: false });
       }
     },
     err => {
       console.warn('watchPosition error', err);
-      // 첫 실패 시에만 안내
-      if (err.code === 1) {
+      // 자동 참여(silent=true) 일 땐 alert 안 띄움 — 사용자 부담 최소화
+      if (err.code === 1 && !silent) {
         alert('위치 권한을 허용해야 다른 참여자에게 내 위치가 보입니다.');
       }
     },
