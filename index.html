@@ -1940,17 +1940,21 @@ const DDC_USER = (function setupLobby() {
   showLobby();
   return null;   // 로비 통과 전엔 user 없음
 
-  // 관리자 비밀번호 — 사장님 정한 값. 저장소가 Private 이라 plain text 박아도 안전.
-  const ADMIN_PASSWORD = '관리자119';
-  const ADMIN_PASSWORD_NFC = ADMIN_PASSWORD.normalize('NFC');
+  // 관리자 비밀번호 — 여러 형태 허용 (한글 입력 안 되는 환경 대비)
+  const ADMIN_PASSWORDS = [
+    '관리자119', '관리자 119',         // 한글 + 띄어쓰기 허용
+    'admin119', 'admin', 'ADMIN119',  // 영문 fallback
+  ].map(s => s.normalize('NFC').toLowerCase());
 
   function parseCode(raw, regionKey) {
-    // 한글 입력 시 자소 분리(NFD) 문제 방지 — NFC 로 통일 후 비교
-    const code = (raw || '').trim().normalize('NFC');
+    // 한글 입력 시 자소 분리(NFD) 문제 방지 — NFC + lowercase 로 통일 후 비교
+    const raw1 = (raw || '').trim();
+    const code = raw1.normalize('NFC');
+    const codeNormalized = code.toLowerCase();
     if (!code) return null;
     const region = regionKey || 'dongducheon';
-    // 관리자: 정확히 비밀번호와 일치
-    if (code === ADMIN_PASSWORD_NFC) {
+    // 관리자: 위 ADMIN_PASSWORDS 중 하나와 일치
+    if (ADMIN_PASSWORDS.includes(codeNormalized)) {
       return { role: 'admin', nickname: '관리자', rawCode: code, region };
     }
     // 소방관: 끝이 119 (단, 숫자만으로 된 코드는 제외)
