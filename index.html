@@ -1006,6 +1006,12 @@
   .ops-card-people .person.command::before { background: #3b82f6; }
   .ops-card-people .person.gps-off { opacity: 0.5; }
   .ops-card-people .person.gps-off::after { content: ' 📡✕'; font-size: 9px; opacity: 0.7; }
+  .ops-card-people .people-empty {
+    font-size: 10.5px;
+    color: rgba(255,255,255,0.45);
+    padding: 2px 0;
+    font-style: italic;
+  }
   .ops-card-actions {
     display: flex;
     gap: 6px;
@@ -3703,20 +3709,19 @@ function renderAdminCards(data) {
     // 비어있는 임시 코드(상시방 외)는 표시 안 함 — 노이즈 방지
     if (!isStanding && total === 0) return;
 
-    // 참여자 명단 칩 HTML
-    const peopleHtml = participants.length > 0
-      ? '<div class="ops-card-people">' +
-          participants.map(p => {
-            const role = (p && p.role) || 'rescuer';
-            const rawName = (p && p.nickname) || '익명';
-            // joinOp 에서 '한경승 (구조자)' 형태로 저장되므로 괄호 부분 제거
-            const cleanName = rawName.replace(/\s*\([^)]+\)\s*$/, '').trim() || '익명';
-            const gpsOff = !p || typeof p.lat !== 'number' || (p.lat === 0 && p.lng === 0);
-            const cls = 'person ' + role + (gpsOff ? ' gps-off' : '');
-            return '<span class="' + cls + '" title="' + (gpsOff ? 'GPS 위치 미전송' : 'GPS 전송 중') + '">' + escapePersonName(cleanName) + '</span>';
-          }).join('') +
-        '</div>'
-      : '';
+    // 참여자 명단 칩 HTML — 비어있어도 영역 표시 (관리자가 항상 인지)
+    const peopleInner = participants.length > 0
+      ? participants.map(p => {
+          const role = (p && p.role) || 'rescuer';
+          const rawName = (p && p.nickname) || '익명';
+          // joinOp 에서 '한경승 (구조자)' 형태로 저장되므로 괄호 부분 제거
+          const cleanName = rawName.replace(/\s*\([^)]+\)\s*$/, '').trim() || '익명';
+          const gpsOff = !p || typeof p.lat !== 'number' || (p.lat === 0 && p.lng === 0);
+          const cls = 'person ' + role + (gpsOff ? ' gps-off' : '');
+          return '<span class="' + cls + '" title="' + (gpsOff ? 'GPS 위치 미전송' : 'GPS 전송 중') + '">' + escapePersonName(cleanName) + '</span>';
+        }).join('')
+      : '<span class="people-empty">대기 중인 접속자 없음</span>';
+    const peopleHtml = '<div class="ops-card-people">' + peopleInner + '</div>';
 
     const card = document.createElement('div');
     card.className = 'ops-card' +
