@@ -637,6 +637,49 @@
   }
   .op-code-share:hover { background: rgba(255,255,255,0.4); }
 
+  /* 자기 지역 상시방 접속자 미리보기 (참여 안 하고도 봄) */
+  .standing-preview {
+    padding: 8px 10px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 11.5px;
+    margin: 2px 0;
+  }
+  .srp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    font-size: 10.5px;
+    letter-spacing: 0.3px;
+  }
+  .srp-head > :first-child strong, #srp-region { color: var(--text); font-weight: 700; }
+  .srp-count { color: var(--text); font-weight: 800; font-size: 11px; }
+  .srp-list { display: flex; flex-wrap: wrap; gap: 4px; min-height: 18px; }
+  .srp-empty { color: var(--text-sub); font-size: 10.5px; padding: 1px 0; }
+  .srp-list .chip {
+    font-size: 10.5px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-weight: 600;
+  }
+  .srp-list .chip::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+  }
+  .srp-list .chip.rescuer { color: #f59e0b; }
+  .srp-list .chip.rescuer::before { background: #f59e0b; }
+  .srp-list .chip.victim { color: #dc2626; box-shadow: 0 0 0 1px rgba(239,68,68,0.3); }
+  .srp-list .chip.victim::before { background: #dc2626; }
+  .srp-list .chip.command { color: #3b82f6; }
+  .srp-list .chip.command::before { background: #3b82f6; }
+
   /* 공유 버튼 그룹 (조난자/동료) */
   .op-share-group {
     display: flex;
@@ -1762,6 +1805,18 @@
   <div class="op-section" id="op-section-start">
     <h3>🆘 출동 위치 공유</h3>
     <div class="hint">동료·조난자와 실시간 위치를 공유해 같이 수색합니다.<br>익명, 출동 종료시 자동 삭제.</div>
+
+    <!-- 자기 지역 상시방 현재 접속자 (참여 안 해도 볼 수만 있음) -->
+    <div class="standing-preview" id="standing-preview">
+      <div class="srp-head">
+        <span><span id="srp-region">동두천</span> 상시방 접속자</span>
+        <span class="srp-count" id="srp-count">0명</span>
+      </div>
+      <div class="srp-list" id="srp-list">
+        <div class="srp-empty">현재 대기자 없음</div>
+      </div>
+    </div>
+
     <button class="op-btn primary" id="op-create">새 출동 시작</button>
     <button class="op-btn" id="op-join-default">상시방 참여 (<span id="op-default-code">DDC119</span>)</button>
     <div class="op-divider">또는</div>
@@ -3504,6 +3559,8 @@ function watchStandingRoom() {
   const partsRef = ref(db, `operations/${code}/participants`);
   standingWatchUnsub = onValue(partsRef, snap => {
     const all = snap.val() || {};
+    // 출동 패널 시작 화면의 '현재 접속자' 명단 갱신 (본인 참여 여부 무관)
+    updateStandingPreview(all);
     // 본인이 이미 참여 중이면 알림 안 띄움
     if (OpState.opCode === code) { hideDispatchAlert(); return; }
     // 본인 외 참여자
@@ -3512,6 +3569,34 @@ function watchStandingRoom() {
     const hasVictim = others.some(([_, p]) => p && p.role === 'victim');
     showDispatchAlert(others.length, hasVictim, code);
   });
+
+  // 지역 표시 갱신
+  const u = window.DDC_USER;
+  const r = (u && u.region && window.SUPPORTED_REGIONS && window.SUPPORTED_REGIONS[u.region])
+    || (window.SUPPORTED_REGIONS && window.SUPPORTED_REGIONS.dongducheon);
+  const regionEl = document.getElementById('srp-region');
+  if (regionEl && r) regionEl.textContent = r.short;
+}
+
+function updateStandingPreview(all) {
+  const list = document.getElementById('srp-list');
+  const count = document.getElementById('srp-count');
+  if (!list || !count) return;
+
+  const entries = Object.values(all || {});
+  count.textContent = entries.length + '명';
+
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="srp-empty">현재 대기자 없음</div>';
+    return;
+  }
+
+  list.innerHTML = entries.map(p => {
+    const role = (p && p.role) || 'rescuer';
+    const raw = (p && p.nickname) || '익명';
+    const name = raw.replace(/\s*\([^)]+\)\s*$/, '').trim() || '익명';
+    return '<span class="chip ' + role + '">' + escapePersonName(name) + '</span>';
+  }).join('');
 }
 
 function showDispatchAlert(count, hasVictim, code) {
