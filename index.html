@@ -975,6 +975,14 @@
     color: #a5b4fc;
     margin-top: -2px;
   }
+  /* 명단 섹션 라벨 (재난 참여자 / 현재 접속자) */
+  .ops-card-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.02em;
+    margin-top: 6px;
+  }
   /* 참여자 명단 칩 */
   .ops-card-people {
     display: flex;
@@ -1904,6 +1912,10 @@
     <div class="admin-stat">
       <div class="label">활동 인원</div>
       <div class="value" id="adm-total-count">0</div>
+    </div>
+    <div class="admin-stat">
+      <div class="label">현재 접속자</div>
+      <div class="value" id="adm-presence-count">0</div>
     </div>
   </div>
 
@@ -3551,28 +3563,41 @@ $('op-join-default').onclick = () => {
   joinOp(getRescueOpCode(), $('op-role-input').value);
 };
 
-/* ===== 소방관: 자기 지역 상시방 감시 (명단·알림용) ===== */
-// 자동 참여는 아래 autoEnterStandingRoom 에서 처리(silent 모드 — admin 제외).
-// 이 watcher 는 다른 사람(특히 조난자)이 들어오면 배너로 알려주는 역할.
+/* ===== 소방관: 자기 지역 방 감시 (접속자 명단 + 재난 발생 알림) ===== */
+// - 접속자 명단(srp-list): presence/{지역코드}/ 데이터로 채움 (재난 무관, 들어오기만 하면 뜸).
+// - 알림 배너: operations/{지역코드}/participants/ 에 victim 이 새로 생기면 → 재난 발생 알림.
+//   (관리자가 명시적으로 재난 시작했거나 조난자가 위치송신 누른 경우)
 let standingWatchUnsub = null;
+let standingPresenceUnsub = null;
 function watchStandingRoom() {
   const user = window.DDC_USER;
   if (!user || user.role !== 'fire') return;
   if (standingWatchUnsub) { standingWatchUnsub(); standingWatchUnsub = null; }
+  if (standingPresenceUnsub) { standingPresenceUnsub(); standingPresenceUnsub = null; }
 
   const code = getRescueOpCode();
+
+  // (1) 접속자 명단: presence 데이터 구독
+  const presRef = ref(db, `presence/${code}`);
+  standingPresenceUnsub = onValue(presRef, snap => {
+    const all = snap.val() || {};
+    updateStandingPreview(all);
+  }, err => {
+    console.warn('[presence] onValue error:', err);
+    updateStandingPreview({});
+  });
+
+  // (2) 재난 알림: operations victim 추가 시
   const partsRef = ref(db, `operations/${code}/participants`);
   standingWatchUnsub = onValue(partsRef, snap => {
     const all = snap.val() || {};
-    // 출동 패널 시작 화면의 '현재 접속자' 명단 갱신 (본인 참여 여부 무관)
-    updateStandingPreview(all);
-    // 본인이 이미 참여 중이면 알림 안 띄움
-    if (OpState.opCode === code) { hideDispatchAlert(); return; }
-    // 본인 외 참여자
+    if (OpState.opCode === code) { hideDispatchAlert(); return; }   // 본인 이미 참여 중
     const others = Object.entries(all).filter(([uid]) => uid !== OpState.uid);
     if (others.length === 0) { hideDispatchAlert(); return; }
     const hasVictim = others.some(([_, p]) => p && p.role === 'victim');
-    showDispatchAlert(others.length, hasVictim, code);
+    // 재난 알림은 조난자(victim)가 들어왔을 때만 — 같은 소방관끼리는 알림 X
+    if (hasVictim) showDispatchAlert(others.length, true, code);
+    else hideDispatchAlert();
   });
 
   // 지역 표시 갱신
@@ -3583,6 +3608,8 @@ function watchStandingRoom() {
   if (regionEl && r) regionEl.textContent = r.short;
 }
 
+// presence 데이터(역할=fire/public/admin)로 명단 채움.
+// role 매핑: fire → rescuer 칩(주황), public → victim 칩(빨강) 시각.
 function updateStandingPreview(all) {
   const list = document.getElementById('srp-list');
   const count = document.getElementById('srp-count');
@@ -3592,15 +3619,15 @@ function updateStandingPreview(all) {
   count.textContent = entries.length + '명';
 
   if (entries.length === 0) {
-    list.innerHTML = '<div class="srp-empty">현재 대기자 없음</div>';
+    list.innerHTML = '<div class="srp-empty">현재 접속자 없음</div>';
     return;
   }
 
   list.innerHTML = entries.map(p => {
-    const role = (p && p.role) || 'rescuer';
-    const raw = (p && p.nickname) || '익명';
-    const name = raw.replace(/\s*\([^)]+\)\s*$/, '').trim() || '익명';
-    return '<span class="chip ' + role + '">' + escapePersonName(name) + '</span>';
+    const userRole = (p && p.role) || 'public';
+    const chipRole = userRole === 'fire' ? 'rescuer' : userRole === 'admin' ? 'command' : 'victim';
+    const name = (p && p.nickname) || '익명';
+    return '<span class="chip ' + chipRole + '">' + escapePersonName(name) + '</span>';
   }).join('');
 }
 
@@ -3620,38 +3647,47 @@ function hideDispatchAlert() {
 }
 window.startFirefighterWatch = watchStandingRoom;
 
-/* ===== 입장 즉시 자동 참여 — 재난 시작 전이라도 명단·GPS 자동 표시 ===== */
-// 사장님 요청 (2026-05-21): "사람들 들어오면 자동으로 gps 읽어오면 안되?"
-// → 사이트 들어오기만 하면 자기 지역 상시방(코드 SHORT+119)에 조용히 참여 +
-//   본인 GPS 송신 → 관리자 대시보드·소방관 명단에 즉시 표시됨.
-// 자동 참여 규칙:
-//   - admin : 본인 위치 송신 불필요 (대시보드만) → 제외
-//   - fire  : rescuer 역할로 자동 참여
-//   - public: victim 역할로 자동 참여 (산속 조난자 즉시 위치공유 목적)
-// silent:true → GPS 권한 거절해도 alert 안 띄움(부담 최소).
-// 출동 패널은 자동으로 안 열고 헤더 op-status 배지만 표시.
-let autoEnterAttempted = false;
-function autoEnterStandingRoom() {
-  if (autoEnterAttempted) return;
+/* ===== 입장 즉시 presence 등록 — 단순 접속자 표시 (GPS 안 함) ===== */
+// 사장님 요청 (2026-05-21): "재난을 시작하지 않아도 현재 각 관서방에 참여한 사람이 보이게"
+// → 재난 참여(GPS 송신)와 단순 접속을 분리.
+// presence/{지역코드}/{uid} 에 { nickname, role, joinedAt } 만 등록.
+// 관리자(admin)는 본인 명단 표시 불필요 → 제외.
+// 재난 시작·참여는 사용자가 명시적으로 출동 패널에서 누를 때만 (joinOp).
+const PresenceState = { uid: null, regionCode: null, ref: null };
+
+async function enterPresence() {
   const user = window.DDC_USER;
   if (!user) return;
-  if (user.role === 'admin') { autoEnterAttempted = true; return; }
-  if (OpState.opCode) { autoEnterAttempted = true; return; }   // 이미 참여 중
-  autoEnterAttempted = true;
-  const code = getRescueOpCode();
-  const role = user.role === 'fire' ? 'rescuer' : 'victim';
-  joinOp(code, role, { silent: true });
+  if (user.role === 'admin') return;
+  if (PresenceState.uid) return;   // 이미 등록됨
+
+  PresenceState.uid = randomUid();
+  PresenceState.regionCode = getRescueOpCode();
+  PresenceState.ref = ref(db, `presence/${PresenceState.regionCode}/${PresenceState.uid}`);
+
+  try {
+    await set(PresenceState.ref, {
+      nickname: user.nickname,
+      role: user.role,                 // 'fire' | 'public'
+      joinedAt: serverTimestamp(),
+    });
+    onDisconnect(PresenceState.ref).remove();
+  } catch (e) {
+    console.warn('presence set 실패', e);
+    PresenceState.uid = null;
+    PresenceState.ref = null;
+  }
 }
-window.autoEnterStandingRoom = autoEnterStandingRoom;
+window.enterPresence = enterPresence;
 
 // 사용자 확정 시점에 자동 호출 (Firebase 모듈 로드·DDC_USER 준비 둘 다 기다림)
-(function setupAutoEnter() {
+(function setupPresence() {
   const tryStart = setInterval(() => {
     if (document.body.classList.contains('lobby-passed') &&
         window.DDC_USER &&
         window.SUPPORTED_REGIONS) {
       clearInterval(tryStart);
-      autoEnterStandingRoom();
+      enterPresence();
     }
   }, 300);
   setTimeout(() => clearInterval(tryStart), 30000);
@@ -3659,6 +3695,7 @@ window.autoEnterStandingRoom = autoEnterStandingRoom;
 
 /* ===== 관리자 대시보드 ===== */
 let adminUnsub = null;
+let adminPresenceUnsub = null;
 
 function initAdminDashboard() {
   if (!window.DDC_USER || window.DDC_USER.role !== 'admin') return;
@@ -3674,19 +3711,28 @@ function initAdminDashboard() {
   ensureAdminReopenButton();
 
   // 즉시 빈 데이터로 한 번 렌더 (11개 시군 카드 표시 — onValue 첫 응답 대기 시간 없음)
-  renderAdminCards(window._adminLastData || {});
+  renderAdminCards();
 
-  // operations/ 전체 onValue 구독
+  // operations/ 전체 onValue 구독 (재난 참여자 데이터)
   if (adminUnsub) { adminUnsub(); adminUnsub = null; }
   const opsRef = ref(db, 'operations');
   adminUnsub = onValue(opsRef, snap => {
-    const data = snap.val() || {};
-    window._adminLastData = data;
-    renderAdminCards(data);
+    window._adminLastData = snap.val() || {};
+    renderAdminCards();
   }, err => {
-    // 권한 등 에러시에도 빈 카드라도 보여줌
-    console.warn('[admin] onValue error:', err);
-    renderAdminCards({});
+    console.warn('[admin] operations onValue error:', err);
+    renderAdminCards();
+  });
+
+  // presence/ 전체 onValue 구독 (단순 접속자 데이터, 재난 무관)
+  if (adminPresenceUnsub) { adminPresenceUnsub(); adminPresenceUnsub = null; }
+  const presRef = ref(db, 'presence');
+  adminPresenceUnsub = onValue(presRef, snap => {
+    window._adminPresenceData = snap.val() || {};
+    renderAdminCards();
+  }, err => {
+    console.warn('[admin] presence onValue error:', err);
+    renderAdminCards();
   });
 }
 
@@ -3710,25 +3756,30 @@ function escapePersonName(s) {
   }[c]));
 }
 
-function renderAdminCards(data) {
+function renderAdminCards() {
   const grid = $('admin-grid');
   grid.innerHTML = '';
+
+  // 두 데이터 소스 통합
+  const opsData = window._adminLastData || {};
+  const presData = window._adminPresenceData || {};
 
   // 지원 시군의 상시방 코드 + Firebase 에 존재하는 모든 임시 코드 통합
   const regions = window.SUPPORTED_REGIONS || {};
   const standingCodes = Object.values(regions).map(r => r.code + '119');
-  const allCodes = new Set([...standingCodes, ...Object.keys(data)]);
+  const allCodes = new Set([...standingCodes, ...Object.keys(opsData), ...Object.keys(presData)]);
   // 시군의 short 이름 매핑 (코드 → 지역)
   const codeToRegion = {};
   for (const [key, r] of Object.entries(regions)) {
     codeToRegion[r.code + '119'] = r.short;
   }
 
-  let totalActive = 0, totalVictim = 0, totalParticipants = 0;
+  let totalActive = 0, totalVictim = 0, totalParticipants = 0, totalPresence = 0;
   const sortedCodes = [...allCodes].sort();
   sortedCodes.forEach(code => {
-    const op = data[code];
+    const op = opsData[code];
     const participants = (op && op.participants) ? Object.values(op.participants) : [];
+    const presList = presData[code] ? Object.values(presData[code]) : [];
     const isStanding = standingCodes.includes(code);
 
     const counts = { rescuer: 0, victim: 0, command: 0 };
@@ -3736,33 +3787,50 @@ function renderAdminCards(data) {
       if (p && counts[p.role] != null) counts[p.role]++;
     });
     const total = participants.length;
+    const presTotal = presList.length;
     const hasVictim = counts.victim > 0;
 
     if (total > 0) totalActive++;
     totalVictim += counts.victim;
     totalParticipants += total;
+    totalPresence += presTotal;
 
     // 비어있는 임시 코드(상시방 외)는 표시 안 함 — 노이즈 방지
-    if (!isStanding && total === 0) return;
+    if (!isStanding && total === 0 && presTotal === 0) return;
 
-    // 참여자 명단 칩 HTML — 비어있어도 영역 표시 (관리자가 항상 인지)
-    const peopleInner = participants.length > 0
-      ? participants.map(p => {
-          const role = (p && p.role) || 'rescuer';
-          const rawName = (p && p.nickname) || '익명';
-          // joinOp 에서 '한경승 (구조자)' 형태로 저장되므로 괄호 부분 제거
-          const cleanName = rawName.replace(/\s*\([^)]+\)\s*$/, '').trim() || '익명';
-          const gpsOff = !p || typeof p.lat !== 'number' || (p.lat === 0 && p.lng === 0);
-          const cls = 'person ' + role + (gpsOff ? ' gps-off' : '');
-          return '<span class="' + cls + '" title="' + (gpsOff ? 'GPS 위치 미전송' : 'GPS 전송 중') + '">' + escapePersonName(cleanName) + '</span>';
+    // 1) 재난 참여자 명단 (operations) — 있을 때만 표시
+    let rescueBlockHtml = '';
+    if (total > 0) {
+      const rescueChips = participants.map(p => {
+        const role = (p && p.role) || 'rescuer';
+        const rawName = (p && p.nickname) || '익명';
+        const cleanName = rawName.replace(/\s*\([^)]+\)\s*$/, '').trim() || '익명';
+        const gpsOff = !p || typeof p.lat !== 'number' || (p.lat === 0 && p.lng === 0);
+        const cls = 'person ' + role + (gpsOff ? ' gps-off' : '');
+        return '<span class="' + cls + '" title="' + (gpsOff ? 'GPS 위치 미전송' : 'GPS 전송 중') + '">' + escapePersonName(cleanName) + '</span>';
+      }).join('');
+      rescueBlockHtml =
+        '<div class="ops-card-section-label">🚨 재난 참여자 (' + total + ')</div>' +
+        '<div class="ops-card-people">' + rescueChips + '</div>';
+    }
+
+    // 2) 단순 접속자 명단 (presence) — 항상 표시
+    const presChips = presList.length > 0
+      ? presList.map(p => {
+          const userRole = (p && p.role) || 'public';
+          const chipRole = userRole === 'fire' ? 'rescuer' : 'victim';
+          const name = (p && p.nickname) || '익명';
+          return '<span class="person ' + chipRole + '">' + escapePersonName(name) + '</span>';
         }).join('')
-      : '<span class="people-empty">대기 중인 접속자 없음</span>';
-    const peopleHtml = '<div class="ops-card-people">' + peopleInner + '</div>';
+      : '<span class="people-empty">접속자 없음</span>';
+    const presBlockHtml =
+      '<div class="ops-card-section-label">👥 현재 접속자 (' + presTotal + ')</div>' +
+      '<div class="ops-card-people">' + presChips + '</div>';
 
     const card = document.createElement('div');
     card.className = 'ops-card' +
       (hasVictim ? ' has-victim' : '') +
-      (total > 0 ? ' active' : ' empty');
+      (total > 0 ? ' active' : (presTotal > 0 ? ' has-presence' : ' empty'));
     const regionLabel = codeToRegion[code] || '임시';
     card.innerHTML =
       '<div class="ops-card-head">' +
@@ -3774,8 +3842,11 @@ function renderAdminCards(data) {
         '<div class="pill victim"><span class="num">' + counts.victim + '</span><span class="lbl">조난자</span></div>' +
         '<div class="pill command"><span class="num">' + counts.command + '</span><span class="lbl">지휘부</span></div>' +
       '</div>' +
-      (total > 0 ? '<div class="ops-card-time">참여자 ' + total + '명' + (hasVictim ? ' · 🆘 긴급' : '') + '</div>' : '<div class="ops-card-time">대기 중 (참여자 없음)</div>') +
-      peopleHtml +
+      (total > 0
+        ? '<div class="ops-card-time">참여자 ' + total + '명' + (hasVictim ? ' · 🆘 긴급' : '') + '</div>'
+        : '<div class="ops-card-time">재난 시작 전</div>') +
+      rescueBlockHtml +
+      presBlockHtml +
       '<div class="ops-card-actions">' +
         '<button class="a-map" data-act="map">🗺 지도</button>' +
         '<button class="a-join" data-act="join">참여</button>' +
@@ -3792,6 +3863,8 @@ function renderAdminCards(data) {
   $('adm-active-count').textContent = totalActive;
   $('adm-victim-count').textContent = totalVictim;
   $('adm-total-count').textContent = totalParticipants;
+  const presEl = $('adm-presence-count');
+  if (presEl) presEl.textContent = totalPresence;
 
   if (grid.children.length === 0) {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#a5b4fc;font-size:13px;">현재 진행 중인 출동이 없습니다. 🕊</div>';

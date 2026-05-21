@@ -1,6 +1,7 @@
 {
   "rules": {
     "operations": {
+      ".read": true,
       "$opCode": {
         ".validate": "$opCode.matches(/^[A-Z0-9]{4,8}$/)",
         ".read": true,
@@ -19,6 +20,20 @@
             "accuracy": { ".validate": "!newData.exists() || newData.isNumber()" },
             "updatedAt": { ".validate": "newData.isNumber() || newData.val() == now" }
           }
+        }
+      }
+    },
+    "presence": {
+      ".read": true,
+      "$regionCode": {
+        ".validate": "$regionCode.matches(/^[A-Z0-9]{4,8}$/)",
+        ".read": true,
+        ".write": true,
+        "$uid": {
+          ".validate": "$uid.matches(/^[a-zA-Z0-9_-]{6,40}$/)",
+          "role": { ".validate": "newData.isString() && newData.val().matches(/^(fire|public|admin)$/)" },
+          "nickname": { ".validate": "newData.isString() && newData.val().length <= 20" },
+          "joinedAt": { ".validate": "newData.isNumber() || newData.val() == now" }
         }
       }
     }
