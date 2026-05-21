@@ -912,6 +912,37 @@
     color: #a5b4fc;
     margin-top: -2px;
   }
+  /* 참여자 명단 칩 */
+  .ops-card-people {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+  }
+  .ops-card-people .person {
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.3);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+  }
+  .ops-card-people .person::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+  .ops-card-people .person.rescuer { color: #fbbf24; }
+  .ops-card-people .person.rescuer::before { background: #f59e0b; }
+  .ops-card-people .person.victim { color: #fca5a5; box-shadow: 0 0 0 1px rgba(239,68,68,0.4); }
+  .ops-card-people .person.victim::before { background: #dc2626; }
+  .ops-card-people .person.command { color: #93c5fd; }
+  .ops-card-people .person.command::before { background: #3b82f6; }
+  .ops-card-people .person.gps-off { opacity: 0.5; }
+  .ops-card-people .person.gps-off::after { content: ' 📡✕'; font-size: 9px; opacity: 0.7; }
   .ops-card-actions {
     display: flex;
     gap: 6px;
@@ -3471,6 +3502,12 @@ function ensureAdminReopenButton() {
   headerRight.insertBefore(btn, headerRight.firstChild);
 }
 
+function escapePersonName(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
 function renderAdminCards(data) {
   const grid = $('admin-grid');
   grid.innerHTML = '';
@@ -3506,6 +3543,21 @@ function renderAdminCards(data) {
     // 비어있는 임시 코드(상시방 외)는 표시 안 함 — 노이즈 방지
     if (!isStanding && total === 0) return;
 
+    // 참여자 명단 칩 HTML
+    const peopleHtml = participants.length > 0
+      ? '<div class="ops-card-people">' +
+          participants.map(p => {
+            const role = (p && p.role) || 'rescuer';
+            const rawName = (p && p.nickname) || '익명';
+            // joinOp 에서 '한경승 (구조자)' 형태로 저장되므로 괄호 부분 제거
+            const cleanName = rawName.replace(/\s*\([^)]+\)\s*$/, '').trim() || '익명';
+            const gpsOff = !p || typeof p.lat !== 'number' || (p.lat === 0 && p.lng === 0);
+            const cls = 'person ' + role + (gpsOff ? ' gps-off' : '');
+            return '<span class="' + cls + '" title="' + (gpsOff ? 'GPS 위치 미전송' : 'GPS 전송 중') + '">' + escapePersonName(cleanName) + '</span>';
+          }).join('') +
+        '</div>'
+      : '';
+
     const card = document.createElement('div');
     card.className = 'ops-card' +
       (hasVictim ? ' has-victim' : '') +
@@ -3522,6 +3574,7 @@ function renderAdminCards(data) {
         '<div class="pill command"><span class="num">' + counts.command + '</span><span class="lbl">지휘부</span></div>' +
       '</div>' +
       (total > 0 ? '<div class="ops-card-time">참여자 ' + total + '명' + (hasVictim ? ' · 🆘 긴급' : '') + '</div>' : '<div class="ops-card-time">대기 중 (참여자 없음)</div>') +
+      peopleHtml +
       '<div class="ops-card-actions">' +
         '<button class="a-map" data-act="map">🗺 지도</button>' +
         '<button class="a-join" data-act="join">참여</button>' +
