@@ -2181,15 +2181,19 @@ const CATS = DATA.categories || {};
 let activeCategory = null;   // null = 전체 보기, 또는 카테고리 키
 let searchQuery = '';
 
-/* ----- 테마 토글 ----- */
+/* ----- 테마 토글 (다크 = 위성 자동 전환) ----- */
 const savedTheme = localStorage.getItem('ddc-theme');
 if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 'light');
 document.getElementById('theme-toggle').onclick = () => {
   const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur === 'light' ? null : 'light';
+  const next = cur === 'light' ? null : 'light';   // null = 다크
   if (next) document.documentElement.setAttribute('data-theme', next);
   else document.documentElement.removeAttribute('data-theme');
   localStorage.setItem('ddc-theme', next || 'dark');
+  // 다크 모드 → 위성(하이브리드), 라이트 모드 → 일반
+  if (typeof window.setMapTypeByKey === 'function') {
+    window.setMapTypeByKey(next === null ? 'hybrid' : 'normal');
+  }
 };
 
 /* ----- 네이버맵 초기화 ----- */
@@ -2520,13 +2524,24 @@ function bindMapTools() {
   ];
   let mtIdx = 0;
   const mtBtn = document.getElementById('maptype-toggle');
-  mtBtn.onclick = () => {
-    mtIdx = (mtIdx + 1) % MAP_TYPES.length;
+  function applyMapType(idx) {
+    if (idx < 0 || idx >= MAP_TYPES.length) return;
+    mtIdx = idx;
     const t = MAP_TYPES[mtIdx];
     map.setMapTypeId(t.naver);
     mtBtn.textContent = t.label;
     mtBtn.classList.toggle('active', t.id !== 'normal');
+  }
+  mtBtn.onclick = () => applyMapType((mtIdx + 1) % MAP_TYPES.length);
+  // 다른 곳(테마 토글)에서 모드 강제 변경 가능
+  window.setMapTypeByKey = function(key) {
+    const idx = MAP_TYPES.findIndex(t => t.id === key);
+    if (idx >= 0) applyMapType(idx);
   };
+  // 페이지 로드 시 다크 모드면 위성으로 자동 시작
+  if (document.documentElement.getAttribute('data-theme') !== 'light') {
+    applyMapType(MAP_TYPES.findIndex(t => t.id === 'hybrid'));
+  }
 }
 
 /* ----- 사용자 위치 / 거리 계산 ----- */
