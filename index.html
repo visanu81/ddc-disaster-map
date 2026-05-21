@@ -1928,6 +1928,12 @@ const DDC_USER = (function setupLobby() {
   const LAST_NAME_KEY = 'ddc-last-name';
   const REMEMBER_KEY = 'ddc-remember';
 
+  // 관리자 비밀번호 — return 위에 정의해야 한다 (const TDZ 방지)
+  const ADMIN_PASSWORDS = [
+    '관리자119', '관리자 119',         // 한글 + 띄어쓰기 허용
+    'admin119', 'admin', 'ADMIN119',  // 영문 fallback
+  ].map(s => s.normalize('NFC').toLowerCase());
+
   // 1) 이미 세션 있으면 그대로 진입
   let saved = null;
   try { saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); } catch (_) {}
@@ -1939,12 +1945,6 @@ const DDC_USER = (function setupLobby() {
   // 2) 로비 표시
   showLobby();
   return null;   // 로비 통과 전엔 user 없음
-
-  // 관리자 비밀번호 — 여러 형태 허용 (한글 입력 안 되는 환경 대비)
-  const ADMIN_PASSWORDS = [
-    '관리자119', '관리자 119',         // 한글 + 띄어쓰기 허용
-    'admin119', 'admin', 'ADMIN119',  // 영문 fallback
-  ].map(s => s.normalize('NFC').toLowerCase());
 
   function parseCode(raw, regionKey) {
     // 한글 입력 시 자소 분리(NFD) 문제 방지 — NFC + lowercase 로 통일 후 비교
@@ -2024,38 +2024,25 @@ const DDC_USER = (function setupLobby() {
 
     form.onsubmit = (e) => {
       e.preventDefault();
-      try {
-        const user = parseCode(input.value, regionSel.value);
-        if (!user || !user.nickname) {
-          errBox.textContent = '이름을 입력해주세요';
-          errBox.classList.add('show');
-          return;
-        }
-        errBox.classList.remove('show');
-
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
-        localStorage.setItem('ddc-last-region', user.region);   // 지역은 항상 기억
-        if (rememberBox.checked) {
-          localStorage.setItem(REMEMBER_KEY, '1');
-          localStorage.setItem(LAST_NAME_KEY, user.rawCode);
-        } else {
-          localStorage.setItem(REMEMBER_KEY, '0');
-          localStorage.removeItem(LAST_NAME_KEY);
-        }
-        applyUser(user);
-      } catch (err) {
-        // 입장 처리 중 에러 발생 — 사용자에게 노출
-        alert('입장 처리 오류:\n' + (err && err.message ? err.message : err) + '\n\n' +
-              '입력값: ' + input.value + '\n' +
-              '지역: ' + regionSel.value);
-        console.error('Lobby submit error:', err);
+      const user = parseCode(input.value, regionSel.value);
+      if (!user || !user.nickname) {
+        errBox.textContent = '이름을 입력해주세요';
+        errBox.classList.add('show');
+        return;
       }
-    };
+      errBox.classList.remove('show');
 
-    // 진단용: 입장 버튼 클릭이 form submit 으로 도달하는지 확인
-    document.querySelector('.lobby-enter').addEventListener('click', function() {
-      console.log('[lobby] enter clicked. input=', input.value, 'region=', regionSel.value);
-    });
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      localStorage.setItem('ddc-last-region', user.region);   // 지역은 항상 기억
+      if (rememberBox.checked) {
+        localStorage.setItem(REMEMBER_KEY, '1');
+        localStorage.setItem(LAST_NAME_KEY, user.rawCode);
+      } else {
+        localStorage.setItem(REMEMBER_KEY, '0');
+        localStorage.removeItem(LAST_NAME_KEY);
+      }
+      applyUser(user);
+    };
   }
 })();
 
