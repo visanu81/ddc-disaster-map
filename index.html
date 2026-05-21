@@ -4041,9 +4041,11 @@ window.addEventListener('beforeunload', () => {
 
 /* ===== 본인 위치 추적 (renderPeers 의 거리 계산용) ===== */
 const _origSetUserLocation = window.setUserLocation;
-window.setUserLocation = function(lat, lng, accuracy) {
+window.setUserLocation = function(lat, lng, accuracy, opts) {
+  // opts 도 그대로 전달해야 watchPosition 의 { recenter: false } 가 적용됨.
+  // 이전엔 opts 누락으로 매번 본인 위치로 자동 이동하는 버그.
   OpState.lastSelf = { lat, lng };
-  if (typeof _origSetUserLocation === 'function') _origSetUserLocation(lat, lng, accuracy);
+  if (typeof _origSetUserLocation === 'function') _origSetUserLocation(lat, lng, accuracy, opts);
 };
 </script>
 
