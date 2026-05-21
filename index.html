@@ -3475,42 +3475,27 @@ $('op-join-default').onclick = () => {
   joinOp(getRescueOpCode(), $('op-role-input').value);
 };
 
-/* ===== 소방관: 관내 진입 시 자동으로 상시방 참여 ===== */
+/* ===== 소방관: 자기 지역 상시방 감시 (자동 참여는 안 함) ===== */
+// 자동 참여를 하면 사이트 방문만으로 GPS 권한 요청·관리자 대시보드 노출됨
+// → 부담. 출동은 명시적 선택으로만.
+// 대신 다른 사람(특히 조난자)이 자기 지역 방에 들어오면 알림 배너로 알려줌.
+let standingWatchUnsub = null;
 function watchStandingRoom() {
-  // 소방관 모드만. 일반인·조난자는 별도 흐름(구조위치송신).
   const user = window.DDC_USER;
   if (!user || user.role !== 'fire') return;
-
-  // 이미 다른 방 참여 중이면 그대로 둠 (사용자 명시적 선택 존중)
-  if (OpState.opCode) return;
+  if (standingWatchUnsub) { standingWatchUnsub(); standingWatchUnsub = null; }
 
   const code = getRescueOpCode();
-  // 약간 지연 — initMap·Firebase SDK·DDC_USER 다 안정된 후
-  setTimeout(() => {
-    if (OpState.opCode) return;   // 사이에 다른 방 들어갔으면 패스
-    joinOp(code, 'rescuer', { silent: true }).then(() => {
-      hideDispatchAlert();   // 본인 참여했으니 알림 배너 더는 필요 없음
-    }).catch(err => {
-      console.warn('[standing] auto-join failed:', err);
-    });
-  }, 1500);
-}
-
-// 조난자 등 다른 사람이 같은 방에 들어왔을 때도 알림 (기존 dispatch-alert 보존)
-// — 본인이 이미 참여 중이면 알림 자동 숨김
-function listenForVictims(code) {
   const partsRef = ref(db, `operations/${code}/participants`);
-  onValue(partsRef, snap => {
+  standingWatchUnsub = onValue(partsRef, snap => {
     const all = snap.val() || {};
+    // 본인이 이미 참여 중이면 알림 안 띄움
+    if (OpState.opCode === code) { hideDispatchAlert(); return; }
     // 본인 외 참여자
     const others = Object.entries(all).filter(([uid]) => uid !== OpState.uid);
-    if (others.length === 0 || OpState.opCode === code) {
-      hideDispatchAlert();
-      return;
-    }
+    if (others.length === 0) { hideDispatchAlert(); return; }
     const hasVictim = others.some(([_, p]) => p && p.role === 'victim');
-    if (hasVictim) showDispatchAlert(others.length, true, code);
-    else hideDispatchAlert();
+    showDispatchAlert(others.length, hasVictim, code);
   });
 }
 
