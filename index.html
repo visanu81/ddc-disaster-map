@@ -1942,17 +1942,19 @@ const DDC_USER = (function setupLobby() {
 
   // 관리자 비밀번호 — 사장님 정한 값. 저장소가 Private 이라 plain text 박아도 안전.
   const ADMIN_PASSWORD = '관리자119';
+  const ADMIN_PASSWORD_NFC = ADMIN_PASSWORD.normalize('NFC');
 
   function parseCode(raw, regionKey) {
-    const code = (raw || '').trim();
+    // 한글 입력 시 자소 분리(NFD) 문제 방지 — NFC 로 통일 후 비교
+    const code = (raw || '').trim().normalize('NFC');
     if (!code) return null;
     const region = regionKey || 'dongducheon';
     // 관리자: 정확히 비밀번호와 일치
-    if (code === ADMIN_PASSWORD) {
+    if (code === ADMIN_PASSWORD_NFC) {
       return { role: 'admin', nickname: '관리자', rawCode: code, region };
     }
-    // 소방관: 끝이 119
-    if (/119$/.test(code)) {
+    // 소방관: 끝이 119 (단, 숫자만으로 된 코드는 제외)
+    if (/119$/.test(code) && !/^\d+$/.test(code)) {
       const name = code.replace(/119$/, '').trim();
       return { role: 'fire', nickname: name || '소방관', rawCode: code, region };
     }
