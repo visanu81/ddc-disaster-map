@@ -2,13 +2,10 @@ name: Auto Update Weather
 
 # 매시간 정각 기상·산림·하천 위험도를 새로 받아서 weather.js 를 갱신·push.
 # 배포는 Cloudflare Pages 가 git push 를 감지해 자동으로 처리 (이 워크플로우는 데이터 갱신만 담당).
-#
-# 2026-06-18: 사장님 요청으로 cron 일시 정지 (GitHub Actions 2000분/월 한도 소진).
-# 한도 리셋 후(7월 1일) 다시 켤 때 schedule 줄 주석만 풀면 됨.
 
 on:
-  # schedule:
-  #   - cron: '0 * * * *'
+  schedule:
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 permissions:
