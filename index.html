@@ -10,7 +10,8 @@
 <meta name="theme-color" content="#0a1530">
 <meta name="description" content="동두천시 재난안전지도 — 소방서·구급함·산악표지판 + 실시간 기상·산불·신천 수위">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="재난안전지도">
@@ -37,6 +38,74 @@
       });
     });
   }
+
+  // ===== 앱 설치 (PWA) =====
+  // 크롬/엣지(안드로이드·데스크탑): beforeinstallprompt 캡처 → '설치' 버튼으로 네이티브 설치 프롬프트.
+  // iOS 사파리: beforeinstallprompt 미지원 → '공유 → 홈 화면에 추가' 안내.
+  (function setupInstall() {
+    let deferredPrompt = null;
+
+    const isStandalone = () =>
+      window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const isIOS = () =>
+      /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+
+    function whenReady(fn) {
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+      else fn();
+    }
+
+    function showBar() {
+      if (isStandalone()) return;                                    // 이미 설치돼 실행 중
+      if (localStorage.getItem('ddc-install-dismissed') === '1') return;
+      whenReady(() => {
+        const bar = document.getElementById('install-bar');
+        if (bar) bar.classList.add('show');
+      });
+    }
+    function hideBar() {
+      const bar = document.getElementById('install-bar');
+      if (bar) bar.classList.remove('show');
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();          // 크롬 기본 미니바 억제, 우리 버튼으로 유도
+      deferredPrompt = e;
+      showBar();
+    });
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      hideBar();
+      localStorage.setItem('ddc-install-dismissed', '1');
+    });
+
+    whenReady(() => {
+      const go = document.getElementById('install-go');
+      const x = document.getElementById('install-x');
+      const text = document.querySelector('.install-text');
+      if (go) go.onclick = async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          try { await deferredPrompt.userChoice; } catch (_) {}
+          deferredPrompt = null;
+          hideBar();
+        } else if (isIOS()) {
+          alert('아이폰 설치 방법:\n\n1) 사파리 하단 가운데 "공유" 버튼(↑)을 누르세요.\n2) 목록에서 "홈 화면에 추가"를 누르세요.\n3) 오른쪽 위 "추가"를 누르면 앱처럼 설치됩니다.');
+        } else {
+          alert('브라우저 메뉴(⋮)에서 "앱 설치" 또는 "홈 화면에 추가"를 선택하세요.');
+        }
+      };
+      if (x) x.onclick = () => {
+        hideBar();
+        localStorage.setItem('ddc-install-dismissed', '1');
+      };
+      // iOS 는 beforeinstallprompt 가 없으므로, iOS·미설치·미닫힘이면 안내 바를 직접 노출
+      if (isIOS() && !isStandalone()) {
+        if (text) text.innerHTML = '아이폰에서 <strong>홈 화면에 앱으로 추가</strong>할 수 있어요';
+        showBar();
+      }
+    });
+  })();
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -243,6 +312,57 @@
   @media (max-width: 600px) {
     .rescue-banner { padding: 9px 12px; flex-wrap: wrap; }
     .rescue-banner .msg { flex-basis: 100%; font-size: 12px; }
+  }
+
+  /* 앱 설치 안내 바 (하단 고정, 설치 가능할 때만 .show) */
+  .install-bar {
+    display: none;
+    position: fixed;
+    left: 12px; right: 12px; bottom: 12px;
+    z-index: 10000;   /* 로비(9999) 위에도 노출 — 첫 방문 시 설치 유도 */
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    background: linear-gradient(135deg, #0a1530, #16308a);
+    color: #fff;
+    border: 1px solid rgba(120,170,255,0.35);
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    font-weight: 600;
+  }
+  .install-bar.show { display: flex; }
+  .install-ico { font-size: 20px; flex-shrink: 0; }
+  .install-text { flex: 1; font-size: 12.5px; line-height: 1.4; letter-spacing: -0.2px; }
+  .install-text strong { color: #7fd4ff; font-weight: 800; }
+  .install-go {
+    background: linear-gradient(135deg, #00d4ff, #0088ff);
+    color: #04122b;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .install-go:active { transform: scale(0.97); }
+  .install-x {
+    background: rgba(255,255,255,0.12);
+    color: #cbd5e1;
+    border: none;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    flex-shrink: 0;
+  }
+  .install-x:hover { background: rgba(255,255,255,0.22); }
+  @media (max-width: 600px) {
+    .install-bar { left: 8px; right: 8px; bottom: 8px; padding: 10px 12px; gap: 8px; }
+    .install-text { font-size: 12px; }
   }
 
   /* 기상·산림·하천 위험도 가로 띠 (헤더 아래) */
@@ -1947,6 +2067,14 @@
   <button class="rescue-btn" id="rescue-go">📍 가장 가까운 표지판 안내</button>
   <button class="rescue-btn" id="rescue-beacon">🆘 구조위치송신</button>
   <button class="rescue-close" id="rescue-close" title="닫기">✕</button>
+</div>
+
+<!-- 앱 설치 안내 바 (설치 가능할 때만 노출) -->
+<div class="install-bar" id="install-bar">
+  <span class="install-ico">📲</span>
+  <span class="install-text">이 지도를 휴대폰에 <strong>앱으로 설치</strong>하면 더 빠르게 열려요</span>
+  <button class="install-go" id="install-go" type="button">설치</button>
+  <button class="install-x" id="install-x" type="button" aria-label="닫기">✕</button>
 </div>
 
 <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
