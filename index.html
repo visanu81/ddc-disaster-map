@@ -144,6 +144,10 @@
     transition: all 0.2s;
   }
   .theme-btn:hover { color: var(--accent); border-color: var(--accent); }
+  /* 알림 토글 — 소방관 역할에만 노출 (출동 알림을 받는 대상) */
+  .noti-btn { display: none; }
+  body.role-fire .noti-btn { display: flex; }
+  .noti-btn.off { opacity: 0.4; }
 
   /* GPS 좌표 표시 (헤더) */
   .coord-display {
@@ -1484,7 +1488,7 @@
   .cluster-marker {
     width: 38px; height: 38px;
     border-radius: 50%;
-    background: rgba(15, 23, 42, 0.88);
+    background: rgba(15, 23, 42, 0.88);   /* 인라인 style 로 카테고리 색 덮어씀 */
     color: white;
     display: flex;
     align-items: center;
@@ -1492,14 +1496,15 @@
     font-weight: 800;
     font-size: 13px;
     border: 2.5px solid white;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.15);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);   /* 밝은 카테고리 색에서도 숫자 가독 */
     cursor: pointer;
     user-select: none;
     transition: transform 0.12s ease-out;
   }
   .cluster-marker:hover { transform: scale(1.12); }
   .cluster-marker.size-l { width: 44px; height: 44px; font-size: 14px; }
-  .cluster-marker.size-xl { width: 52px; height: 52px; font-size: 15px; background: rgba(220,38,38,0.92); }
+  .cluster-marker.size-xl { width: 52px; height: 52px; font-size: 15px; }
 
   /* 정보창 (InfoWindow 내부 컨텐츠) */
   .info-window {
@@ -1749,6 +1754,7 @@
       <span class="ico">📞</span>119
     </a>
     <div class="updated-at">갱신 <strong id="updated-at">-</strong></div>
+    <button class="theme-btn noti-btn" id="noti-toggle" title="조난자 알림 소리·진동">🔔</button>
     <button class="theme-btn" id="theme-toggle" title="테마 전환">🌓</button>
   </div>
 </header>
@@ -2176,6 +2182,9 @@ const DDC_USER = (function setupLobby() {
         return;
       }
       errBox.classList.remove('show');
+
+      // 입장(=확실한 사용자 제스처) 시점에 경보음 오디오 컨텍스트 미리 깨움 — 모바일 자동재생 정책 대비
+      if (window.primeDispatchAudio) { try { window.primeDispatchAudio(); } catch (_) {} }
 
       sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
       localStorage.setItem('ddc-last-region', user.region);   // 지역은 항상 기억
@@ -3024,7 +3033,7 @@ function updateMeasureText() {
   else {
     const total = totalMeasureDistance();
     el.innerHTML = '총 <strong>' + formatDistance(total) + '</strong> · ' + n + '점' +
-      ' (도보 약 ' + estimateWalkMin(total) + '분)';
+      ' (도보 약 ' + formatWalkTime(estimateWalkMin(total)) + ')';
   }
 }
 
@@ -3032,6 +3041,15 @@ function estimateWalkMin(meters) {
   // 산악 평균 도보 속도 약 2.5km/h (오르막·내리막 포함 보수적)
   const minutes = (meters / 1000) / 2.5 * 60;
   return Math.round(minutes);
+}
+
+// 분 → 읽기 쉬운 표기 (예: 95 → "1시간 35분", 8 → "8분", 0 → "1분 미만")
+function formatWalkTime(minutes) {
+  if (minutes < 1) return '1분 미만';
+  if (minutes < 60) return minutes + '분';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? h + '시간' : h + '시간 ' + m + '분';
 }
 
 let pickMode = false;
@@ -3182,45 +3200,56 @@ function recomputeClusters() {
                  : zoom === 14 ? 0.005
                  : 0;  // 15+ 클러스터링 OFF
 
-  const visible = getVisibleRecs();
   const hiddenSet = new Set();   // 클러스터로 흡수된 rec
 
   if (cellSize > 0) {
-    const grid = {};
-    visible.forEach(rec => {
-      const gx = Math.floor(rec.item.lng / cellSize);
-      const gy = Math.floor(rec.item.lat / cellSize);
-      const key = gx + ',' + gy;
-      (grid[key] = grid[key] || []).push(rec);
-    });
+    // ★ 카테고리별로 따로 묶음 — 소방서·구급함·산악표지판이 한 묶음에 섞이지 않고,
+    //    각 클러스터는 해당 카테고리 색으로 표시되어 무엇이 몇 개인지 한눈에 보임.
+    Object.entries(markers).forEach(([key, list]) => {
+      if (activeCategory && activeCategory !== key) return;   // 필터 중인 카테고리만
+      const cat = CATS[key] || {};
+      const color = cat.color || 'rgba(15,23,42,0.88)';
+      const recs = list.filter(rec => !searchQuery || matchSearch(rec.item, rec.cat));
 
-    Object.values(grid).forEach(group => {
-      if (group.length < 2) return;
-      // 그룹 내 마커는 숨기고, 클러스터 한 개 표시
-      group.forEach(rec => hiddenSet.add(rec));
-      const lat = group.reduce((s, r) => s + r.item.lat, 0) / group.length;
-      const lng = group.reduce((s, r) => s + r.item.lng, 0) / group.length;
-      const sizeClass = group.length >= 30 ? ' size-xl'
-                      : group.length >= 10 ? ' size-l' : '';
-      const cluster = new naver.maps.Marker({
-        position: new naver.maps.LatLng(lat, lng),
-        map: map,
-        icon: {
-          content: '<div class="cluster-marker' + sizeClass + '">' + group.length + '</div>',
-          anchor: new naver.maps.Point(19, 19),
-        },
-        zIndex: 50,
+      const grid = {};
+      recs.forEach(rec => {
+        const gx = Math.floor(rec.item.lng / cellSize);
+        const gy = Math.floor(rec.item.lat / cellSize);
+        const gkey = gx + ',' + gy;
+        (grid[gkey] = grid[gkey] || []).push(rec);
       });
-      naver.maps.Event.addListener(cluster, 'click', () => {
-        const z = Math.min(map.getZoom() + 2, 18);
-        map.setCenter(new naver.maps.LatLng(lat, lng));
-        map.setZoom(z);
+
+      Object.values(grid).forEach(group => {
+        if (group.length < 2) return;
+        group.forEach(rec => hiddenSet.add(rec));
+        const lat = group.reduce((s, r) => s + r.item.lat, 0) / group.length;
+        const lng = group.reduce((s, r) => s + r.item.lng, 0) / group.length;
+        const sizeClass = group.length >= 30 ? ' size-xl'
+                        : group.length >= 10 ? ' size-l' : '';
+        const label = escapeHtml(cat.label || key);
+        const cluster = new naver.maps.Marker({
+          position: new naver.maps.LatLng(lat, lng),
+          map: map,
+          title: label + ' ' + group.length + '곳',
+          icon: {
+            content: '<div class="cluster-marker' + sizeClass + '" style="background:' + color + ';" '
+                   + 'title="' + label + ' ' + group.length + '곳">' + group.length + '</div>',
+            anchor: new naver.maps.Point(19, 19),
+          },
+          zIndex: 50,
+        });
+        naver.maps.Event.addListener(cluster, 'click', () => {
+          const z = Math.min(map.getZoom() + 2, 18);
+          map.setCenter(new naver.maps.LatLng(lat, lng));
+          map.setZoom(z);
+        });
+        clusterMarkers.push(cluster);
       });
-      clusterMarkers.push(cluster);
     });
   }
 
-  // 모든 rec 마커 visibility 설정
+  // 모든 rec 마커 visibility 설정 (필터 통과 + 클러스터에 안 묶인 것만 개별 표시)
+  const visible = getVisibleRecs();
   Object.values(markers).forEach(list => {
     list.forEach(rec => {
       const show = visible.includes(rec) && !hiddenSet.has(rec);
@@ -3504,6 +3533,107 @@ const OpState = {
 const ROLE_LABEL = { rescuer: '구조자', victim: '조난자', command: '지휘부' };
 const ROLE_ICON = { rescuer: 'R', victim: 'S', command: 'C' };
 
+/* ===== 조난자 알림 (소리·진동·브라우저 알림) ===== */
+// 시각 배너만으로는 시끄러운 현장에서 놓치기 쉬움 → 소리+진동+브라우저 알림 추가.
+// 핵심: showDispatchAlert 는 조난자의 GPS 갱신마다 매번 호출되므로,
+//       소리/진동은 "새 조난자"가 나타날 때만 1회 울리도록 alertedVictimUids 로 dedupe.
+let notificationsEnabled = localStorage.getItem('ddc-noti') !== 'off';
+let alertedVictimUids = new Set();   // 이미 알림 울린 조난자 uid
+let dispatchAudioCtx = null;         // WebAudio 컨텍스트 (사용자 제스처 후 생성)
+
+// 사용자 제스처(버튼 클릭 등) 시점에 호출 — 모바일 자동재생 정책상 컨텍스트를 미리 깨워둠
+function primeDispatchAudio() {
+  try {
+    if (!dispatchAudioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) dispatchAudioCtx = new AC();
+    }
+    if (dispatchAudioCtx && dispatchAudioCtx.state === 'suspended') {
+      dispatchAudioCtx.resume();
+    }
+  } catch (e) { /* 무시 */ }
+}
+window.primeDispatchAudio = primeDispatchAudio;
+
+// 경보음 — urgent 면 880Hz 3연타, 아니면 620Hz 1회
+function playDispatchBeep(urgent) {
+  try {
+    primeDispatchAudio();
+    if (!dispatchAudioCtx) return;
+    const ctx = dispatchAudioCtx;
+    const emit = () => {
+      const now = ctx.currentTime;
+      const beeps = urgent
+        ? [[now, now + 0.18], [now + 0.30, now + 0.48], [now + 0.60, now + 0.78]]
+        : [[now, now + 0.30]];
+      beeps.forEach(([start, end]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = urgent ? 880 : 620;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.35, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, end);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(end + 0.02);
+      });
+    };
+    // 백그라운드 복귀 등으로 suspended 면 resume 후 재생 (조용히 빠지지 않게)
+    if (ctx.state === 'suspended') ctx.resume().then(emit).catch(() => {});
+    else emit();
+  } catch (e) { console.warn('[알림] 비프음 실패', e); }
+}
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    try { await Notification.requestPermission(); } catch (e) { /* 무시 */ }
+  }
+}
+
+// 새 조난자 발생 시 1회 실행 — 진동 + 브라우저 알림 + 경보음
+function fireDispatchAlertEffects(count, code) {
+  if (!notificationsEnabled) return;
+  // 1) 진동
+  if (navigator.vibrate) {
+    try { navigator.vibrate([400, 150, 400, 150, 400]); } catch (e) { /* 무시 */ }
+  }
+  // 2) 브라우저 알림 (백그라운드 탭에서도 뜸)
+  //    안드로이드 Chrome 은 PWA(서비스워커 등록) 환경에서 new Notification() 이 throw 되므로
+  //    ServiceWorkerRegistration.showNotification() 을 우선 사용하고, 없으면 new Notification 으로 폴백.
+  if ('Notification' in window && Notification.permission === 'granted') {
+    const title = '🆘 조난자 위치 수신';
+    const opts = {
+      body: code + ' 방에 조난자가 위치를 공유했습니다. (' + count + '명 활동 중)',
+      icon: 'icon.svg',
+      tag: 'ddc-dispatch-' + code,
+      renotify: true,
+      requireInteraction: true,
+    };
+    if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistration) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg && reg.showNotification) {
+          reg.showNotification(title, opts).catch(() => {});
+        } else {
+          try {
+            const n = new Notification(title, opts);
+            n.onclick = () => { try { window.focus(); } catch (e) {} n.close(); };
+          } catch (e) { /* 무시 */ }
+        }
+      }).catch(() => {});
+    } else {
+      try {
+        const n = new Notification(title, opts);
+        n.onclick = () => { try { window.focus(); } catch (e) {} n.close(); };
+      } catch (e) { /* 무시 */ }
+    }
+  }
+  // 3) 경보음
+  playDispatchBeep(true);
+}
+
 /* ===== 유틸 ===== */
 function randomCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // 0/1/O/I 같은 헷갈리는 문자 제외
@@ -3572,6 +3702,9 @@ function watchStandingRoom() {
   if (standingWatchUnsub) { standingWatchUnsub(); standingWatchUnsub = null; }
   if (standingPresenceUnsub) { standingPresenceUnsub(); standingPresenceUnsub = null; }
 
+  // 소방관 진입 + 알림 켜짐이면 브라우저 알림 권한 미리 요청 (조난자 발생 전에 준비)
+  if (notificationsEnabled) requestNotificationPermission();
+
   const code = getRescueOpCode();
 
   // (1) 접속자 명단: presence 데이터 구독
@@ -3588,13 +3721,28 @@ function watchStandingRoom() {
   const partsRef = ref(db, `operations/${code}/participants`);
   standingWatchUnsub = onValue(partsRef, snap => {
     const all = snap.val() || {};
-    if (OpState.opCode === code) { hideDispatchAlert(); return; }   // 본인 이미 참여 중
+    if (OpState.opCode === code) { hideDispatchAlert(); alertedVictimUids.clear(); return; }   // 본인 이미 참여 중
     const others = Object.entries(all).filter(([uid]) => uid !== OpState.uid);
-    if (others.length === 0) { hideDispatchAlert(); return; }
-    const hasVictim = others.some(([_, p]) => p && p.role === 'victim');
-    // 재난 알림은 조난자(victim)가 들어왔을 때만 — 같은 소방관끼리는 알림 X
-    if (hasVictim) showDispatchAlert(others.length, true, code);
-    else hideDispatchAlert();
+    if (others.length === 0) { hideDispatchAlert(); alertedVictimUids.clear(); return; }
+    // 조난자(victim)가 들어왔을 때만 — 같은 소방관끼리는 알림 X
+    const victimEntries = others.filter(([_, p]) => p && p.role === 'victim');
+    if (victimEntries.length === 0) { hideDispatchAlert(); alertedVictimUids.clear(); return; }
+
+    showDispatchAlert(others.length, true, code);
+
+    // 소리·진동·브라우저 알림은 "새 조난자"가 나타났을 때만 1회 (GPS 갱신마다 울리지 않도록)
+    // dedupe set 은 알림이 켜진 동안에만 채운다 — 꺼둔 상태에서 들어온 조난자도
+    // 알림을 켠 직후 다음 갱신에서 "새 조난자"로 인식되어 즉시 경보가 울리도록.
+    const currentVictimUids = victimEntries.map(([uid]) => uid);
+    const newVictims = currentVictimUids.filter(uid => !alertedVictimUids.has(uid));
+    if (notificationsEnabled && newVictims.length > 0) {
+      newVictims.forEach(uid => alertedVictimUids.add(uid));
+      fireDispatchAlertEffects(others.length, code);
+    }
+    // 사라진 조난자는 set 에서 제거 — 나갔다 다시 들어오면 또 알림
+    [...alertedVictimUids].forEach(uid => {
+      if (!currentVictimUids.includes(uid)) alertedVictimUids.delete(uid);
+    });
   });
 
   // 지역 표시 갱신
@@ -3949,6 +4097,38 @@ if (document.body.classList.contains('lobby-passed') && window.DDC_USER && windo
 $('op-leave').onclick = leaveOp;
 $('op-share-victim').onclick = () => shareOp('victim');
 $('op-share-teammate').onclick = () => shareOp('teammate');
+
+/* 알림 토글 (소방관) — 소리·진동·브라우저 알림 켜기/끄기 */
+(function bindNotiToggle() {
+  const btn = document.getElementById('noti-toggle');
+  if (!btn) return;
+  function render() {
+    btn.classList.toggle('off', !notificationsEnabled);
+    btn.textContent = notificationsEnabled ? '🔔' : '🔕';
+    btn.title = notificationsEnabled ? '조난자 알림 켜짐 (소리·진동)' : '조난자 알림 꺼짐';
+  }
+  btn.onclick = () => {
+    notificationsEnabled = !notificationsEnabled;
+    localStorage.setItem('ddc-noti', notificationsEnabled ? 'on' : 'off');
+    render();
+    if (notificationsEnabled) {
+      // 켤 때 권한 요청 + 오디오 컨텍스트 깨우기 + 테스트 비프 (이 클릭이 사용자 제스처)
+      requestNotificationPermission();
+      primeDispatchAudio();
+      playDispatchBeep(false);
+    }
+  };
+  render();
+  // 사용자가 화면을 터치할 때마다 오디오 컨텍스트를 깨움 (벨을 안 눌러도 경보음 동작).
+  // 한 번이 아니라 'running' 이 될 때까지 유지 — 백그라운드 복귀로 다시 suspended 되는 경우 대비.
+  const wake = () => {
+    primeDispatchAudio();
+    if (dispatchAudioCtx && dispatchAudioCtx.state === 'running') {
+      window.removeEventListener('pointerdown', wake);
+    }
+  };
+  window.addEventListener('pointerdown', wake);
+})();
 
 /* 구조위치송신 — 조난자 배너에서 호출. URL 의 ?op= 있으면 그 코드, 없으면 상시방 */
 window.joinRescueOp = function() {
