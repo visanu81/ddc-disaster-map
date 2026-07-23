@@ -1,0 +1,36 @@
+name: Deploy SOS (test)
+
+# 테스트본(sos 워커) 배포 — sos 브랜치에 push 하면 wrangler 로 'sos' 워커에 배포.
+# 운영(ddc-disaster-map)은 Cloudflare Git 연동으로 main push 시 자동 배포되며, 이 워크플로우와 무관.
+# 주소: https://sos.visanu81.workers.dev
+
+on:
+  push:
+    branches: [sos]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-sos
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to sos worker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Wrangler
+        run: npm install -g wrangler@latest
+
+      - name: Deploy (wrangler → sos)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: wrangler deploy --name sos
