@@ -2150,8 +2150,18 @@
 </main>
 
 <!-- 데이터 (별도 파일에서 로드) -->
-<script src="data.js"></script>
-<script src="weather.js"></script>
+<!-- ★ 테스트본(sos) 전용: 운영(ddc-disaster-map) 데이터를 실시간 참조.
+     sos.visanu81.workers.dev 에서 열면 운영의 data.js/weather.js 를 로드 → 코드만 다르고 데이터는 항상 운영 최신.
+     운영·로컬(다른 호스트)에서는 자기 파일(/data.js, /weather.js) 사용. 이 블록은 sos 브랜치에만 존재. -->
+<script>
+  (function(){
+    var origin = (location.hostname === 'sos.visanu81.workers.dev')
+      ? 'https://ddc-disaster-map.visanu81.workers.dev' : '';
+    window.__DATA_ORIGIN = origin;
+    document.write('<scr' + 'ipt src="' + origin + '/data.js"><\/scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="' + origin + '/weather.js"><\/scr' + 'ipt>');
+  })();
+</script>
 
 <!-- 네이버맵 v3 SDK -->
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=nk07ypv156"></script>
