@@ -5,7 +5,7 @@
    - 외부 폰트·CDN: 캐시 우선, 네트워크 fallback
 */
 
-const VERSION = 'ddc-v10-install';   // 버전 올리면 이전 캐시 자동 무효화
+const VERSION = 'ddc-v11-sos-vworld';   // 버전 올리면 이전 캐시 자동 무효화
 const STATIC_CACHE = 'ddc-static-' + VERSION;
 const TILE_CACHE = 'ddc-tiles';   // 타일은 version 무관 (계속 누적)
 
@@ -58,6 +58,12 @@ self.addEventListener('fetch', e => {
 
   let url;
   try { url = new URL(req.url); } catch (_) { return; }
+
+  // 브이월드 타일(api.vworld.kr): 캐시 안 함(network-only).
+  // 도메인 미등록 시의 인증 실패가 캐시돼 등록 후에도 실패로 남는 함정 방지.
+  if (url.hostname.includes('vworld.kr')) {
+    return;   // SW 개입 안 함 → 브라우저가 직접 네트워크로
+  }
 
   // 네이버맵 타일/SDK: cache-first (한 번 본 영역 오프라인 유지)
   if (

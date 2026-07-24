@@ -2134,7 +2134,7 @@
           <path d="M14 19c0-2 1.6-3.5 3.5-3.5S21 17 21 19"/>
         </svg>
       </button>
-      <button class="map-tool-btn" id="maptype-toggle" title="지도 모드 (일반·지형·위성 순환)">일반</button>
+      <button class="map-tool-btn" id="maptype-toggle" title="지도 모드 (일반·지형·위성·브이월드지형·브이월드항공 순환)">일반</button>
       <button class="map-tool-btn" id="cadastral-toggle" title="지적편집도 표시/숨김">지적</button>
       <button class="map-tool-btn icon-btn" id="recenter-btn" title="동두천소방서 기준으로 되돌리기">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-label="소방서로 복귀">
@@ -2461,6 +2461,27 @@ function initMap() {
   // 지적편집도 레이어 (토글 가능, 기본은 OFF)
   cadastralLayer = new naver.maps.CadastralLayer();
 
+  // ★ [sos 전용] 브이월드(국토지리정보원) 지형 바탕지도 — 등고선·상세 산악지형.
+  //   기존 VWorld 키 재사용(클라이언트 키, 도메인 등록으로 보호). sos 도메인 등록 필요.
+  //   WMTS(Web Mercator XYZ) 라 네이버 타일 좌표와 그대로 정합.
+  (function registerVworldMapTypes(){
+    const KEY = 'CA711B51-FC8E-3021-A91F-0D342A3495F9';
+    window.VWORLD_KEY = KEY;
+    const size = new naver.maps.Size(256, 256);
+    // 일반(Base): 등고선 포함 상세 지형도
+    map.mapTypes.set('vworld-terrain', new naver.maps.ImageMapType({
+      name: '브이월드 지형',
+      minZoom: 6, maxZoom: 19, tileSize: size,
+      getTileUrl: (x, y, z) => 'https://api.vworld.kr/req/wmts/1.0.0/' + KEY + '/Base/' + z + '/' + y + '/' + x + '.png',
+    }));
+    // 항공영상(Satellite)
+    map.mapTypes.set('vworld-photo', new naver.maps.ImageMapType({
+      name: '브이월드 항공',
+      minZoom: 6, maxZoom: 19, tileSize: size,
+      getTileUrl: (x, y, z) => 'https://api.vworld.kr/req/wmts/1.0.0/' + KEY + '/Satellite/' + z + '/' + y + '/' + x + '.jpeg',
+    }));
+  })();
+
   // 지도 클릭: 모드별 분기
   naver.maps.Event.addListener(map, 'click', (e) => {
     if (!e || !e.coord) return;
@@ -2733,11 +2754,14 @@ function bindMapTools() {
   // 내 현재 위치 (토글: 누르면 켜고/끄기)
   document.getElementById('locate-btn').onclick = toggleUserLocation;
 
-  // 지도 모드 순환 (일반 → 지형 → 위성(하이브리드: 위성 + 도로/라벨) → 일반...)
+  // 지도 모드 순환 (일반 → 지형 → 위성 → 브이월드 지형(등고선) → 브이월드 항공 → ...)
+  // ★ [sos 전용] 브이월드 지형/항공은 커스텀 지도타입 id 로 전환 (naver 값 대신 vwId 사용)
   const MAP_TYPES = [
     { id: 'normal',  label: '일반',  naver: naver.maps.MapTypeId.NORMAL },
     { id: 'terrain', label: '지형',  naver: naver.maps.MapTypeId.TERRAIN },
     { id: 'hybrid',  label: '위성',  naver: naver.maps.MapTypeId.HYBRID },
+    { id: 'vworld',  label: 'VW지형', vwId: 'vworld-terrain' },
+    { id: 'vwphoto', label: 'VW항공', vwId: 'vworld-photo' },
   ];
   let mtIdx = 0;
   const mtBtn = document.getElementById('maptype-toggle');
@@ -2745,7 +2769,7 @@ function bindMapTools() {
     if (idx < 0 || idx >= MAP_TYPES.length) return;
     mtIdx = idx;
     const t = MAP_TYPES[mtIdx];
-    map.setMapTypeId(t.naver);
+    map.setMapTypeId(t.vwId || t.naver);   // 커스텀(vwId) 있으면 그걸로, 없으면 네이버 기본
     mtBtn.textContent = t.label;
     mtBtn.classList.toggle('active', t.id !== 'normal');
   }
