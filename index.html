@@ -2760,8 +2760,10 @@ function bindMapTools() {
     { id: 'normal',  label: '일반',  naver: naver.maps.MapTypeId.NORMAL },
     { id: 'terrain', label: '지형',  naver: naver.maps.MapTypeId.TERRAIN },
     { id: 'hybrid',  label: '위성',  naver: naver.maps.MapTypeId.HYBRID },
-    { id: 'vworld',  label: 'VW지형', vwId: 'vworld-terrain' },
-    { id: 'vwphoto', label: 'VW항공', vwId: 'vworld-photo' },
+    // ⚠️ VW지형/VW항공 임시 비활성 — 네이버(EPSG:5179 격자)와 브이월드(Web Mercator) 타일 격자
+    //    불일치로 좌표 어긋남(에러 타일). 올바른 렌더(GroundOverlay+StaticMap 등) 재작업 필요.
+    // { id: 'vworld',  label: 'VW지형', vwId: 'vworld-terrain' },
+    // { id: 'vwphoto', label: 'VW항공', vwId: 'vworld-photo' },
   ];
   let mtIdx = 0;
   const mtBtn = document.getElementById('maptype-toggle');
