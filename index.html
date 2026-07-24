@@ -704,6 +704,44 @@
   .op-section { display: flex; flex-direction: column; gap: 10px; }
   .op-section.hidden { display: none; }
 
+  /* GPS 상태 표시 */
+  .op-gps-state {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 11px; border-radius: 9px;
+    background: var(--bg-card-2); border: 1px solid var(--border);
+    font-size: 12.5px; font-weight: 700;
+  }
+  .op-gps-state .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+  .op-gps-state.on { border-color: rgba(34,197,94,.45); background: rgba(34,197,94,.10); color: #16a34a; }
+  .op-gps-state.on .dot { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.25); }
+  .op-gps-state.off { border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.12); color: #dc2626; }
+  .op-gps-state.off .dot { background: #ef4444; }
+  .op-gps-fix {
+    margin-left: auto; border: none; background: #dc2626; color: #fff;
+    padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit;
+    animation: gpspulse 1.4s ease-in-out infinite;
+  }
+  @keyframes gpspulse { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.06);} }
+
+  /* 상태 입력 */
+  .op-status-input { display: flex; flex-direction: column; gap: 6px; }
+  .op-status-input label { font-size: 12px; font-weight: 700; color: var(--text); }
+  .op-status-input label small { color: var(--text-dim); font-weight: 500; }
+  .op-status-input textarea {
+    width: 100%; resize: vertical; min-height: 42px;
+    padding: 9px 10px; border-radius: 9px;
+    border: 1px solid var(--border); background: var(--bg-card-2); color: var(--text);
+    font-family: inherit; font-size: 13px; line-height: 1.4;
+  }
+  .op-status-input textarea:focus { outline: none; border-color: var(--accent); }
+  .op-status-sent { font-size: 11.5px; font-weight: 700; color: #16a34a; }
+  /* 명단에 표시되는 상태 메시지 */
+  .op-person .pstatus {
+    flex-basis: 100%; font-size: 11px; color: #b45309;
+    background: rgba(245,158,11,.14); border-radius: 6px; padding: 3px 7px; margin-top: 3px;
+    white-space: normal; word-break: break-word;
+  }
+
   .op-btn {
     padding: 10px;
     border: none;
@@ -1714,7 +1752,6 @@
   body.rescue-mode .sidebar,
   body.rescue-mode .sidebar-backdrop,
   body.rescue-mode .weather-strip,
-  body.rescue-mode .op-panel,
   body.rescue-mode #sidebar-toggle,
   body.rescue-mode #measure-btn,
   body.rescue-mode #cadastral-toggle,
@@ -1943,8 +1980,8 @@
 
   <!-- 출동 시작/참여 화면 -->
   <div class="op-section" id="op-section-start">
-    <h3>🆘 출동 위치 공유</h3>
-    <div class="hint">동료·조난자와 실시간 위치를 공유해 같이 수색합니다.<br>익명, 출동 종료시 자동 삭제.</div>
+    <h3>🆘 실시간 위치·상태 공유</h3>
+    <div class="hint">요구조자·동료·지휘부가 실시간으로 위치와 상태를 공유합니다. 모든 재난 상황에 사용.<br>익명, 종료 시 자동 삭제.</div>
 
     <!-- 자기 지역 상시방 현재 접속자 (참여 안 해도 볼 수만 있음) -->
     <div class="standing-preview" id="standing-preview">
@@ -1963,7 +2000,7 @@
     <input type="text" class="op-input" id="op-code-input" placeholder="코드 입력 (예: H3K7)" maxlength="8">
     <select class="op-select" id="op-role-input">
       <option value="rescuer">구조자 (소방관)</option>
-      <option value="victim">조난자</option>
+      <option value="victim">요구조자</option>
       <option value="command">지휘부</option>
     </select>
     <button class="op-btn" id="op-join">참여</button>
@@ -1971,11 +2008,27 @@
 
   <!-- 출동 활성 화면 -->
   <div class="op-section hidden" id="op-section-active">
-    <!-- 일반인(요구조자) 전용 안내. 소방관에겐 CSS 로 숨김 -->
+    <!-- 요구조자 전용 안내. 소방관에겐 CSS 로 숨김 -->
     <div class="public-rescue-notice">
-      📡 <strong>내 위치를 동두천소방서에 송신 중</strong>입니다.<br>
-      소방관이 마커를 보고 곧 출동합니다. 가능하면 같은 자리에서 기다려주세요.<br>
-      구조 완료되거나 위치 송신을 중지하려면 아래 <strong>종료</strong> 버튼을 누르세요.
+      📡 <strong>내 위치를 구조대에 실시간 공유 중</strong>입니다.<br>
+      구조대가 마커를 보고 위치로 이동합니다. 가능하면 같은 자리에서 기다려주세요.<br>
+      아래 <strong>내 상태</strong>를 적어 보내면 구조대가 상황을 미리 알 수 있습니다.
+    </div>
+
+    <!-- GPS 상태 표시 (요구조자에게 특히 중요) -->
+    <div class="op-gps-state" id="op-gps-state">
+      <span class="dot"></span>
+      <span class="txt" id="op-gps-txt">위치 확인 중…</span>
+      <button class="op-gps-fix" id="op-gps-fix" type="button" style="display:none;">📍 위치 켜기</button>
+    </div>
+
+    <!-- 내 상태 입력 → 실시간 공유 -->
+    <div class="op-status-input" id="op-status-input">
+      <label for="op-status-text">내 상태 전달 <small>(부상·인원·상황)</small></label>
+      <textarea id="op-status-text" rows="2" maxlength="200"
+                placeholder="예: 발목 부상, 2명, 계곡 옆 큰 바위 아래"></textarea>
+      <button class="op-btn primary" id="op-status-send" type="button">📨 상태 전달</button>
+      <div class="op-status-sent" id="op-status-sent" style="display:none;">✓ 전달됨 — 구조대에 실시간 공유되었습니다</div>
     </div>
 
     <div class="op-code-box">
@@ -1986,7 +2039,7 @@
     </div>
     <div class="op-share-group">
       <button class="op-share-btn victim" id="op-share-victim">
-        🚨 조난자에게 공유 <small>(단순 화면 + 위치송신)</small>
+        🚨 요구조자에게 링크 보내기 <small>(위치·상태 공유)</small>
       </button>
       <button class="op-share-btn teammate" id="op-share-teammate">
         👮 동료에게 공유 <small>(같이 출동중 — 풀 화면)</small>
@@ -2054,18 +2107,18 @@
 <div class="dispatch-alert" id="dispatch-alert">
   <span class="ico">🆘</span>
   <span>진행 중 출동 <strong id="dispatch-count">0</strong>명</span>
-  <span class="victim-mark" id="dispatch-victim-mark" style="display:none;">조난자 포함</span>
+  <span class="victim-mark" id="dispatch-victim-mark" style="display:none;">요구조자 포함</span>
   <button class="dispatch-join-btn" id="dispatch-join-btn" type="button">바로 참여</button>
 </div>
 
 <!-- 조난자 안내 배너 (닫기 가능) -->
 <div class="rescue-banner" id="rescue-banner">
   <div class="msg">
-    ⚠️ 조난·응급상황이신가요?
-    <small>현재 위치에서 가장 가까운 산악표지판으로 즉시 안내해드립니다.</small>
+    ⚠️ 도움이 필요하신가요?
+    <small>내 위치를 구조대에 실시간으로 보내면 정확한 지점으로 찾아옵니다.</small>
   </div>
-  <button class="rescue-btn" id="rescue-go">📍 가장 가까운 표지판 안내</button>
-  <button class="rescue-btn" id="rescue-beacon">🆘 구조위치송신</button>
+  <button class="rescue-btn" id="rescue-beacon">📍 내 위치 공유 시작</button>
+  <button class="rescue-btn" id="rescue-go">가까운 표지판 안내</button>
   <button class="rescue-close" id="rescue-close" title="닫기">✕</button>
 </div>
 
@@ -3739,7 +3792,7 @@ const OpState = {
   peers: {},          // uid -> { marker, label, info }
 };
 
-const ROLE_LABEL = { rescuer: '구조자', victim: '조난자', command: '지휘부' };
+const ROLE_LABEL = { rescuer: '구조자', victim: '요구조자', command: '지휘부' };
 const ROLE_ICON = { rescuer: 'R', victim: 'S', command: 'C' };
 
 /* ===== 조난자 알림 (소리·진동·브라우저 알림) ===== */
@@ -4307,6 +4360,51 @@ $('op-leave').onclick = leaveOp;
 $('op-share-victim').onclick = () => shareOp('victim');
 $('op-share-teammate').onclick = () => shareOp('teammate');
 
+/* ===== 내 상태 전달 (요구조자 등) — 실시간 공유 ===== */
+function sendMyStatus() {
+  const txt = ($('op-status-text').value || '').trim().slice(0, 200);
+  if (!OpState.opCode || !OpState.uid) { alert('먼저 위치 공유에 참여해야 합니다.'); return; }
+  const myRef = ref(db, `operations/${OpState.opCode}/participants/${OpState.uid}`);
+  update(myRef, { status: txt, updatedAt: serverTimestamp() })
+    .then(() => {
+      const sent = $('op-status-sent');
+      if (sent) { sent.style.display = 'block'; setTimeout(() => { sent.style.display = 'none'; }, 4000); }
+    })
+    .catch(e => alert('상태 전달 실패: ' + e.message));
+}
+if ($('op-status-send')) $('op-status-send').onclick = sendMyStatus;
+
+/* ===== GPS 상태 표시 (요구조자에게 위치 켜짐/꺼짐 명확히) ===== */
+function setGpsState(state) {
+  // state: 'pending' | 'on' | 'off'
+  const box = $('op-gps-state'); if (!box) return;
+  const txt = $('op-gps-txt'); const fix = $('op-gps-fix');
+  box.classList.remove('on', 'off');
+  if (state === 'on') {
+    box.classList.add('on');
+    if (txt) txt.textContent = '위치 공유 중 — 구조대가 내 위치를 봅니다';
+    if (fix) fix.style.display = 'none';
+  } else if (state === 'off') {
+    box.classList.add('off');
+    if (txt) txt.textContent = '위치가 꺼져 있습니다 — 켜야 구조대가 찾을 수 있어요';
+    if (fix) fix.style.display = 'inline-block';
+  } else {
+    if (txt) txt.textContent = '위치 확인 중…';
+    if (fix) fix.style.display = 'none';
+  }
+}
+// 위치 다시 켜기 — getCurrentPosition 재요청(권한창 재유도). 이미 참여 중이면 watch 재시작.
+if ($('op-gps-fix')) $('op-gps-fix').onclick = () => {
+  setGpsState('pending');
+  if (OpState.opCode && OpState.uid) {
+    const myRef = ref(db, `operations/${OpState.opCode}/participants/${OpState.uid}`);
+    if (OpState.watchId != null) { try { navigator.geolocation.clearWatch(OpState.watchId); } catch (_) {} }
+    startWatchingPosition(myRef, false);
+  } else if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(() => setGpsState('on'), () => setGpsState('off'), { enableHighAccuracy: true });
+  }
+};
+
 /* 알림 토글 (소방관) — 소리·진동·브라우저 알림 켜기/끄기 */
 (function bindNotiToggle() {
   const btn = document.getElementById('noti-toggle');
@@ -4401,6 +4499,9 @@ async function joinOp(code, role, opts) {
   $('op-status-code').textContent = code;
   $('op-status').classList.add('show');
   $('op-self-role').textContent = ROLE_LABEL[role];
+  // 참여했으면 조난자 안내 배너는 감춤(패널 활성화면으로 대체) + 패널 열기
+  const rb = $('rescue-banner'); if (rb) rb.classList.add('hidden');
+  $('op-panel').classList.add('show');
 
   // 위치 송신 시작 (자동 참여면 silent — 거절해도 alert 없음)
   startWatchingPosition(myRef, !!opts.silent);
@@ -4440,17 +4541,23 @@ function leaveOp() {
   $('op-status').classList.remove('show');
   $('op-people-list').innerHTML = '';
   $('op-people-count').textContent = '0';
+  setGpsState('pending');
+  if ($('op-status-text')) $('op-status-text').value = '';
+  if ($('op-status-sent')) $('op-status-sent').style.display = 'none';
 }
 
 /* ===== 위치 송신 ===== */
 function startWatchingPosition(myRef, silent) {
   if (!navigator.geolocation) {
-    if (!silent) alert('이 브라우저는 GPS 를 지원하지 않습니다.');
+    setGpsState('off');
+    if (!silent) alert('이 기기는 위치(GPS)를 지원하지 않습니다.');
     return;
   }
+  setGpsState('pending');
   OpState.watchId = navigator.geolocation.watchPosition(
     pos => {
       const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+      setGpsState('on');
       update(myRef, {
         lat, lng, accuracy: accuracy || 0,
         updatedAt: serverTimestamp(),
@@ -4462,9 +4569,10 @@ function startWatchingPosition(myRef, silent) {
     },
     err => {
       console.warn('watchPosition error', err);
+      if (err.code === 1) setGpsState('off');   // 권한 거부 → 재요청 버튼 노출
       // 자동 참여(silent=true) 일 땐 alert 안 띄움 — 사용자 부담 최소화
       if (err.code === 1 && !silent) {
-        alert('위치 권한을 허용해야 다른 참여자에게 내 위치가 보입니다.');
+        alert('위치를 허용해야 구조대가 내 위치를 볼 수 있습니다.\n\n주소창의 위치 아이콘 또는 브라우저 설정에서 위치를 "허용"으로 바꿔주세요.');
       }
     },
     { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
@@ -4517,10 +4625,14 @@ function renderPeers(all) {
     }
     const el = document.createElement('div');
     el.className = 'op-person';
+    const statusHtml = (info.status && String(info.status).trim())
+      ? '<div class="pstatus">💬 ' + escapePersonName(String(info.status).trim()) + '</div>' : '';
+    if (statusHtml) el.style.flexWrap = 'wrap';
     el.innerHTML =
       '<span class="role-dot ' + dotCls + '"></span>' +
-      '<span class="name">' + (info.nickname || ROLE_LABEL[role]) + (isMe ? ' (나)' : '') + '</span>' +
-      '<span class="dist">' + distText + '</span>';
+      '<span class="name">' + escapePersonName(info.nickname || ROLE_LABEL[role]) + (isMe ? ' (나)' : '') + '</span>' +
+      '<span class="dist">' + distText + '</span>' +
+      statusHtml;
     // 클릭하면 그 사람 위치로 지도 이동
     if (!isMe && info.lat && info.lng) {
       el.style.cursor = 'pointer';
@@ -4576,10 +4688,10 @@ function shareOp(audience) {
   const isVictim = audience === 'victim';
   const url = base + (isVictim ? '&mode=rescue' : '&role=rescuer');
 
-  const title = '동두천시 재난안전지도 — 출동';
+  const title = '재난 위치공유 — 구조대';
   const text = isVictim
-    ? '동두천소방서입니다. 링크를 열고 GPS 를 허용한 뒤 [🆘 구조위치송신] 을 눌러주세요.'
-    : '출동 위치공유 링크입니다. 페이지 열고 GPS 허용 후 [참여] 눌러주세요.';
+    ? '구조대입니다. 이 링크를 열고 [📍 내 위치 공유 시작]을 눌러 위치를 허용해 주세요. 현재 위치와 상태를 실시간으로 확인합니다.'
+    : '위치공유 링크입니다. 링크를 열고 위치를 허용한 뒤 [참여]를 눌러주세요.';
 
   if (navigator.share) {
     navigator.share({ title, text, url }).catch(() => {});
