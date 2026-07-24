@@ -29,8 +29,17 @@ jobs:
       - name: Install Wrangler
         run: npm install -g wrangler@latest
 
+      # 진단: 토큰 유효성 + 계정 확인 (실패해도 계속 — 로그에서 원인 파악용)
+      - name: Diagnose (whoami)
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: wrangler whoami
+
+      # 배포 — ACCOUNT_ID 는 넘기지 않음. 토큰이 단일 계정이면 wrangler 가 자동 선택
+      # (틀린 ACCOUNT_ID 로 인한 실패 회피). 계정이 여러 개면 아래 CLOUDFLARE_ACCOUNT_ID 주석 해제.
       - name: Deploy (wrangler → sos)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: wrangler deploy --name sos
