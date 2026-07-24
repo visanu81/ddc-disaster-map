@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>동두천 재난안전지도 · 브이월드(지형)</title>
+<meta name="description" content="브이월드 국가기본도(등고선·상세지형) 기반 재난안전지도 — 산악구조용 비교 버전" />
+<!-- Leaflet (표준 Web Mercator — 브이월드 타일과 격자 정합) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Malgun Gothic", sans-serif; }
+  #map { position: absolute; inset: 0; background: #0b1020; }
+
+  /* 상단 배너 */
+  .topbar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 1000;
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    background: linear-gradient(90deg, #0a1530, #16308a);
+    color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.35);
+  }
+  .topbar .t { font-weight: 800; font-size: 14px; letter-spacing: -0.3px; }
+  .topbar .badge { font-size: 10.5px; font-weight: 700; background: #22c55e; color: #052e13; padding: 2px 7px; border-radius: 999px; }
+  .topbar .sp { flex: 1; }
+  .topbar a.back {
+    color: #cfe0ff; text-decoration: none; font-size: 12px; font-weight: 700;
+    background: rgba(255,255,255,.12); padding: 7px 11px; border-radius: 8px; white-space: nowrap;
+  }
+  .topbar a.back:hover { background: rgba(255,255,255,.22); }
+
+  /* GPS 버튼 */
+  .locate-btn {
+    position: absolute; right: 12px; bottom: 26px; z-index: 1000;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: #fff; border: none; box-shadow: 0 3px 12px rgba(0,0,0,.35);
+    font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .locate-btn:active { transform: scale(0.94); }
+
+  /* 마커 (SVG divIcon) */
+  .vw-marker svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,.5)); display: block; }
+  .vw-user {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #2563eb; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(37,99,235,.4), 0 2px 6px rgba(0,0,0,.4);
+  }
+
+  /* 팝업 */
+  .leaflet-popup-content { margin: 10px 12px; font-size: 13px; line-height: 1.5; }
+  .pop-name { font-weight: 800; font-size: 14px; margin-bottom: 4px; color: #0f172a; }
+  .pop-row { color: #334155; font-size: 12px; }
+  .pop-row b { color: #64748b; font-weight: 600; margin-right: 4px; }
+  .pop-tel { color: #dc2626; font-weight: 700; text-decoration: none; }
+
+  /* 레이어 컨트롤 살짝 키움 */
+  .leaflet-control-layers { font-size: 13px; }
+  .leaflet-control-layers-list { padding: 4px 6px; }
+
+  .loading {
+    position: absolute; inset: 0; z-index: 900; display: flex; align-items: center; justify-content: center;
+    color: #9fb3d9; font-size: 13px; background: #0b1020;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="t">동두천 재난안전지도</span>
+  <span class="badge">브이월드 · 지형</span>
+  <span class="sp"></span>
+  <a class="back" href="/">← 네이버 지도</a>
+</div>
+
+<div id="map"></div>
+<div class="loading" id="loading">지도 불러오는 중…</div>
+<button class="locate-btn" id="locate" title="내 위치">📍</button>
+
+<!-- 마커 데이터 (운영 실시간 참조) -->
+<script src="https://ddc-disaster-map.visanu81.workers.dev/data.js"></script>
+
+<script>
+(function () {
+  var VWORLD_KEY = '0B1E69E1-2718-35A4-90E4-23FAD52BDE45';   // 재난안전지도 전용 (sos 도메인 등록)
+  var DDC = { lat: 37.9034, lng: 127.0606 };                // 동두천 중심
+
+  function vwUrl(layer, ext) {
+    return 'https://api.vworld.kr/req/wmts/1.0.0/' + VWORLD_KEY + '/' + layer + '/{z}/{y}/{x}.' + ext;
+  }
+  var attr = '© <a href="https://www.vworld.kr" target="_blank" rel="noopener">브이월드</a> · 국토지리정보원';
+
+  // 브이월드 바탕지도 (표준 Web Mercator XYZ — Leaflet {z}/{y}/{x} 와 정합)
+  var terrain = L.tileLayer(vwUrl('Base', 'png'), { maxZoom: 19, attribution: attr });        // 일반(등고선 포함)
+  var satellite = L.tileLayer(vwUrl('Satellite', 'jpeg'), { maxZoom: 19, attribution: attr }); // 항공영상
+  var hybridLabels = L.tileLayer(vwUrl('Hybrid', 'png'), { maxZoom: 19 });                      // 위성용 라벨(투명)
+  var satelliteHybrid = L.layerGroup([satellite, hybridLabels]);
+
+  var map = L.map('map', {
+    center: [DDC.lat, DDC.lng],
+    zoom: 13,
+    layers: [terrain],
+    zoomControl: true,
+    attributionControl: true,
+  });
+  L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+
+  // 타일 하나라도 로드되면 로딩 표시 제거
+  terrain.on('load', function () { var l = document.getElementById('loading'); if (l) l.style.display = 'none'; });
+  setTimeout(function () { var l = document.getElementById('loading'); if (l) l.style.display = 'none'; }, 4000);
+
+  // ── 마커 (카테고리별 레이어그룹) ─────────────────────────────
+  var CATEGORY_SVGS = {
+    '소방서':
+      '<svg viewBox="0 0 32 32" width="32" height="32">' +
+        '<polygon points="16,3 30,15 2,15" fill="#dc2626"/>' +
+        '<rect x="5" y="15" width="22" height="14" fill="#dc2626"/>' +
+        '<rect x="5" y="15" width="22" height="14" fill="none" stroke="white" stroke-width="1"/>' +
+        '<text x="16" y="25" fill="white" font-size="9" font-weight="800" text-anchor="middle">119</text>' +
+      '</svg>',
+    '구급함':
+      '<svg viewBox="0 0 32 32" width="32" height="32">' +
+        '<rect x="2" y="2" width="28" height="28" rx="5" fill="#dc2626" stroke="white" stroke-width="1.5"/>' +
+        '<rect x="13.5" y="7" width="5" height="18" fill="white"/>' +
+        '<rect x="7" y="13.5" width="18" height="5" fill="white"/>' +
+      '</svg>',
+    '산악위치표지판':
+      '<svg viewBox="0 0 32 32" width="32" height="32">' +
+        '<circle cx="16" cy="16" r="13" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>' +
+        '<path d="M7 22 L13 12 L17 18 L21 13 L25 22 Z" fill="#111827"/>' +
+        '<circle cx="22" cy="10" r="1.5" fill="#111827"/>' +
+      '</svg>',
+  };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+  function fallbackIcon(color) {
+    return '<svg viewBox="0 0 32 32" width="30" height="30"><circle cx="16" cy="16" r="11" fill="' + (color || '#0ea5e9') + '" stroke="white" stroke-width="2"/></svg>';
+  }
+  function popupHtml(cat, item) {
+    var rows = [];
+    if (item.address) rows.push('<div class="pop-row"><b>주소</b>' + esc(item.address) + '</div>');
+    if (item.phone) rows.push('<div class="pop-row"><b>전화</b><a class="pop-tel" href="tel:' + esc(String(item.phone).replace(/[^0-9]/g, '')) + '">' + esc(item.phone) + '</a></div>');
+    if (item.type) rows.push('<div class="pop-row"><b>종류</b>' + esc(item.type) + '</div>');
+    if (item.note) rows.push('<div class="pop-row"><b>비고</b>' + esc(item.note) + '</div>');
+    return '<div class="pop-name">' + esc(item.name) + '</div>' + rows.join('') +
+      '<div class="pop-row" style="margin-top:6px"><a class="pop-tel" style="color:#2563eb" target="_blank" rel="noopener" href="https://map.naver.com/p/directions/-/' + item.lng + ',' + item.lat + ',' + encodeURIComponent(item.name) + '/-/transit">길찾기 →</a></div>';
+  }
+
+  var overlays = {};
+  var data = window.DDC_DATA;
+  if (data && data.categories) {
+    Object.keys(data.categories).forEach(function (catKey) {
+      var cat = data.categories[catKey];
+      var group = L.layerGroup();
+      (cat.items || []).forEach(function (item) {
+        if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return;
+        var svg = CATEGORY_SVGS[catKey] || fallbackIcon(cat.color);
+        var icon = L.divIcon({ className: 'vw-marker', html: svg, iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -15] });
+        L.marker([item.lat, item.lng], { icon: icon, title: item.name })
+          .bindPopup(popupHtml(cat, item))
+          .addTo(group);
+      });
+      group.addTo(map);
+      var n = (cat.items || []).length;
+      overlays[esc(catKey) + ' (' + n + ')'] = group;
+    });
+  }
+
+  var baseMaps = { '지형(등고선)': terrain, '위성(항공)': satelliteHybrid };
+  L.control.layers(baseMaps, overlays, { collapsed: true, position: 'topright' }).addTo(map);
+
+  // ── 내 위치(GPS) ────────────────────────────────────────────
+  var userMarker = null, userCircle = null;
+  document.getElementById('locate').onclick = function () {
+    if (!navigator.geolocation) { alert('이 기기는 위치를 지원하지 않습니다.'); return; }
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var lat = pos.coords.latitude, lng = pos.coords.longitude, acc = pos.coords.accuracy || 0;
+      if (userMarker) map.removeLayer(userMarker);
+      if (userCircle) map.removeLayer(userCircle);
+      userMarker = L.marker([lat, lng], { icon: L.divIcon({ className: '', html: '<div class="vw-user"></div>', iconSize: [20, 20], iconAnchor: [10, 10] }), zIndexOffset: 1000 }).addTo(map);
+      if (acc) userCircle = L.circle([lat, lng], { radius: acc, color: '#2563eb', weight: 1, fillColor: '#2563eb', fillOpacity: 0.12 }).addTo(map);
+      map.setView([lat, lng], Math.max(map.getZoom(), 16));
+    }, function (err) {
+      alert('위치를 가져오지 못했습니다: ' + err.message);
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 });
+  };
+})();
+</script>
+
+</body>
+</html>
