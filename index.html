@@ -735,6 +735,37 @@
   }
   .op-status-input textarea:focus { outline: none; border-color: var(--accent); }
   .op-status-sent { font-size: 11.5px; font-weight: 700; color: #16a34a; }
+
+  /* 메시지 이력 (상황 기록) */
+  .op-msg-wrap { display: flex; flex-direction: column; gap: 5px; }
+  .op-msg-head {
+    font-size: 11.5px; font-weight: 800; color: var(--text-dim);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .op-msg-head span { color: var(--accent); }
+  .op-msg-log {
+    max-height: 190px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 7px; border-radius: 9px;
+    background: var(--bg-card-2); border: 1px solid var(--border);
+  }
+  .op-msg {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 6px 8px; border-radius: 7px;
+    background: rgba(148,163,184,0.10);
+    border-left: 3px solid #94a3b8;
+  }
+  .op-msg.victim  { background: rgba(239,68,68,0.10);  border-left-color: #dc2626; }
+  .op-msg.rescuer { background: rgba(245,158,11,0.10); border-left-color: #f59e0b; }
+  .op-msg.command { background: rgba(59,130,246,0.10); border-left-color: #3b82f6; }
+  .op-msg.me      { background: rgba(34,197,94,0.10);  border-left-color: #22c55e; }
+  .op-msg .who {
+    font-size: 10.5px; font-weight: 800; color: var(--text-dim);
+    display: flex; justify-content: space-between; gap: 8px;
+  }
+  .op-msg .who .t { font-weight: 600; opacity: .8; }
+  .op-msg .txt { font-size: 12.5px; color: var(--text); line-height: 1.45; word-break: break-word; }
+  .op-msg-empty { font-size: 11.5px; color: var(--text-dim); font-style: italic; padding: 4px 2px; }
   /* 명단에 표시되는 상태 메시지 */
   .op-person .pstatus {
     flex-basis: 100%; font-size: 11px; color: #b45309;
@@ -2022,13 +2053,19 @@
       <button class="op-gps-fix" id="op-gps-fix" type="button" style="display:none;">📍 위치 켜기</button>
     </div>
 
-    <!-- 내 상태 입력 → 실시간 공유 -->
+    <!-- 상태·메시지 입력 → 실시간 공유 (이력 누적) -->
     <div class="op-status-input" id="op-status-input">
-      <label for="op-status-text">내 상태 전달 <small>(부상·인원·상황)</small></label>
+      <label for="op-status-text">상황 전달 <small>(부상·인원·주변 지형 — 여러 번 보내면 모두 기록됩니다)</small></label>
       <textarea id="op-status-text" rows="2" maxlength="200"
                 placeholder="예: 발목 부상, 2명, 계곡 옆 큰 바위 아래"></textarea>
-      <button class="op-btn primary" id="op-status-send" type="button">📨 상태 전달</button>
+      <button class="op-btn primary" id="op-status-send" type="button">📨 전달</button>
       <div class="op-status-sent" id="op-status-sent" style="display:none;">✓ 전달됨 — 구조대에 실시간 공유되었습니다</div>
+    </div>
+
+    <!-- 주고받은 메시지 이력 (시간순, 최근 50건) -->
+    <div class="op-msg-wrap" id="op-msg-wrap" style="display:none;">
+      <div class="op-msg-head">💬 상황 기록 <span id="op-msg-count">0</span></div>
+      <div class="op-msg-log" id="op-msg-log"></div>
     </div>
 
     <div class="op-code-box">
@@ -3890,7 +3927,8 @@ window.addEventListener('load', initMap);
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
-  getDatabase, ref, set, update, remove, onValue, onDisconnect, serverTimestamp
+  getDatabase, ref, set, update, remove, onValue, onDisconnect, serverTimestamp,
+  push, query, limitToLast
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -4495,19 +4533,86 @@ $('op-leave').onclick = leaveOp;
 $('op-share-victim').onclick = () => shareOp('victim');
 $('op-share-teammate').onclick = () => shareOp('teammate');
 
-/* ===== 내 상태 전달 (요구조자 등) — 실시간 공유 ===== */
+/* ===== 상황 전달 — 이력으로 누적 (이전 메시지 보존) =====
+   operations/{code}/messages 에 push → 시간순 기록. 덮어쓰지 않음.
+   participants/{uid}.status 에는 '최신 한 줄'만 남겨 명단·마커 요약에 사용. */
 function sendMyStatus() {
-  const txt = ($('op-status-text').value || '').trim().slice(0, 200);
+  const box = $('op-status-text');
+  const txt = (box.value || '').trim().slice(0, 200);
+  if (!txt) { box.focus(); return; }
   if (!OpState.opCode || !OpState.uid) { alert('먼저 위치 공유에 참여해야 합니다.'); return; }
-  const myRef = ref(db, `operations/${OpState.opCode}/participants/${OpState.uid}`);
-  update(myRef, { status: txt, updatedAt: serverTimestamp() })
-    .then(() => {
-      const sent = $('op-status-sent');
-      if (sent) { sent.style.display = 'block'; setTimeout(() => { sent.style.display = 'none'; }, 4000); }
-    })
-    .catch(e => alert('상태 전달 실패: ' + e.message));
+
+  const code = OpState.opCode;
+  const myRef = ref(db, `operations/${code}/participants/${OpState.uid}`);
+  const msgRef = push(ref(db, `operations/${code}/messages`));
+  const cleanNick = (OpState.nickname || '').replace(/\s*\([^)]+\)\s*$/, '').trim() || '익명';
+
+  Promise.all([
+    set(msgRef, {
+      uid: OpState.uid,
+      nickname: cleanNick,
+      role: OpState.role || 'rescuer',
+      text: txt,
+      at: serverTimestamp(),
+    }),
+    update(myRef, { status: txt, updatedAt: serverTimestamp() }),
+  ]).then(() => {
+    box.value = '';                        // 연속 입력 편하게 비움 (기록은 남음)
+    const sent = $('op-status-sent');
+    if (sent) { sent.style.display = 'block'; setTimeout(() => { sent.style.display = 'none'; }, 3000); }
+  }).catch(e => alert('전달 실패: ' + e.message));
 }
 if ($('op-status-send')) $('op-status-send').onclick = sendMyStatus;
+// Ctrl+Enter 로도 전송 (장갑 낀 손으로도 빠르게)
+if ($('op-status-text')) $('op-status-text').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendMyStatus(); }
+});
+
+/* ===== 메시지 이력 구독·렌더 ===== */
+let msgUnsub = null;
+function subscribeMessages(code) {
+  if (msgUnsub) { msgUnsub(); msgUnsub = null; }
+  const q = query(ref(db, `operations/${code}/messages`), limitToLast(50));
+  msgUnsub = onValue(q, snap => {
+    const all = snap.val() || {};
+    renderMessages(all);
+  }, err => console.warn('[messages] onValue error:', err));
+}
+
+function fmtMsgTime(at) {
+  if (!at || typeof at !== 'number') return '';
+  const d = new Date(at);
+  const p = n => String(n).padStart(2, '0');
+  return p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+function renderMessages(all) {
+  const wrap = $('op-msg-wrap'), log = $('op-msg-log'), cnt = $('op-msg-count');
+  if (!wrap || !log) return;
+  const list = Object.entries(all)
+    .map(([k, v]) => Object.assign({ _k: k }, v))
+    .filter(m => m && m.text)
+    .sort((a, b) => (a.at || 0) - (b.at || 0));
+
+  wrap.style.display = 'flex';
+  if (cnt) cnt.textContent = list.length + '건';
+  if (list.length === 0) {
+    log.innerHTML = '<div class="op-msg-empty">아직 전달된 내용이 없습니다</div>';
+    return;
+  }
+  log.innerHTML = list.map(m => {
+    const isMe = m.uid === OpState.uid;
+    const role = m.role || 'rescuer';
+    const cls = 'op-msg ' + role + (isMe ? ' me' : '');
+    const who = escapePersonName(m.nickname || ROLE_LABEL[role] || '익명')
+              + (isMe ? ' (나)' : '') + ' · ' + (ROLE_LABEL[role] || role);
+    return '<div class="' + cls + '">' +
+             '<div class="who"><span>' + who + '</span><span class="t">' + fmtMsgTime(m.at) + '</span></div>' +
+             '<div class="txt">' + escapePersonName(m.text) + '</div>' +
+           '</div>';
+  }).join('');
+  log.scrollTop = log.scrollHeight;        // 최신이 보이도록
+}
 
 /* ===== GPS 상태 표시 (요구조자에게 위치 켜짐/꺼짐 명확히) ===== */
 function setGpsState(state) {
@@ -4643,6 +4748,8 @@ async function joinOp(code, role, opts) {
 
   // 다른 참여자 구독
   subscribeParticipants(code);
+  // 상황 기록(메시지 이력) 구독 — 이전 메시지도 모두 보임
+  subscribeMessages(code);
 }
 
 function leaveOp() {
@@ -4679,6 +4786,10 @@ function leaveOp() {
   setGpsState('pending');
   if ($('op-status-text')) $('op-status-text').value = '';
   if ($('op-status-sent')) $('op-status-sent').style.display = 'none';
+  // 메시지 구독 해제 + 이력 영역 숨김 (기록 자체는 서버에 남아 재참여 시 다시 보임)
+  if (msgUnsub) { msgUnsub(); msgUnsub = null; }
+  if ($('op-msg-wrap')) $('op-msg-wrap').style.display = 'none';
+  if ($('op-msg-log')) $('op-msg-log').innerHTML = '';
 }
 
 /* ===== 위치 송신 ===== */

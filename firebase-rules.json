@@ -10,11 +10,21 @@
           "createdAt": { ".validate": "newData.isNumber() || newData.val() == now" },
           "lastActive": { ".validate": "newData.isNumber() || newData.val() == now" }
         },
+        "messages": {
+          "$msgId": {
+            "uid": { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "nickname": { ".validate": "newData.isString() && newData.val().length <= 20" },
+            "role": { ".validate": "newData.isString() && newData.val().matches(/^(rescuer|victim|command)$/)" },
+            "text": { ".validate": "newData.isString() && newData.val().length <= 200" },
+            "at": { ".validate": "newData.isNumber() || newData.val() == now" }
+          }
+        },
         "participants": {
           "$uid": {
             ".validate": "$uid.matches(/^[a-zA-Z0-9_-]{6,40}$/)",
             "role": { ".validate": "newData.isString() && newData.val().matches(/^(rescuer|victim|command)$/)" },
             "nickname": { ".validate": "newData.isString() && newData.val().length <= 20" },
+            "status": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)" },
             "lat": { ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90" },
             "lng": { ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180" },
             "accuracy": { ".validate": "!newData.exists() || newData.isNumber()" },
