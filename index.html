@@ -2224,8 +2224,7 @@
           <path d="M14 19c0-2 1.6-3.5 3.5-3.5S21 17 21 19"/>
         </svg>
       </button>
-      <button class="map-tool-btn" id="maptype-toggle" title="지도 모드 (일반·지형·위성 순환)">일반</button>
-      <a class="map-tool-btn" id="vworld-link" href="vworld.html" title="브이월드 지형지도(등고선)로 보기" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">🗻VW</a>
+      <button class="map-tool-btn" id="maptype-toggle" title="지도 모드 (일반·지형·위성·등고선·브이월드항공 순환)">일반</button>
       <button class="map-tool-btn" id="cadastral-toggle" title="지적편집도 표시/숨김">지적</button>
       <button class="map-tool-btn icon-btn" id="recenter-btn" title="동두천소방서 기준으로 되돌리기">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-label="소방서로 복귀">
@@ -2577,22 +2576,25 @@ function initMap() {
   cadastralLayer = new naver.maps.CadastralLayer();
 
   // ★ [sos 전용] 브이월드(국토지리정보원) 지형 바탕지도 — 등고선·상세 산악지형.
-  //   기존 VWorld 키 재사용(클라이언트 키, 도메인 등록으로 보호). sos 도메인 등록 필요.
-  //   WMTS(Web Mercator XYZ) 라 네이버 타일 좌표와 그대로 정합.
+  //   ★★ 핵심: projection 을 naver.maps.EPSG3857(표준 Web Mercator)로 지정해야
+  //      네이버가 브이월드와 같은 타일 격자 좌표를 넘겨준다.
+  //      (미지정 시 네이버 기본 UTMK 격자로 요청 → 좌표 어긋나 에러타일. 2026-07-26 실측 확인)
+  //      실측: z13 동두천에서 네이버 요청 6987,3162 = 표준 Web Mercator 계산값과 일치.
   (function registerVworldMapTypes(){
     const KEY = '0B1E69E1-2718-35A4-90E4-23FAD52BDE45';   // 재난안전지도 전용 VWorld 키(sos 도메인 등록)
     window.VWORLD_KEY = KEY;
     const size = new naver.maps.Size(256, 256);
+    const proj = naver.maps.EPSG3857;
     // 일반(Base): 등고선 포함 상세 지형도
     map.mapTypes.set('vworld-terrain', new naver.maps.ImageMapType({
       name: '브이월드 지형',
-      minZoom: 6, maxZoom: 19, tileSize: size,
+      minZoom: 6, maxZoom: 19, tileSize: size, projection: proj,
       getTileUrl: (x, y, z) => 'https://api.vworld.kr/req/wmts/1.0.0/' + KEY + '/Base/' + z + '/' + y + '/' + x + '.png',
     }));
-    // 항공영상(Satellite)
+    // 항공영상(Satellite) + 지명 라벨(Hybrid) 두 장을 겹쳐 쓰긴 어려워 항공 단독
     map.mapTypes.set('vworld-photo', new naver.maps.ImageMapType({
       name: '브이월드 항공',
-      minZoom: 6, maxZoom: 19, tileSize: size,
+      minZoom: 6, maxZoom: 19, tileSize: size, projection: proj,
       getTileUrl: (x, y, z) => 'https://api.vworld.kr/req/wmts/1.0.0/' + KEY + '/Satellite/' + z + '/' + y + '/' + x + '.jpeg',
     }));
   })();
@@ -2910,10 +2912,8 @@ function bindMapTools() {
     { id: 'normal',  label: '일반',  naver: naver.maps.MapTypeId.NORMAL },
     { id: 'terrain', label: '지형',  naver: naver.maps.MapTypeId.TERRAIN },
     { id: 'hybrid',  label: '위성',  naver: naver.maps.MapTypeId.HYBRID },
-    // ⚠️ VW지형/VW항공 임시 비활성 — 네이버(EPSG:5179 격자)와 브이월드(Web Mercator) 타일 격자
-    //    불일치로 좌표 어긋남(에러 타일). 올바른 렌더(GroundOverlay+StaticMap 등) 재작업 필요.
-    // { id: 'vworld',  label: 'VW지형', vwId: 'vworld-terrain' },
-    // { id: 'vwphoto', label: 'VW항공', vwId: 'vworld-photo' },
+    { id: 'vworld',  label: '등고선', vwId: 'vworld-terrain' },   // 브이월드 국가기본도(등고선)
+    { id: 'vwphoto', label: 'VW항공', vwId: 'vworld-photo' },     // 브이월드 항공영상
   ];
   let mtIdx = 0;
   const mtBtn = document.getElementById('maptype-toggle');
