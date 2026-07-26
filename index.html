@@ -2580,9 +2580,18 @@ function initMap() {
   //      네이버가 브이월드와 같은 타일 격자 좌표를 넘겨준다.
   //      (미지정 시 네이버 기본 UTMK 격자로 요청 → 좌표 어긋나 에러타일. 2026-07-26 실측 확인)
   //      실측: z13 동두천에서 네이버 요청 6987,3162 = 표준 Web Mercator 계산값과 일치.
+  //   ※ 브이월드는 인증키 1개당 서비스URL 1개만 등록 가능 → 도메인별로 키를 골라 쓴다.
+  //     등록 안 된 도메인에서는 키가 없으므로 브이월드 모드를 아예 노출하지 않음(에러 타일 방지).
   (function registerVworldMapTypes(){
-    const KEY = '0B1E69E1-2718-35A4-90E4-23FAD52BDE45';   // 재난안전지도 전용 VWorld 키(sos 도메인 등록)
+    const VWORLD_KEYS = {
+      'sos.visanu81.workers.dev': '0B1E69E1-2718-35A4-90E4-23FAD52BDE45',
+      // 운영 도메인용 키를 발급받으면 아래 주석을 풀고 값만 넣으면 등고선 모드가 켜짐
+      // 'ddc-disaster-map.visanu81.workers.dev': '여기에-운영용-키',
+    };
+    const KEY = VWORLD_KEYS[location.hostname] || '';
     window.VWORLD_KEY = KEY;
+    window.VWORLD_ENABLED = !!KEY;
+    if (!KEY) return;                    // 키 없는 도메인 → 브이월드 지도타입 미등록
     const size = new naver.maps.Size(256, 256);
     const proj = naver.maps.EPSG3857;
     // 일반(Base): 등고선 포함 상세 지형도
@@ -2906,15 +2915,16 @@ function bindMapTools() {
   // 내 현재 위치 (토글: 누르면 켜고/끄기)
   document.getElementById('locate-btn').onclick = toggleUserLocation;
 
-  // 지도 모드 순환 (일반 → 지형 → 위성 → 브이월드 지형(등고선) → 브이월드 항공 → ...)
-  // ★ [sos 전용] 브이월드 지형/항공은 커스텀 지도타입 id 로 전환 (naver 값 대신 vwId 사용)
+  // 지도 모드 순환 (일반 → 지형 → 위성 → [등고선 → VW항공]) — 브이월드는 키 등록된 도메인에서만
   const MAP_TYPES = [
     { id: 'normal',  label: '일반',  naver: naver.maps.MapTypeId.NORMAL },
     { id: 'terrain', label: '지형',  naver: naver.maps.MapTypeId.TERRAIN },
     { id: 'hybrid',  label: '위성',  naver: naver.maps.MapTypeId.HYBRID },
-    { id: 'vworld',  label: '등고선', vwId: 'vworld-terrain' },   // 브이월드 국가기본도(등고선)
-    { id: 'vwphoto', label: 'VW항공', vwId: 'vworld-photo' },     // 브이월드 항공영상
   ];
+  if (window.VWORLD_ENABLED) {
+    MAP_TYPES.push({ id: 'vworld',  label: '등고선', vwId: 'vworld-terrain' });   // 브이월드 국가기본도
+    MAP_TYPES.push({ id: 'vwphoto', label: 'VW항공', vwId: 'vworld-photo' });     // 브이월드 항공영상
+  }
   let mtIdx = 0;
   const mtBtn = document.getElementById('maptype-toggle');
   function applyMapType(idx) {
