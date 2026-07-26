@@ -2214,6 +2214,8 @@
     window.__DATA_ORIGIN = origin;
     document.write('<scr' + 'ipt src="' + origin + '/data.js"><\/scr' + 'ipt>');
     document.write('<scr' + 'ipt src="' + origin + '/weather.js"><\/scr' + 'ipt>');
+    // 등산로 POI(갈림길·대피소·입구 등) — sos 자체 파일. 없으면(404) 그냥 건너뜀.
+    document.write('<scr' + 'ipt src="poi.js"><\/scr' + 'ipt>');
   })();
 </script>
 
@@ -2408,6 +2410,14 @@ const CATEGORY_ICONS = {
   '취약가구':       '👥',
   '소화전':         '🧯',
   '비상급수':       '🚰',
+  // 등산로 POI (poi.js — 한국등산트레킹지원센터)
+  '갈림길':         '🔀',
+  '산악대피소':     '⛺',
+  '등산로입구':     '🥾',
+  '산악위험구간':   '⚠️',
+  '봉우리':         '🗻',
+  '샘터':           '💧',
+  '등산로주차장':   '🅿️',
 };
 const DEFAULT_ICON = '📍';
 function iconFor(catKey) {
@@ -2448,7 +2458,21 @@ const DATA = window.DDC_DATA || { updatedAt: '-', categories: {} };
 document.getElementById('updated-at').textContent = DATA.updatedAt || '-';
 
 // 카테고리 상태
-const CATS = DATA.categories || {};
+// ★ [sos] 등산로 POI(poi.js) 를 시트 데이터 뒤에 병합 — 기존 마커·칩·클러스터 시스템이 그대로 처리.
+//   신고자가 말하는 "OO 갈림길 / OO 대피소" 를 좌표로 바로 찾기 위한 보조 지점들.
+const CATS = (function mergeCats() {
+  const base = Object.assign({}, DATA.categories || {});
+  const poi = (window.DDC_POI && window.DDC_POI.categories) || {};
+  Object.entries(poi).forEach(([key, cat]) => {
+    if (!cat || !Array.isArray(cat.items) || cat.items.length === 0) return;
+    if (base[key]) {   // 같은 이름이 이미 있으면 항목만 덧붙임 (시트 우선)
+      base[key] = Object.assign({}, base[key], { items: base[key].items.concat(cat.items) });
+    } else {
+      base[key] = cat;
+    }
+  });
+  return base;
+})();
 let activeCategory = null;   // null = 전체 보기, 또는 카테고리 키
 let searchQuery = '';
 
