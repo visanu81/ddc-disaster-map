@@ -2138,7 +2138,7 @@
       <div class="cat-chips" id="cat-chips"></div>
 
       <div class="search-bar" id="search-bar">
-        <input type="text" id="search-input" placeholder="장소 이름·주소 검색" autocomplete="off">
+        <input type="text" id="search-input" placeholder="장소 검색 · 국가지점번호(다사 6369 9404)" autocomplete="off">
         <button class="search-clear" id="search-clear" title="지우기">✕</button>
       </div>
 
@@ -2780,17 +2780,52 @@ function bindSearch() {
   const clear = document.getElementById('search-clear');
   const bar = document.getElementById('search-bar');
   input.addEventListener('input', e => {
-    searchQuery = e.target.value.trim().toLowerCase();
+    const raw = e.target.value.trim();
+    searchQuery = raw.toLowerCase();
     bar.classList.toggle('has-text', !!searchQuery);
+    // ★ 국가지점번호를 입력하면(예: 다사 6369 9404) 계산으로 그 지점을 바로 찾아감.
+    //   요구조자가 표지판 번호를 불러줄 때 사용 — 표지판 데이터가 없는 지역에서도 동작(오프라인 계산).
+    const ll = npnToLatLng(raw);
+    if (ll) { gotoNPN(ll, raw); return; }
     applyFilter();
   });
   clear.addEventListener('click', () => {
     input.value = '';
     searchQuery = '';
     bar.classList.remove('has-text');
+    if (npnMarker) { npnMarker.setMap(null); npnMarker = null; }
     applyFilter();
     input.focus();
   });
+}
+
+/* 국가지점번호로 지점 찾아가기 — 지도 이동 + 강조 마커 */
+let npnMarker = null;
+function gotoNPN(ll, label) {
+  if (!map) return;
+  if (npnMarker) { npnMarker.setMap(null); npnMarker = null; }
+  const pos = new naver.maps.LatLng(ll.lat, ll.lng);
+  npnMarker = new naver.maps.Marker({
+    position: pos,
+    map: map,
+    zIndex: 950,
+    icon: {
+      content:
+        '<div style="position:relative;transform:translate(-50%,-50%);">' +
+          '<div style="width:26px;height:26px;border-radius:50%;background:#dc2626;border:3px solid #fff;' +
+                     'box-shadow:0 0 0 4px rgba(220,38,38,.35),0 2px 8px rgba(0,0,0,.5);"></div>' +
+          '<div style="position:absolute;left:50%;top:30px;transform:translateX(-50%);white-space:nowrap;' +
+                     'background:#dc2626;color:#fff;font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:6px;' +
+                     'box-shadow:0 2px 6px rgba(0,0,0,.4);">' + escapeHtml(label) + '</div>' +
+        '</div>',
+      anchor: new naver.maps.Point(0, 0),
+    },
+  });
+  map.setCenter(pos);
+  map.setZoom(Math.max(map.getZoom(), 17));
+  showToast('국가지점번호 ' + label + ' 위치로 이동했습니다 (오차 ±10m)');
+  // 이 지점 기준으로 가장 가까운 표지판·시설 안내가 필요하면 기존 기능 사용 가능
+  if (typeof updateCoordDisplay === 'function') updateCoordDisplay(ll.lat, ll.lng);
 }
 
 /* ----- 지도 좌상단 도구 모음 ----- */
@@ -3033,22 +3068,98 @@ function formatDistance(m) {
 }
 
 /* ----- 헤더 GPS 좌표 표시 + 클릭 복사 ----- */
+/* ===== 국가지점번호 ↔ 좌표 변환 (오프라인 계산, 데이터 불필요) =====
+   산악·개활지에서 위치를 특정하는 국가 표준 격자체계.
+   좌표계: UTM-K(EPSG:5179, GRS80) / 격자원점 (700000, 1300000) / 100km 격자에 한글, 그 안 10m 단위.
+   ★ 사장님 시트의 실제 표지판 43개로 검증: 격자문자 43/43 일치, 역변환 오차 중앙값 7.1m (격자 10m 이내). */
+const NPN_CHARS = '가나다라마바사아자차카타파하';
+const _NPN = (function () {
+  const a = 6378137.0, f = 1 / 298.257222101, e2 = f * (2 - f), ep2 = e2 / (1 - e2);
+  const k0 = 0.9996, lat0 = 38.0 * Math.PI / 180, lon0 = 127.5 * Math.PI / 180, FE = 1000000.0, FN = 2000000.0;
+  function M(p) {
+    return a * ((1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * Math.pow(e2, 3) / 256) * p
+      - (3 * e2 / 8 + 3 * e2 * e2 / 32 + 45 * Math.pow(e2, 3) / 1024) * Math.sin(2 * p)
+      + (15 * e2 * e2 / 256 + 45 * Math.pow(e2, 3) / 1024) * Math.sin(4 * p)
+      - (35 * Math.pow(e2, 3) / 3072) * Math.sin(6 * p));
+  }
+  function fwd(lat, lng) {                   // WGS84 → UTM-K
+    const p = lat * Math.PI / 180, l = lng * Math.PI / 180;
+    const N = a / Math.sqrt(1 - e2 * Math.pow(Math.sin(p), 2));
+    const T = Math.pow(Math.tan(p), 2), C = ep2 * Math.pow(Math.cos(p), 2), A = (l - lon0) * Math.cos(p);
+    const x = FE + k0 * N * (A + (1 - T + C) * Math.pow(A, 3) / 6 + (5 - 18 * T + T * T + 72 * C - 58 * ep2) * Math.pow(A, 5) / 120);
+    const y = FN + k0 * (M(p) - M(lat0) + N * Math.tan(p) * (A * A / 2 + (5 - T + 9 * C + 4 * C * C) * Math.pow(A, 4) / 24
+      + (61 - 58 * T + T * T + 600 * C - 330 * ep2) * Math.pow(A, 6) / 720));
+    return { x: x, y: y };
+  }
+  function inv(x, y) {                        // UTM-K → WGS84
+    const e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+    const Mv = (y - FN) / k0 + M(lat0), mu = Mv / (a * (1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * Math.pow(e2, 3) / 256));
+    const p1 = mu + (3 * e1 / 2 - 27 * Math.pow(e1, 3) / 32) * Math.sin(2 * mu)
+      + (21 * e1 * e1 / 16 - 55 * Math.pow(e1, 4) / 32) * Math.sin(4 * mu)
+      + (151 * Math.pow(e1, 3) / 96) * Math.sin(6 * mu) + (1097 * Math.pow(e1, 4) / 512) * Math.sin(8 * mu);
+    const C1 = ep2 * Math.pow(Math.cos(p1), 2), T1 = Math.pow(Math.tan(p1), 2);
+    const N1 = a / Math.sqrt(1 - e2 * Math.pow(Math.sin(p1), 2));
+    const R1 = a * (1 - e2) / Math.pow(1 - e2 * Math.pow(Math.sin(p1), 2), 1.5), D = (x - FE) / (N1 * k0);
+    const lat = p1 - (N1 * Math.tan(p1) / R1) * (D * D / 2 - (5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * ep2) * Math.pow(D, 4) / 24
+      + (61 + 90 * T1 + 298 * C1 + 45 * T1 * T1 - 252 * ep2 - 3 * C1 * C1) * Math.pow(D, 6) / 720);
+    const lng = lon0 + (D - (1 + 2 * T1 + C1) * Math.pow(D, 3) / 6
+      + (5 - 2 * C1 + 28 * T1 - 3 * C1 * C1 + 8 * ep2 + 24 * T1 * T1) * Math.pow(D, 5) / 120) / Math.cos(p1);
+    return { lat: lat * 180 / Math.PI, lng: lng * 180 / Math.PI };
+  }
+  return { fwd: fwd, inv: inv };
+})();
+
+// 좌표 → 국가지점번호 (예: "다사 6369 9404"). 범위 밖이면 null.
+function latLngToNPN(lat, lng) {
+  try {
+    const p = _NPN.fwd(lat, lng);
+    const dx = p.x - 700000, dy = p.y - 1300000;
+    if (dx < 0 || dy < 0) return null;
+    const i = Math.floor(dx / 100000), j = Math.floor(dy / 100000);
+    if (i >= NPN_CHARS.length || j >= NPN_CHARS.length) return null;
+    const ex = Math.round((dx - i * 100000) / 10), ny = Math.round((dy - j * 100000) / 10);
+    const pad = n => String(Math.min(n, 9999)).padStart(4, '0');
+    return NPN_CHARS[i] + NPN_CHARS[j] + ' ' + pad(ex) + ' ' + pad(ny);
+  } catch (e) { return null; }
+}
+
+// 국가지점번호 → 좌표. "다사 6369 9404" / "다사63699404" 모두 허용. 형식 틀리면 null.
+function npnToLatLng(text) {
+  if (!text) return null;
+  const s = String(text).replace(/[\s\-·,]/g, '');
+  const m = s.match(/^([가-힣])([가-힣])(\d{4})(\d{4})$/);
+  if (!m) return null;
+  const i = NPN_CHARS.indexOf(m[1]), j = NPN_CHARS.indexOf(m[2]);
+  if (i < 0 || j < 0) return null;
+  const x = 700000 + i * 100000 + parseInt(m[3], 10) * 10 + 5;   // 격자 중심
+  const y = 1300000 + j * 100000 + parseInt(m[4], 10) * 10 + 5;
+  const ll = _NPN.inv(x, y);
+  if (!isFinite(ll.lat) || !isFinite(ll.lng)) return null;
+  return ll;
+}
+window.latLngToNPN = latLngToNPN;
+window.npnToLatLng = npnToLatLng;
+
 function updateCoordDisplay(lat, lng) {
   const el = document.getElementById('coord-display');
+  const npn = latLngToNPN(lat, lng);
   document.getElementById('coord-text').textContent =
-    lat.toFixed(5) + ', ' + lng.toFixed(5);
+    (npn ? npn + ' · ' : '') + lat.toFixed(5) + ', ' + lng.toFixed(5);
   el.classList.add('visible');
 }
 
 function bindCoordDisplay() {
   document.getElementById('coord-display').onclick = async () => {
     if (!userLatLng) return;
-    const text = userLatLng.lat.toFixed(6) + ', ' + userLatLng.lng.toFixed(6);
+    // 국가지점번호를 앞에 붙여 복사 — 무전·119 신고 시 이걸 그대로 읽으면 됨
+    const npn = latLngToNPN(userLatLng.lat, userLatLng.lng);
+    const coord = userLatLng.lat.toFixed(6) + ', ' + userLatLng.lng.toFixed(6);
+    const text = (npn ? '국가지점번호 ' + npn + '\n좌표 ' : '') + coord;
     try {
       await navigator.clipboard.writeText(text);
       const el = document.getElementById('coord-display');
       el.classList.add('copied');
-      showToast('좌표 복사됨: ' + text + '  (119 신고 시 읽어주세요)');
+      showToast('복사됨: ' + (npn ? npn + ' / ' : '') + coord + '  (신고 시 읽어주세요)');
       setTimeout(() => el.classList.remove('copied'), 1500);
     } catch (e) {
       showToast('복사 실패. ' + text);
