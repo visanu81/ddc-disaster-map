@@ -247,9 +247,9 @@ html:not([data-theme="light"]) .npn{background:transparent}
     </div>
 
     <div class="actions">
-      <div class="slide locked" id="slide">
+      <div class="slide" id="slide">
         <div class="fill" id="slide-fill"></div>
-        <div class="cap" id="slide-cap">위치가 잡힐 때까지 기다려주세요</div>
+        <div class="cap" id="slide-cap">밀어서 신고 →</div>
         <div class="knob" id="slide-knob">
           <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5 L14 12 L6 19"></path><path d="M14 5 L22 12 L14 19" opacity=".45"></path></svg>
         </div>
@@ -456,6 +456,15 @@ const REGION_NAME = {
   namyangju: '남양주소방서', guri: '구리소방서', paju: '파주소방서',
   goyang: '고양소방서', ilsan: '고양소방서',
 };
+// 위치를 아직 못 잡았을 때 지도를 띄울 임시 중심 (관내 중심). 위치 잡히면 자동으로 내 위치로 이동.
+const REGION_CENTER = {
+  dongducheon: { lat: 37.9034, lng: 127.0606 }, uijeongbu: { lat: 37.7384, lng: 127.0337 },
+  yangju: { lat: 37.7853, lng: 127.0457 },      pocheon:   { lat: 37.8949, lng: 127.2003 },
+  yeoncheon: { lat: 38.0966, lng: 127.0747 },   gapyeong:  { lat: 37.8316, lng: 127.5097 },
+  namyangju: { lat: 37.6360, lng: 127.2165 },   guri:      { lat: 37.5944, lng: 127.1296 },
+  paju: { lat: 37.7600, lng: 126.7800 },        goyang:    { lat: 37.6586, lng: 126.8320 },
+  ilsan: { lat: 37.6700, lng: 126.7780 },
+};
 $('sender-who').textContent = (REGION_NAME[REGION] || '소방서') + ' 상황실';
 $('sender-when').textContent = SENT_AT
   ? SENT_AT + '에 보낸 구조 요청 링크입니다'
@@ -518,7 +527,19 @@ function onPos(p) {
   if (S.reported) pushPos();
   // 첫 픽스가 신고 뒤에 들어온 경우(약전파·계곡·콜드스타트) — 지도를 그제서라도 생성
   if (S.reported && !S.map && !S.mapFailed) { initMap(); paintPeers(); paintDir(); return; }
-  if (S.map) { S.self.setPosition(S.pos); S.selfLabel.setPosition(S.pos); S.rings.forEach(c => c.setCenter(S.pos)); paintPOI(); paintPeers(); paintDir(); }
+  if (S.map) {
+    if (!S.self) {
+      // 위치 없이 먼저 띄운 지도에 첫 위치가 들어옴 → 내 위치 마커 만들고 그쪽으로 이동
+      buildSelf();
+      showWaitBadge(false);
+      S.map.setCenter(new naver.maps.LatLng(S.pos.lat, S.pos.lng));
+      S.map.setZoom(16);
+    } else {
+      S.self.setPosition(S.pos); S.selfLabel.setPosition(S.pos);
+      S.rings.forEach(c => c.setCenter(S.pos));
+    }
+    paintPOI(); paintPeers(); paintDir();
+  }
 }
 function onPosErr(e) {
   $('gps-state').className = 'warn';
@@ -567,7 +588,8 @@ $('coord-more').onclick = () => {
     $('slide-cap').style.opacity = String(1 - prog * 0.8);
   };
   knob.addEventListener('pointerdown', e => {
-    if (S.reported || !S.pos) return;
+    // 위치를 아직 못 잡았어도 신고는 가능 — 좌표는 잡히는 대로 자동 전송된다.
+    if (S.reported) return;
     dragging = true;
     travel = track.clientWidth - knob.offsetWidth - 12;
     originX = e.clientX - prog * travel;
@@ -584,7 +606,8 @@ $('coord-more').onclick = () => {
 })();
 
 async function report() {
-  if (S.reported || !S.pos) return;
+  // 위치 없이도 신고 접수 — 상황실에 '요구조자 접속'이 먼저 뜨고, 좌표는 잡히는 대로 갱신된다.
+  if (S.reported) return;
   S.reported = true;
   $('slide').classList.add('done');
   $('slide-cap').textContent = '전송 시작…';
@@ -664,14 +687,27 @@ function initMap() {
     $('map').innerHTML = '<div style="padding:32px;text-align:center;color:var(--sub);font-size:17px;line-height:1.6">지도를 불러올 수 없습니다.<br>위의 국가지점번호를 119에 읽어주세요.</div>';
     return;
   }
-  if (!S.pos) return;   // 아직 픽스 전 — onPos 가 다시 부른다
+  // ★ 위치를 아직 못 잡았어도 지도는 먼저 띄운다 (관내 중심, 넓게).
+  //   아무것도 안 보이는 것보다 주변 지형이라도 보이는 편이 낫다 — 위치가 잡히면 자동으로 내 위치로 이동.
+  const hasPos = !!S.pos;
+  const c = S.pos || REGION_CENTER[REGION] || REGION_CENTER.dongducheon;
   S.map = new naver.maps.Map('map', {
-    center: new naver.maps.LatLng(S.pos.lat, S.pos.lng),
-    zoom: 16,
+    center: new naver.maps.LatLng(c.lat, c.lng),
+    zoom: hasPos ? 16 : 13,
     mapTypeId: naver.maps.MapTypeId.TERRAIN,
     logoControl: false, mapDataControl: false, scaleControl: true, zoomControl: false,
   });
+  if (!hasPos) showWaitBadge(true);
 
+  if (hasPos) buildSelf();
+  buildPOI();
+  buildChips();
+  paintPOI();
+}
+
+/* 내 위치 마커·반경 — 위치가 잡힌 뒤에 만든다(없는 상태로 지도를 먼저 띄우므로 분리) */
+function buildSelf() {
+  if (!S.map || !S.pos || S.self) return;
   [500, 1000].forEach((r, i) => {
     S.rings.push(new naver.maps.Circle({
       map: S.map, center: S.pos, radius: r,
@@ -679,7 +715,6 @@ function initMap() {
       fillOpacity: 0,
     }));
   });
-
   S.self = new naver.maps.Marker({
     position: S.pos, map: S.map, zIndex: 1000,
     icon: { content: '<div class="m-self"></div>', anchor: new naver.maps.Point(15, 15) },
@@ -688,10 +723,25 @@ function initMap() {
     position: S.pos, map: S.map, zIndex: 1001, clickable: false,
     icon: { content: '<div class="m-self-l">내 위치</div>', anchor: new naver.maps.Point(34, -12) },
   });
+}
 
-  buildPOI();
-  buildChips();
-  paintPOI();
+/* 위치 대기 안내 배지 — 지도 위에 '내 위치 찾는 중' 표시 */
+function showWaitBadge(on) {
+  let b = document.getElementById('map-wait');
+  if (on) {
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'map-wait';
+      b.style.cssText = 'position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:30;'
+        + 'background:rgba(0,0,0,.72);color:#fff;font-size:14px;font-weight:700;padding:8px 14px;'
+        + 'border-radius:999px;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.4)';
+      b.textContent = '📍 내 위치 찾는 중… 하늘이 보이는 곳이 빠릅니다';
+      const wrap = document.getElementById('map');
+      if (wrap && wrap.parentElement) wrap.parentElement.appendChild(b);
+    }
+  } else if (b) {
+    b.remove();
+  }
 }
 
 function buildPOI() {
