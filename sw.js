@@ -5,7 +5,7 @@
    - 외부 폰트·CDN: 캐시 우선, 네트워크 fallback
 */
 
-const VERSION = 'ddc-v20-vwkey-per-domain';   // 버전 올리면 이전 캐시 자동 무효화
+const VERSION = 'ddc-v21-sos-page';   // 버전 올리면 이전 캐시 자동 무효화
 const STATIC_CACHE = 'ddc-static-' + VERSION;
 const TILE_CACHE = 'ddc-tiles';   // 타일은 version 무관 (계속 누적)
 
@@ -13,6 +13,7 @@ const TILE_CACHE = 'ddc-tiles';   // 타일은 version 무관 (계속 누적)
 const STATIC_FILES = [
   './',
   './index.html',
+  './sos.html',
   './manifest.json',
   './icon.svg',
   './icon-192.png',

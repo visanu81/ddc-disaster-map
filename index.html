@@ -4942,11 +4942,16 @@ function shareOp(audience) {
     ? '&region=' + window.DDC_USER.region : '';
   const base = location.origin + location.pathname + '?op=' + OpState.opCode + regionPart;
   const isVictim = audience === 'victim';
-  const url = base + (isVictim ? '&mode=rescue' : '&role=rescuer');
+  // ★ 요구조자는 전용 페이지(sos.html)로 — 로비·사이드바·설치배너 없이 [신고] 한 동작만.
+  const dir = location.pathname.replace(/[^/]*$/, '');
+  const victimUrl = location.origin + dir + 'sos.html?op=' + OpState.opCode + regionPart
+    + (document.documentElement.getAttribute('data-theme') === 'light' ? '&theme=light' : '')
+    + '&t=' + encodeURIComponent(new Date().toTimeString().slice(0, 5));
+  const url = isVictim ? victimUrl : base + '&role=rescuer';
 
   const title = '재난 위치공유 — 구조대';
   const text = isVictim
-    ? '구조대입니다. 이 링크를 열고 [📍 내 위치 공유 시작]을 눌러 위치를 허용해 주세요. 현재 위치와 상태를 실시간으로 확인합니다.'
+    ? '[소방서] 구조 요청 위치 확인입니다. 아래 링크를 열고 [신고]를 밀어주세요.'
     : '위치공유 링크입니다. 링크를 열고 위치를 허용한 뒤 [참여]를 눌러주세요.';
 
   if (navigator.share) {
