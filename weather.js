@@ -2,7 +2,7 @@
    경기북부 시군별 실시간 기상·산림·하천 위험도. */
 
 window.DDC_WEATHER = {
-  "updatedAt": "2026-08-15 06:38",
+  "updatedAt": "2026-08-15 07:39",
   "regions": {
     "dongducheon": {
       "current": null,
