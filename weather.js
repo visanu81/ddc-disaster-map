@@ -2,16 +2,16 @@
    경기북부 시군별 실시간 기상·산림·하천 위험도. */
 
 window.DDC_WEATHER = {
-  "updatedAt": "2026-08-17 08:45",
+  "updatedAt": "2026-08-17 09:43",
   "regions": {
     "dongducheon": {
       "current": {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 87,
+        "humid": 79,
         "rain": 0.0,
-        "temp": 23.2,
+        "temp": 24.2,
         "wind": 0.1
       },
       "forecast": [
@@ -111,10 +111,10 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 93,
+        "humid": 94,
         "rain": 0.0,
-        "temp": 23.2,
-        "wind": 0.9
+        "temp": 23.5,
+        "wind": 0.8
       },
       "forecast": [
         {
@@ -213,10 +213,10 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 93,
+        "humid": 94,
         "rain": 0.0,
-        "temp": 23.2,
-        "wind": 0.9
+        "temp": 23.5,
+        "wind": 0.8
       },
       "forecast": [
         {
@@ -312,13 +312,13 @@ window.DDC_WEATHER = {
     },
     "pocheon": {
       "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
         "humid": 100,
-        "rain": 0.0,
-        "temp": 23.2,
-        "wind": 0.1
+        "rain": 1.0,
+        "temp": 22.8,
+        "wind": 0.9
       },
       "forecast": [
         {
@@ -417,10 +417,10 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 96,
+        "humid": 89,
         "rain": 0.0,
-        "temp": 23.9,
-        "wind": 0.5
+        "temp": 25.3,
+        "wind": 1.2
       },
       "forecast": [
         {
@@ -516,13 +516,13 @@ window.DDC_WEATHER = {
     },
     "gapyeong": {
       "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 91,
-        "rain": 0.0,
-        "temp": 23.9,
-        "wind": 1.4
+        "pty": "1",
+        "ptyText": "비",
+        "icon": "🌧",
+        "humid": 88,
+        "rain": 0.1,
+        "temp": 24.3,
+        "wind": 0.3
       },
       "forecast": [
         {
@@ -621,10 +621,10 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 89,
+        "humid": 87,
         "rain": 0.0,
-        "temp": 24.3,
-        "wind": 1.4
+        "temp": 25.0,
+        "wind": 1.2
       },
       "forecast": [
         {
@@ -723,10 +723,10 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 86,
+        "humid": 81,
         "rain": 0.0,
-        "temp": 24.1,
-        "wind": 1.6
+        "temp": 25.0,
+        "wind": 1.0
       },
       "forecast": [
         {
@@ -825,10 +825,10 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 87,
+        "humid": 83,
         "rain": 0.0,
-        "temp": 25.6,
-        "wind": 0.5
+        "temp": 25.9,
+        "wind": 1.1
       },
       "forecast": [
         {
@@ -927,10 +927,10 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 79,
+        "humid": 75,
         "rain": 0.0,
-        "temp": 25.9,
-        "wind": 1.2
+        "temp": 27.0,
+        "wind": 1.1
       },
       "forecast": [
         {
@@ -1029,10 +1029,10 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 79,
+        "humid": 75,
         "rain": 0.0,
-        "temp": 25.9,
-        "wind": 1.2
+        "temp": 27.0,
+        "wind": 1.1
       },
       "forecast": [
         {
