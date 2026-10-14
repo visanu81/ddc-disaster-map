@@ -2,193 +2,72 @@
    경기북부 시군별 실시간 기상·산림·하천 위험도. */
 
 window.DDC_WEATHER = {
-  "updatedAt": "2026-10-14 02:55",
+  "updatedAt": "2026-10-14 08:29",
   "regions": {
     "dongducheon": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 59,
-        "rain": 0.0,
-        "temp": 12.1,
-        "wind": 1.2
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "uijeongbu": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 67,
-        "rain": 0.0,
-        "temp": 11.5,
-        "wind": 0.7
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "yangju": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 67,
-        "rain": 0.0,
-        "temp": 11.5,
-        "wind": 0.7
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "pocheon": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 53,
-        "rain": 0.0,
-        "temp": 13.1,
-        "wind": 2.4
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "yeoncheon": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 87,
-        "rain": 0.0,
-        "temp": 9.7,
-        "wind": 1.0
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 2,
-        "levelText": "보통"
-      },
+      "fire": null,
       "river": null
     },
     "gapyeong": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 64,
-        "rain": 0.0,
-        "temp": 12.5,
-        "wind": 1.8
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "namyangju": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 53,
-        "rain": 0.0,
-        "temp": 13.8,
-        "wind": 1.7
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "guri": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 48,
-        "rain": 0.0,
-        "temp": 14.7,
-        "wind": 2.7
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "paju": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 64,
-        "rain": 0.0,
-        "temp": 12.7,
-        "wind": 2.9
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 2,
-        "levelText": "보통"
-      },
+      "fire": null,
       "river": null
     },
     "goyang": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 59,
-        "rain": 0.0,
-        "temp": 14.6,
-        "wind": 2.5
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "ilsan": {
-      "current": {
-        "pty": "0",
-        "ptyText": "없음",
-        "icon": "🌤",
-        "humid": 59,
-        "rain": 0.0,
-        "temp": 14.6,
-        "wind": 2.5
-      },
+      "current": null,
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     }
   }
