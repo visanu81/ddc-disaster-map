@@ -2,23 +2,20 @@
    경기북부 시군별 실시간 기상·산림·하천 위험도. */
 
 window.DDC_WEATHER = {
-  "updatedAt": "2026-10-27 23:33",
+  "updatedAt": "2026-10-28 03:15",
   "regions": {
     "dongducheon": {
       "current": {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 48,
+        "humid": 57,
         "rain": 0.0,
-        "temp": 5.1,
-        "wind": 0.2
+        "temp": 1.4,
+        "wind": 0.6
       },
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "uijeongbu": {
@@ -26,16 +23,13 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 46,
+        "humid": 35,
         "rain": 0.0,
-        "temp": 6.6,
-        "wind": 1.4
+        "temp": 5.0,
+        "wind": 1.5
       },
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "yangju": {
@@ -43,16 +37,13 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 46,
+        "humid": 35,
         "rain": 0.0,
-        "temp": 6.6,
-        "wind": 1.4
+        "temp": 5.0,
+        "wind": 1.5
       },
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "pocheon": {
@@ -60,16 +51,13 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 34,
+        "humid": 28,
         "rain": 0.0,
-        "temp": 7.7,
-        "wind": 1.2
+        "temp": 5.6,
+        "wind": 1.0
       },
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "yeoncheon": {
@@ -77,16 +65,13 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 48,
+        "humid": 38,
         "rain": 0.0,
-        "temp": 5.2,
-        "wind": 0.4
+        "temp": 3.9,
+        "wind": 0.8
       },
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "gapyeong": {
@@ -94,16 +79,13 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 37,
+        "humid": 79,
         "rain": 0.0,
-        "temp": 6.4,
-        "wind": 1.0
+        "temp": 0.8,
+        "wind": 0.5
       },
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "namyangju": {
@@ -111,16 +93,13 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 45,
+        "humid": 30,
         "rain": 0.0,
-        "temp": 7.3,
-        "wind": 1.1
+        "temp": 6.3,
+        "wind": 1.6
       },
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "guri": {
@@ -128,16 +107,13 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 30,
+        "humid": 26,
         "rain": 0.0,
-        "temp": 9.8,
-        "wind": 3.2
+        "temp": 7.6,
+        "wind": 2.7
       },
       "forecast": [],
-      "fire": {
-        "level": 2,
-        "levelText": "보통"
-      },
+      "fire": null,
       "river": null
     },
     "paju": {
@@ -145,16 +121,13 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 49,
+        "humid": 42,
         "rain": 0.0,
-        "temp": 6.8,
-        "wind": 0.5
+        "temp": 4.7,
+        "wind": 1.1
       },
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "goyang": {
@@ -162,16 +135,13 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 36,
+        "humid": 39,
         "rain": 0.0,
-        "temp": 9.9,
-        "wind": 2.6
+        "temp": 7.3,
+        "wind": 1.7
       },
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     },
     "ilsan": {
@@ -179,16 +149,13 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 36,
+        "humid": 39,
         "rain": 0.0,
-        "temp": 9.9,
-        "wind": 2.6
+        "temp": 7.3,
+        "wind": 1.7
       },
       "forecast": [],
-      "fire": {
-        "level": 1,
-        "levelText": "낮음"
-      },
+      "fire": null,
       "river": null
     }
   }
