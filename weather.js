@@ -2,61 +2,19 @@
    경기북부 시군별 실시간 기상·산림·하천 위험도. */
 
 window.DDC_WEATHER = {
-  "updatedAt": "2026-11-13 18:31",
+  "updatedAt": "2026-11-14 00:15",
   "regions": {
     "dongducheon": {
       "current": {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 64,
+        "humid": 81,
         "rain": 0.0,
-        "temp": 13.6,
-        "wind": 0.6
+        "temp": 9.9,
+        "wind": 0.3
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 19,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 20,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 21,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 22,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -98,6 +56,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "0",
           "temp": 9.0
+        },
+        {
+          "hour": 6,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 7,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 12.0
         }
       ],
       "fire": {
@@ -111,54 +111,12 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 70,
+        "humid": 84,
         "rain": 0.0,
-        "temp": 13.5,
-        "wind": 0.3
+        "temp": 10.6,
+        "wind": 0.8
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 19,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 20,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 21,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 22,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -200,6 +158,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "1",
           "temp": 9.0
+        },
+        {
+          "hour": 6,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 7,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
         }
       ],
       "fire": {
@@ -213,54 +213,12 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 70,
+        "humid": 84,
         "rain": 0.0,
-        "temp": 13.5,
-        "wind": 0.3
+        "temp": 10.6,
+        "wind": 0.8
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 19,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 20,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 21,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 22,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -302,6 +260,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "1",
           "temp": 9.0
+        },
+        {
+          "hour": 6,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 7,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 12.0
         }
       ],
       "fire": {
@@ -315,54 +315,12 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 63,
+        "humid": 91,
         "rain": 0.0,
-        "temp": 14.0,
-        "wind": 0.9
+        "temp": 8.8,
+        "wind": 0.1
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 19,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 20,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 21,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 9.0
-        },
-        {
-          "hour": 22,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 9.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 9.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -404,6 +362,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "1",
           "temp": 8.0
+        },
+        {
+          "hour": 6,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 8.0
+        },
+        {
+          "hour": 7,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 8.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
         }
       ],
       "fire": {
@@ -417,54 +417,12 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 76,
+        "humid": 95,
         "rain": 0.0,
-        "temp": 12.8,
-        "wind": 0.1
+        "temp": 8.2,
+        "wind": 0.7
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 19,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 20,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 21,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 22,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 9.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 9.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -506,6 +464,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "0",
           "temp": 8.0
+        },
+        {
+          "hour": 6,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 8.0
+        },
+        {
+          "hour": 7,
+          "pop": 30,
+          "pcp": 0,
+          "pty": "0",
+          "temp": 8.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 12.0
         }
       ],
       "fire": {
@@ -519,54 +519,12 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 65,
+        "humid": 89,
         "rain": 0.0,
-        "temp": 13.5,
-        "wind": 0.5
+        "temp": 9.1,
+        "wind": 0.9
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 19,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 20,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 21,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 22,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 9.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 8.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -608,6 +566,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "0",
           "temp": 8.0
+        },
+        {
+          "hour": 6,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 8.0
+        },
+        {
+          "hour": 7,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 8.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 8.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
         }
       ],
       "fire": {
@@ -621,54 +621,12 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 67,
+        "humid": 82,
         "rain": 0.0,
-        "temp": 14.5,
-        "wind": 0.7
+        "temp": 11.1,
+        "wind": 0.6
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 19,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 20,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 21,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 22,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 9.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -710,6 +668,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "1",
           "temp": 9.0
+        },
+        {
+          "hour": 6,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 7,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 9.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
         }
       ],
       "fire": {
@@ -723,54 +723,12 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 61,
+        "humid": 69,
         "rain": 0.0,
-        "temp": 14.9,
-        "wind": 0.6
+        "temp": 13.0,
+        "wind": 1.7
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 13.0
-        },
-        {
-          "hour": 19,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 13.0
-        },
-        {
-          "hour": 20,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 21,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 22,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -812,6 +770,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "1",
           "temp": 10.0
+        },
+        {
+          "hour": 6,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 7,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 12.0
         }
       ],
       "fire": {
@@ -825,54 +825,12 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 74,
+        "humid": 89,
         "rain": 0.0,
-        "temp": 13.7,
-        "wind": 0.5
+        "temp": 10.7,
+        "wind": 0.9
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 13.0
-        },
-        {
-          "hour": 19,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 20,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 21,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 22,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -914,6 +872,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "1",
           "temp": 10.0
+        },
+        {
+          "hour": 6,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 7,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 10.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 12.0
         }
       ],
       "fire": {
@@ -927,54 +927,12 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 68,
+        "humid": 79,
         "rain": 0.0,
-        "temp": 14.9,
-        "wind": 0.7
+        "temp": 12.6,
+        "wind": 0.8
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 13.0
-        },
-        {
-          "hour": 19,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 13.0
-        },
-        {
-          "hour": 20,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 21,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 22,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -1016,6 +974,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "1",
           "temp": 11.0
+        },
+        {
+          "hour": 6,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 7,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 12.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 12.0
         }
       ],
       "fire": {
@@ -1029,54 +1029,12 @@ window.DDC_WEATHER = {
         "pty": "0",
         "ptyText": "없음",
         "icon": "🌤",
-        "humid": 68,
+        "humid": 79,
         "rain": 0.0,
-        "temp": 14.9,
-        "wind": 0.7
+        "temp": 12.6,
+        "wind": 0.8
       },
       "forecast": [
-        {
-          "hour": 18,
-          "pop": 20,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 13.0
-        },
-        {
-          "hour": 19,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 13.0
-        },
-        {
-          "hour": 20,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 12.0
-        },
-        {
-          "hour": 21,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 22,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 11.0
-        },
-        {
-          "hour": 23,
-          "pop": 30,
-          "pcp": 0,
-          "pty": "0",
-          "temp": 10.0
-        },
         {
           "hour": 0,
           "pop": 30,
@@ -1118,6 +1076,48 @@ window.DDC_WEATHER = {
           "pcp": 0,
           "pty": "1",
           "temp": 11.0
+        },
+        {
+          "hour": 6,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 7,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 8,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 9,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 11.0
+        },
+        {
+          "hour": 10,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 12.0
+        },
+        {
+          "hour": 11,
+          "pop": 60,
+          "pcp": 0,
+          "pty": "1",
+          "temp": 12.0
         }
       ],
       "fire": {
